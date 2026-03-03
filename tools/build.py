@@ -53,14 +53,14 @@ def build_application(clean):
     Builds application in a dev-container
     """
 
-    clean_command = f"rm -rf {paths.BUILD_FOLDER_MOUNT_PATH}"
+    clean_command = f"rm -rf {paths.BUILD_DIRECTORY_MOUNT_PATH}"
     cmake_command = str(
         "cmake"
         " -DCMAKE_BUILD_TYPE=Release"
-        f" -S {paths.SOURCE_FOLDER_MOUNT_PATH}"
-        f" -B {paths.BUILD_FOLDER_MOUNT_PATH}"
+        f" -S {paths.SOURCE_DIRECTORY_MOUNT_PATH}"
+        f" -B {paths.BUILD_DIRECTORY_MOUNT_PATH}"
     )
-    build_command = f"cmake --build {paths.BUILD_FOLDER_MOUNT_PATH} --parallel 16"
+    build_command = f"cmake --build {paths.BUILD_DIRECTORY_MOUNT_PATH} --parallel 16"
 
     full_command = f"{cmake_command} && {build_command}"
 

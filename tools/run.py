@@ -17,6 +17,7 @@ def run_application():
     try:
         subprocess.run(
             [paths.APPLICATION_BINARY_PATH],
+            cwd=paths.BUILD_DIRECTORY_PATH,
             check=True
         )
     except subprocess.CalledProcessError:

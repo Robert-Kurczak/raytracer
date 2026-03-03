@@ -8,5 +8,7 @@ Checks: >
   bugprone-*,
 
   -modernize-use-trailing-return-type,
-  -readability-convert-member-functions-to-static
-HeaderFilterRegex: "application/.*"
+  -readability-convert-member-functions-to-static,
+  -bugprone-easily-swappable-parameters,
+  -readability-identifier-length,
+HeaderFilterRegex: "src/.*"
