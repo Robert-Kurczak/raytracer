@@ -12,7 +12,7 @@ void PpmWriter::writePpmHeader(
     const Vector2<uint32_t>& resolution
 ) {
     fileStream << "P3\n";
-    fileStream << resolution.x << " " << resolution.y << "\n";
+    fileStream << resolution.getX() << " " << resolution.getY() << "\n";
     fileStream << "255\n";
 }
 
@@ -25,8 +25,8 @@ void PpmWriter::write(const Framebuffer& framebuffer) noexcept {
 
     writePpmHeader(fileStream, resolution);
 
-    for (uint32_t yIndex = 0; yIndex < resolution.y; yIndex++) {
-        for (uint32_t xIndex = 0; xIndex < resolution.x; xIndex++) {
+    for (uint32_t yIndex = 0; yIndex < resolution.getY(); yIndex++) {
+        for (uint32_t xIndex = 0; xIndex < resolution.getX(); xIndex++) {
             const Color8Bit color =
                 framebuffer.getColorAt({xIndex, yIndex});
 

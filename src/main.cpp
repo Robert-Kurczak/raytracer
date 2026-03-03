@@ -5,10 +5,7 @@
 #include <filesystem>
 
 inline constexpr std::string OUTPUT_IMAGE_PATH {"raytracing.ppm"};
-inline constexpr RTC::Vector2<uint32_t> IMAGE_RESOLUTION {
-    .x = 1920,
-    .y = 1080
-};
+inline constexpr RTC::Vector2<uint32_t> IMAGE_RESOLUTION {1920, 1080};
 
 int main() {
     RTC::PpmWriter writer {OUTPUT_IMAGE_PATH};

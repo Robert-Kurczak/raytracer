@@ -6,13 +6,14 @@
 namespace RTC {
 Framebuffer::Framebuffer(const Vector2<uint32_t>& resolution) :
     resolution_(resolution),
-    buffer_(size_t(resolution_.x * resolution_.y)) {}
+    buffer_(size_t(resolution_.getX() * resolution_.getY())) {}
 
 void Framebuffer::setColorAt(
     const Point2<uint32_t>& point,
     const Color8Bit& color
 ) noexcept {
-    const size_t index = point.x + (resolution_.x * point.y);
+    const size_t index =
+        point.getX() + (resolution_.getX() * point.getY());
     buffer_.at(index) = color;
 }
 
@@ -28,7 +29,8 @@ std::span<const Color8Bit> Framebuffer::getConstBuffer() const noexcept {
 const Color8Bit& Framebuffer::getColorAt(
     const Point2<uint32_t>& point
 ) const noexcept {
-    const size_t index = point.x + (resolution_.x * point.y);
+    const size_t index =
+        point.getX() + (resolution_.getX() * point.getY());
 
     return buffer_.at(index);
 }
