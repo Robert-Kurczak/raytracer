@@ -10,6 +10,5 @@ struct CameraParameters {
     double aspectRatio = 0;
 
     Point3<float> center;
-    Vector3<float> direction;
 };
 }

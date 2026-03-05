@@ -6,6 +6,9 @@
 namespace RTC {
 class SampleRenderer : public IRenderer {
 public:
-    void render(Framebuffer& framebuffer) noexcept override;
+    void render(
+        const Camera& camera,
+        Framebuffer& framebuffer
+    ) noexcept override;
 };
 }
