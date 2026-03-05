@@ -77,16 +77,6 @@ public:
         return resultVector;
     }
 
-    [[nodiscard]] constexpr Type getDotProduct(
-        const Vector<Type, Size>& vector
-    ) const noexcept {
-        Type result {0};
-        for (size_t i = 0; i < Size; i++) {
-            result += dimensions[i] * vector[i];
-        }
-        return result;
-    }
-
     [[nodiscard]] constexpr Type getSquaredLength() const noexcept {
         Type result {};
         for (size_t i = 0; i < Size; i++) {
@@ -101,6 +91,24 @@ public:
 
     [[nodiscard]] constexpr Vector<Type, Size> getVersor() const noexcept {
         return *this / getLength();
+    }
+
+    [[nodiscard]] constexpr const Type& getX() const noexcept
+        requires(Size >= 1)
+    {
+        return dimensions[0];
+    }
+
+    [[nodiscard]] constexpr const Type& getY() const noexcept
+        requires(Size >= 2)
+    {
+        return dimensions[1];
+    }
+
+    [[nodiscard]] constexpr const Type& getZ() const noexcept
+        requires(Size >= 3)
+    {
+        return dimensions[2];
     }
 };
 
@@ -192,59 +200,38 @@ template<typename Type, size_t Size>
     return vector * (1.0F / scalar);
 }
 
-template<typename Type>
-class Vector2 : public Vector<Type, 2> {
-public:
-    constexpr Vector2(Type x = Type {}, Type y = Type {}) noexcept :
-        Vector<Type, 2>({x, y}) {}
+template<typename Type, size_t Size>
+[[nodiscard]] constexpr Type getDotProduct(
+    const Vector<Type, 3>& vector1,
+    const Vector<Type, 3>& vector2
+) noexcept {
+    Type result {0};
+    for (size_t i = 0; i < Size; i++) {
+        result += vector1.dimensions[i] * vector2.dimensions[i];
+    }
+    return result;
+}
 
-    [[nodiscard]] constexpr Type getX() const noexcept {
-        return this->dimensions[0];
-    }
-    [[nodiscard]] constexpr Type getY() const noexcept {
-        return this->dimensions[1];
-    }
+template<typename Type>
+[[nodiscard]] constexpr Vector<Type, 3> getCrossProduct(
+    const Vector<Type, 3>& vector1,
+    const Vector<Type, 3>& vector2
+) noexcept {
+    const Type x = vector1.dimensions[1] * vector2.dimensions[2] -
+                   vector1.dimensions[2] * vector2.dimensions[1];
+
+    const Type y = vector1.dimensions[2] * vector2.dimensions[0] -
+                   vector1.dimensions[0] * vector2.dimensions[2];
+
+    const Type z = vector1.dimensions[0] * vector2.dimensions[1] -
+                   vector1.dimensions[1] * vector2.dimensions[0];
+
+    return Vector<Type, 3> {x, y, z};
 };
 
 template<typename Type>
-class Vector3 : public Vector<Type, 3> {
-public:
-    constexpr Vector3(
-        Type x = Type {},
-        Type y = Type {},
-        Type z = Type {}
-    ) noexcept :
-        Vector<Type, 3>({x, y, z}) {}
-
-    [[nodiscard]] constexpr Type getX() const noexcept {
-        return this->dimensions[0];
-    }
-    [[nodiscard]] constexpr Type getY() const noexcept {
-        return this->dimensions[1];
-    }
-    [[nodiscard]] constexpr Type getZ() const noexcept {
-        return this->dimensions[2];
-    }
-
-    [[nodiscard]] constexpr Vector3<Type> getCrossProduct(
-        const Vector3<Type>& vector
-    ) const noexcept {
-        const Type x = this->dimensions[1] * vector.dimensions[2] -
-                       this->dimensions[2] * vector.dimensions[1];
-
-        const Type y = this->dimensions[2] * vector.dimensions[0] -
-                       this->dimensions[0] * vector.dimensions[2];
-
-        const Type z = this->dimensions[0] * vector.dimensions[1] -
-                       this->dimensions[1] * vector.dimensions[0];
-
-        return Vector3<Type> {x, y, z};
-    }
-};
+using Vector3 = Vector<Type, 3>;
 
 template<typename Type>
-using Point2 = Vector2<Type>;
-
-template<typename Type>
-using Point3 = Vector3<Type>;
+using Vector2 = Vector<Type, 2>;
 }
