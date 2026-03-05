@@ -8,10 +8,12 @@
 
 namespace RTC {
 template<typename Type, size_t Size>
+requires std::is_arithmetic_v<Type>
 class Vector {
-public:
+private:
     std::array<Type, Size> dimensions {};
 
+public:
     constexpr Vector() noexcept = default;
 
     constexpr Vector(std::initializer_list<Type> list) noexcept {
@@ -113,10 +115,11 @@ public:
 };
 
 template<typename Type, size_t Size>
-constexpr std::ostream& operator<<(
+requires std::is_arithmetic_v<Type>
+std::ostream& operator<<(
     std::ostream& out,
     const Vector<Type, Size>& vector
-) noexcept {
+) {
     out << "Vector<" << int(Size) << "> (";
 
     for (size_t i = 0; i < Size - 1; i++) {
@@ -129,6 +132,7 @@ constexpr std::ostream& operator<<(
 }
 
 template<typename Type, size_t Size>
+requires std::is_arithmetic_v<Type>
 [[nodiscard]] constexpr Vector<Type, Size> operator+(
     const Vector<Type, Size>& vector1,
     const Vector<Type, Size>& vector2
@@ -143,6 +147,7 @@ template<typename Type, size_t Size>
 }
 
 template<typename Type, size_t Size>
+requires std::is_arithmetic_v<Type>
 [[nodiscard]] constexpr Vector<Type, Size> operator-(
     const Vector<Type, Size>& vector1,
     const Vector<Type, Size>& vector2
@@ -157,6 +162,7 @@ template<typename Type, size_t Size>
 }
 
 template<typename Type, size_t Size>
+requires std::is_arithmetic_v<Type>
 [[nodiscard]] constexpr Vector<Type, Size> operator*(
     const Vector<Type, Size>& vector1,
     const Vector<Type, Size>& vector2
@@ -171,6 +177,7 @@ template<typename Type, size_t Size>
 }
 
 template<typename Type, size_t Size>
+requires std::is_arithmetic_v<Type>
 [[nodiscard]] constexpr Vector<Type, Size> operator*(
     const Type& scalar,
     const Vector<Type, Size>& vector
@@ -185,6 +192,7 @@ template<typename Type, size_t Size>
 }
 
 template<typename Type, size_t Size>
+requires std::is_arithmetic_v<Type>
 [[nodiscard]] constexpr Vector<Type, Size> operator*(
     const Vector<Type, Size>& vector,
     const Type& scalar
@@ -193,17 +201,25 @@ template<typename Type, size_t Size>
 }
 
 template<typename Type, size_t Size>
+requires std::is_arithmetic_v<Type>
 [[nodiscard]] constexpr Vector<Type, Size> operator/(
     const Vector<Type, Size>& vector,
     const Type& scalar
 ) noexcept {
-    return vector * (1.0F / scalar);
+    Vector<Type, Size> resultVector {};
+
+    for (size_t i = 0; i < Size; i++) {
+        resultVector[i] = vector[i] / scalar;
+    }
+
+    return resultVector;
 }
 
 template<typename Type, size_t Size>
+requires std::is_arithmetic_v<Type>
 [[nodiscard]] constexpr Type getDotProduct(
-    const Vector<Type, 3>& vector1,
-    const Vector<Type, 3>& vector2
+    const Vector<Type, Size>& vector1,
+    const Vector<Type, Size>& vector2
 ) noexcept {
     Type result {0};
     for (size_t i = 0; i < Size; i++) {
@@ -213,6 +229,7 @@ template<typename Type, size_t Size>
 }
 
 template<typename Type>
+requires std::is_arithmetic_v<Type>
 [[nodiscard]] constexpr Vector<Type, 3> getCrossProduct(
     const Vector<Type, 3>& vector1,
     const Vector<Type, 3>& vector2
@@ -225,8 +242,10 @@ template<typename Type>
 };
 
 template<typename Type>
+requires std::is_arithmetic_v<Type>
 using Vector3 = Vector<Type, 3>;
 
 template<typename Type>
+requires std::is_arithmetic_v<Type>
 using Vector2 = Vector<Type, 2>;
 }
