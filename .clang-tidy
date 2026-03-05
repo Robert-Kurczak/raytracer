@@ -11,4 +11,6 @@ Checks: >
   -readability-convert-member-functions-to-static,
   -bugprone-easily-swappable-parameters,
   -readability-identifier-length,
+  -cppcoreguidelines-avoid-magic-numbers,
+  -readability-magic-numbers,
 HeaderFilterRegex: "src/.*"
