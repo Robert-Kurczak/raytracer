@@ -1,7 +1,7 @@
 #include "Camera/Camera.hpp"
 #include "Camera/CameraParameters.hpp"
 #include "Framebuffer/Framebuffer.hpp"
-#include "Renderer/SampleRenderer/SampleRenderer.hpp"
+#include "Renderer/DefaultRenderer/DefaultRenderer.hpp"
 #include "Writer/PpmWriter/PpmWriter.hpp"
 
 #include <filesystem>
@@ -17,7 +17,7 @@ inline constexpr RTC::CameraParameters CAMERA_PARAMETERS {
 
 int main() {
     RTC::PpmWriter writer {OUTPUT_IMAGE_PATH};
-    RTC::SampleRenderer renderer {};
+    RTC::DefaultRenderer renderer {};
     RTC::Framebuffer framebuffer {IMAGE_RESOLUTION};
     RTC::Camera camera {CAMERA_PARAMETERS};
 

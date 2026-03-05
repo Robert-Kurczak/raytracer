@@ -7,7 +7,7 @@
 namespace RTC {
 Ray::Ray(const Point3<float>& origin, const Vector3<float>& direction) :
     origin_(origin),
-    direction_(direction.getVersor()) {}
+    direction_(direction) {}
 
 [[nodiscard]] const Point3<float>& Ray::getOrigin() const {
     return origin_;
