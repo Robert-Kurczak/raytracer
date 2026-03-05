@@ -120,10 +120,10 @@ constexpr std::ostream& operator<<(
     out << "Vector<" << int(Size) << "> (";
 
     for (size_t i = 0; i < Size - 1; i++) {
-        out << vector.dimensions[i] << "; ";
+        out << vector[i] << "; ";
     }
 
-    out << vector.dimensions[Size - 1] << ")\n";
+    out << vector[Size - 1] << ")\n";
 
     return out;
 }
@@ -207,7 +207,7 @@ template<typename Type, size_t Size>
 ) noexcept {
     Type result {0};
     for (size_t i = 0; i < Size; i++) {
-        result += vector1.dimensions[i] * vector2.dimensions[i];
+        result += vector1[i] * vector2[i];
     }
     return result;
 }
@@ -217,14 +217,9 @@ template<typename Type>
     const Vector<Type, 3>& vector1,
     const Vector<Type, 3>& vector2
 ) noexcept {
-    const Type x = vector1.dimensions[1] * vector2.dimensions[2] -
-                   vector1.dimensions[2] * vector2.dimensions[1];
-
-    const Type y = vector1.dimensions[2] * vector2.dimensions[0] -
-                   vector1.dimensions[0] * vector2.dimensions[2];
-
-    const Type z = vector1.dimensions[0] * vector2.dimensions[1] -
-                   vector1.dimensions[1] * vector2.dimensions[0];
+    const Type x = vector1[1] * vector2[2] - vector1[2] * vector2[1];
+    const Type y = vector1[2] * vector2[0] - vector1[0] * vector2[2];
+    const Type z = vector1[0] * vector2[1] - vector1[1] * vector2[0];
 
     return Vector<Type, 3> {x, y, z};
 };
