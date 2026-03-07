@@ -28,10 +28,14 @@ bool Sphere::isHit(
         return false;
     }
 
-    const float minTSolution =
-        (hTerm - std::sqrt(quadraticDelta)) / aTerm;
+    const float minT = (hTerm - std::sqrt(quadraticDelta)) / aTerm;
+    const Point3<float> minTPoint = ray.at(minT);
+    const Vector3<float> minTNormal =
+        (minTPoint - center_).getNormalized();
 
-    hitData.rayT = minTSolution;
+    hitData.rayT = minT;
+    hitData.hitPoint = minTPoint;
+    hitData.hitNormal = minTNormal;
 
     return true;
 }

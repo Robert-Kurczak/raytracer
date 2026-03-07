@@ -4,7 +4,7 @@
 #include "Math/Point.hpp"
 
 namespace RTC {
-class Sphere : IHittable {
+class Sphere : public IHittable {
 private:
     const Point3<float> center_ {0.0F, 0.0F, 0.0F};
     const float radius_ = 0.0F;

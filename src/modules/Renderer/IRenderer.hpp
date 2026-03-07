@@ -2,6 +2,7 @@
 
 #include "Camera/Camera.hpp"
 #include "Framebuffer/Framebuffer.hpp"
+#include "Scene/Scene.hpp"
 
 namespace RTC {
 class IRenderer {
@@ -15,6 +16,7 @@ public:
 
     virtual void render(
         const Camera& camera,
+        const Scene& scene,
         Framebuffer& framebuffer
     ) noexcept = 0;
 };

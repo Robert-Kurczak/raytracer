@@ -1,6 +1,7 @@
 #include "DefaultRenderer.hpp"
 
 #include "Color/Color.hpp"
+#include "Hittable/HitData.hpp"
 #include "Math/Vector.hpp"
 
 namespace RTC {
@@ -27,25 +28,36 @@ Color8Bit DefaultRenderer::getSkyColor(
     };
 }
 
-Color8Bit DefaultRenderer::calculateColor(Ray& ray) {
-    const Vector3<float> rayDirectionVersor =
-        ray.getDirection().getNormalized();
+Color8Bit DefaultRenderer::calculateColor(const HitData& hitData) {
+    const float red = 255.0F * (hitData.hitNormal.getX() + 1.0F) / 2.0F;
+    const float green = 255.0F * (hitData.hitNormal.getY() + 1.0F) / 2.0F;
+    const float blue = 255.0F * (hitData.hitNormal.getZ() + 1.0F) / 2.0F;
 
-    return getSkyColor(rayDirectionVersor);
+    return Color8Bit {uint8_t(red), uint8_t(green), uint8_t(blue)};
 }
 
 void DefaultRenderer::render(
     const Camera& camera,
+    const Scene& scene,
     Framebuffer& framebuffer
 ) noexcept {
     const Vector2<uint32_t> resolution = framebuffer.getResolution();
+
+    HitData hitData {};
 
     for (uint32_t yIndex = 0; yIndex < resolution.getY(); yIndex++) {
         for (uint32_t xIndex = 0; xIndex < resolution.getX(); xIndex++) {
             const Point2<uint32_t> pixel {xIndex, yIndex};
 
             Ray ray = camera.getRay(pixel);
-            const Color8Bit color = calculateColor(ray);
+            const bool objectHit = scene.hitRay(ray, {}, hitData);
+
+            Color8Bit color;
+            if (objectHit) {
+                color = calculateColor(hitData);
+            } else {
+                color = getSkyColor(ray.getDirection().getNormalized());
+            }
 
             framebuffer.setColorAt({xIndex, yIndex}, color);
         }

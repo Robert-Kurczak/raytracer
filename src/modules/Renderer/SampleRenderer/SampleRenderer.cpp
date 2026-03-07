@@ -5,8 +5,11 @@
 namespace RTC {
 void SampleRenderer::render(
     const Camera& camera,
+    const Scene& scene,
     Framebuffer& framebuffer
 ) noexcept {
+    (void) scene;
+
     const Vector2<uint32_t> resolution = framebuffer.getResolution();
 
     for (uint32_t yIndex = 0; yIndex < resolution.getY(); yIndex++) {
