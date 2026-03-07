@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Hittable/HitData.hpp"
 #include "Hittable/IHittable.hpp"
 #include "Math/Point.hpp"
 
@@ -9,6 +10,12 @@ private:
     const Point3<float> center_ {0.0F, 0.0F, 0.0F};
     const float radius_ = 0.0F;
     const float radiusSquared_ = 0.0F;
+
+    void updateHitData(
+        float rayT,
+        const Ray& ray,
+        HitData& hitData
+    ) const;
 
 public:
     Sphere(const Point3<float>& center, float radius);

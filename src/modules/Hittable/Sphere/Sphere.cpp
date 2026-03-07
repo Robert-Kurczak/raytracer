@@ -3,6 +3,18 @@
 #include "Math/Vector.hpp"
 
 namespace RTC {
+void Sphere::updateHitData(
+    float rayT,
+    const Ray& ray,
+    HitData& hitData
+) const {
+    const Point3<float> tPoint = ray.at(rayT);
+    const Vector3<float> normal = (tPoint - center_).getNormalized();
+
+    hitData.rayT = rayT;
+    hitData.hitPoint = tPoint;
+    hitData.hitNormal = normal;
+}
 
 Sphere::Sphere(const Point3<float>& center, float radius) :
     center_(center),
@@ -28,16 +40,23 @@ bool Sphere::isHit(
         return false;
     }
 
-    const float minT = (hTerm - std::sqrt(quadraticDelta)) / aTerm;
-    const Point3<float> minTPoint = ray.at(minT);
-    const Vector3<float> minTNormal =
-        (minTPoint - center_).getNormalized();
+    const float quadraticDeltaSqrt = std::sqrt(quadraticDelta);
 
-    hitData.rayT = minT;
-    hitData.hitPoint = minTPoint;
-    hitData.hitNormal = minTNormal;
+    const float minT = (hTerm - quadraticDeltaSqrt) / aTerm;
 
-    return true;
+    if (interval.contains(minT)) {
+        updateHitData(minT, ray, hitData);
+        return true;
+    }
+
+    const float maxT = (hTerm + quadraticDeltaSqrt) / aTerm;
+
+    if (interval.contains(maxT)) {
+        updateHitData(maxT, ray, hitData);
+        return true;
+    }
+
+    return false;
 }
 
 }

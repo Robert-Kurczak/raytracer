@@ -2,6 +2,7 @@
 
 #include "Color/Color.hpp"
 #include "Hittable/HitData.hpp"
+#include "Math/Interval.hpp"
 #include "Math/Vector.hpp"
 
 namespace RTC {
@@ -42,6 +43,7 @@ void DefaultRenderer::render(
     Framebuffer& framebuffer
 ) noexcept {
     const Vector2<uint32_t> resolution = framebuffer.getResolution();
+    const Interval<float> renderedInterval = Interval<float>::universe();
 
     HitData hitData {};
 
@@ -50,7 +52,8 @@ void DefaultRenderer::render(
             const Point2<uint32_t> pixel {xIndex, yIndex};
 
             Ray ray = camera.getRay(pixel);
-            const bool objectHit = scene.hitRay(ray, {}, hitData);
+            const bool objectHit =
+                scene.hitRay(ray, renderedInterval, hitData);
 
             Color8Bit color;
             if (objectHit) {
