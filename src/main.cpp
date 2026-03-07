@@ -26,12 +26,18 @@ int main() {
     RTC::Camera camera {CAMERA_PARAMETERS};
     RTC::Scene scene {};
 
-    std::unique_ptr<RTC::IHittable> sphere =
+    std::unique_ptr<RTC::IHittable> sphere1 =
         std::make_unique<RTC::Sphere>(
             RTC::Point3<float> {0.0F, 0.0F, -1.0F}, 0.5F
         );
 
-    scene.addObject(std::move(sphere));
+    std::unique_ptr<RTC::IHittable> sphere2 =
+        std::make_unique<RTC::Sphere>(
+            RTC::Point3<float> {1.5F, 0.5F, -3.0F}, 0.85F
+        );
+
+    scene.addObject(std::move(sphere1));
+    scene.addObject(std::move(sphere2));
 
     renderer.render(camera, scene, framebuffer);
     writer.write(framebuffer);
