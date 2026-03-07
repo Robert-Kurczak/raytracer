@@ -6,7 +6,7 @@
 #include "Renderer/IRenderer.hpp"
 
 namespace RTC {
-class DefaultRenderer : public IRenderer {
+class NormalMapRenderer : public IRenderer {
 private:
     Color8Bit getSkyColor(const Vector3<float>& rayDirectionVersor);
     Color8Bit calculateColor(const HitData& hitData);

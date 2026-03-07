@@ -1,4 +1,4 @@
-#include "DefaultRenderer.hpp"
+#include "NormalMapRenderer.hpp"
 
 #include "Color/Color.hpp"
 #include "Hittable/HitData.hpp"
@@ -17,7 +17,7 @@ inline constexpr Color<float> BLUEISH_COLOR {
     .blue = 255
 };
 
-Color8Bit DefaultRenderer::getSkyColor(
+Color8Bit NormalMapRenderer::getSkyColor(
     const Vector3<float>& rayDirectionVersor
 ) {
     const float a = (0.5F * rayDirectionVersor.getY()) + 1.0F;
@@ -29,7 +29,7 @@ Color8Bit DefaultRenderer::getSkyColor(
     };
 }
 
-Color8Bit DefaultRenderer::calculateColor(const HitData& hitData) {
+Color8Bit NormalMapRenderer::calculateColor(const HitData& hitData) {
     const float red = 255.0F * (hitData.hitNormal.getX() + 1.0F) / 2.0F;
     const float green = 255.0F * (hitData.hitNormal.getY() + 1.0F) / 2.0F;
     const float blue = 255.0F * (hitData.hitNormal.getZ() + 1.0F) / 2.0F;
@@ -37,7 +37,7 @@ Color8Bit DefaultRenderer::calculateColor(const HitData& hitData) {
     return Color8Bit {uint8_t(red), uint8_t(green), uint8_t(blue)};
 }
 
-void DefaultRenderer::render(
+void NormalMapRenderer::render(
     const Camera& camera,
     const Scene& scene,
     Framebuffer& framebuffer

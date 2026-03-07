@@ -3,7 +3,7 @@
 #include "Framebuffer/Framebuffer.hpp"
 #include "Hittable/IHittable.hpp"
 #include "Hittable/Sphere/Sphere.hpp"
-#include "Renderer/DefaultRenderer/DefaultRenderer.hpp"
+#include "Renderer/NormalMapRenderer/NormalMapRenderer.hpp"
 #include "Scene/Scene.hpp"
 #include "Writer/PpmWriter/PpmWriter.hpp"
 
@@ -21,7 +21,7 @@ inline constexpr RTC::CameraParameters CAMERA_PARAMETERS {
 
 int main() {
     RTC::PpmWriter writer {OUTPUT_IMAGE_PATH};
-    RTC::DefaultRenderer renderer {};
+    RTC::NormalMapRenderer renderer {};
     RTC::Framebuffer framebuffer {IMAGE_RESOLUTION};
     RTC::Camera camera {CAMERA_PARAMETERS};
     RTC::Scene scene {};
