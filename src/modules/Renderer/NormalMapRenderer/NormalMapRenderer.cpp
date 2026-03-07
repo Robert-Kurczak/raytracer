@@ -17,25 +17,23 @@ inline constexpr Color<float> BLUEISH_COLOR {
     .blue = 255
 };
 
-Color8Bit NormalMapRenderer::getSkyColor(
+Color<float> NormalMapRenderer::getSkyColor(
     const Vector3<float>& rayDirectionVersor
 ) {
     const float a = (rayDirectionVersor.getY() + 1.0F) / 2.0F;
-    const Color<float> color =
-        (1.0F - a) * WHITE_COLOR + a * BLUEISH_COLOR;
-
-    return Color8Bit {
-        uint8_t(color.red), uint8_t(color.green), uint8_t(color.blue)
-    };
+    return (1.0F - a) * WHITE_COLOR + a * BLUEISH_COLOR;
 }
 
-Color8Bit NormalMapRenderer::calculateColor(const HitData& hitData) {
+Color<float> NormalMapRenderer::calculateColor(const HitData& hitData) {
     const float red = 255.0F * (hitData.hitNormal.getX() + 1.0F) / 2.0F;
     const float green = 255.0F * (hitData.hitNormal.getY() + 1.0F) / 2.0F;
     const float blue = 255.0F * (hitData.hitNormal.getZ() + 1.0F) / 2.0F;
 
-    return Color8Bit {uint8_t(red), uint8_t(green), uint8_t(blue)};
+    return Color<float> {.red = red, .green = green, .blue = blue};
 }
+
+NormalMapRenderer::NormalMapRenderer(uint32_t samplesPerPixel) :
+    samplesPerPixel_(samplesPerPixel) {}
 
 void NormalMapRenderer::render(
     const Camera& camera,
@@ -53,18 +51,29 @@ void NormalMapRenderer::render(
         for (uint32_t xIndex = 0; xIndex < resolution.getX(); xIndex++) {
             const Point2<uint32_t> pixel {xIndex, yIndex};
 
-            Ray ray = camera.getRay(pixel);
-            const bool objectHit =
-                scene.hitRay(ray, renderedInterval, hitData);
+            Color<float> resultColor {.red = 0, .green = 0, .blue = 0};
 
-            Color8Bit color;
-            if (objectHit) {
-                color = calculateColor(hitData);
-            } else {
-                color = getSkyColor(ray.getDirection().getNormalized());
+            for (uint32_t i = 0; i < samplesPerPixel_; i++) {
+                Ray ray = camera.getRandomizedRay(pixel);
+
+                const bool objectHit =
+                    scene.hitRay(ray, renderedInterval, hitData);
+
+                Color<float> sampleColor;
+                if (objectHit) {
+                    sampleColor = calculateColor(hitData);
+                } else {
+                    sampleColor =
+                        getSkyColor(ray.getDirection().getNormalized());
+                }
+
+                resultColor += sampleColor;
             }
 
-            framebuffer.setColorAt({xIndex, yIndex}, color);
+            framebuffer.setColorAt(
+                {xIndex, yIndex},
+                castColorTo8Bit(resultColor / float(samplesPerPixel_))
+            );
         }
     }
 }

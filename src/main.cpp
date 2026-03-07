@@ -19,9 +19,11 @@ inline constexpr RTC::CameraParameters CAMERA_PARAMETERS {
     .center = {0.0F, 0.0F, 0.0F},
 };
 
+inline constexpr uint32_t SAMPLES_PER_PIXEL = 400;
+
 int main() {
     RTC::PpmWriter writer {OUTPUT_IMAGE_PATH};
-    RTC::NormalMapRenderer renderer {};
+    RTC::NormalMapRenderer renderer {SAMPLES_PER_PIXEL};
     RTC::Framebuffer framebuffer {IMAGE_RESOLUTION};
     RTC::Camera camera {CAMERA_PARAMETERS};
     RTC::Scene scene {};

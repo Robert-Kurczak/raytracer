@@ -1,5 +1,6 @@
 #pragma once
 
+#include <algorithm>
 #include <cstdint>
 #include <ostream>
 #include <type_traits>
@@ -157,4 +158,16 @@ requires std::is_arithmetic_v<Type>
 }
 
 using Color8Bit = Color<uint8_t>;
+
+template<typename Type>
+requires std::is_arithmetic_v<Type>
+[[nodiscard]] Color8Bit castColorTo8Bit(
+    const Color<Type>& color
+) noexcept {
+    return {
+        .red = uint8_t(std::clamp(color.red, Type {0}, Type {255})),
+        .green = uint8_t(std::clamp(color.green, Type {0}, Type {255})),
+        .blue = uint8_t(std::clamp(color.blue, Type {0}, Type {255}))
+    };
+}
 }

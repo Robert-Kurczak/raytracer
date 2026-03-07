@@ -28,9 +28,20 @@ private:
     void setupViewportData();
     void setupPixelData();
 
+    [[nodiscard]] Vector2<float> getRandomPixelOffset() const;
+
+    [[nodiscard]] Ray getRay(
+        const Point2<uint32_t>& pixel,
+        const Vector2<float>& pixelOffset
+    ) const;
+
 public:
     Camera(const CameraParameters& parameters);
 
     [[nodiscard]] Ray getRay(const Point2<uint32_t>& pixel) const;
+
+    [[nodiscard]] Ray getRandomizedRay(
+        const Point2<uint32_t>& pixel
+    ) const;
 };
 }

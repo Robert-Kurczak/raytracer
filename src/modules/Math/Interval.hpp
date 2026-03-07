@@ -26,6 +26,18 @@ struct Interval {
         return value > start && value < end;
     }
 
+    constexpr Type clamp(Type value) const noexcept {
+        if (value < start) {
+            return start;
+        }
+
+        if (value > end) {
+            return end;
+        }
+
+        return value;
+    }
+
     static constexpr Type infinity() noexcept {
         if constexpr (std::is_floating_point_v<Type>) {
             return std::numeric_limits<Type>::infinity();

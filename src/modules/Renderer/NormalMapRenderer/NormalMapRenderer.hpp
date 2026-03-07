@@ -8,10 +8,14 @@
 namespace RTC {
 class NormalMapRenderer : public IRenderer {
 private:
-    Color8Bit getSkyColor(const Vector3<float>& rayDirectionVersor);
-    Color8Bit calculateColor(const HitData& hitData);
+    const uint32_t samplesPerPixel_;
+
+    Color<float> getSkyColor(const Vector3<float>& rayDirectionVersor);
+    Color<float> calculateColor(const HitData& hitData);
 
 public:
+    NormalMapRenderer(uint32_t samplesPerPixel);
+
     void render(
         const Camera& camera,
         const Scene& scene,

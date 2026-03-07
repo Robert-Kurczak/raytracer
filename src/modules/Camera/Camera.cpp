@@ -1,6 +1,7 @@
 #include "Camera.hpp"
 
 #include "Camera/CameraParameters.hpp"
+#include "Math/Random.hpp"
 #include "Math/Vector.hpp"
 #include "Ray/Ray.hpp"
 
@@ -40,22 +41,43 @@ void Camera::setupPixelData() {
         viewportTopLeft_ + (pixelDeltaU_ + pixelDeltaV_) / 2.0F;
 }
 
+Vector2<float> Camera::getRandomPixelOffset() const {
+    return Point2<float> {
+        getRandomNumber<float>() - 0.5F, getRandomNumber<float>() - 0.5F
+    };
+}
+
 Camera::Camera(const CameraParameters& parameters) {
     setupScreenData(parameters);
     setupViewportData();
     setupPixelData();
 }
 
-Ray Camera::getRay(const Point2<uint32_t>& pixel) const {
+Ray Camera::getRay(
+    const Point2<uint32_t>& pixel,
+    const Point2<float>& pixelOffset
+) const {
     const Vector3<float> pixelUOffset =
-        float(pixel.getX()) * pixelDeltaU_;
+        (float(pixel.getX()) + pixelOffset.getX()) * pixelDeltaU_;
 
     const Vector3<float> pixelVOffset =
-        float(pixel.getY()) * pixelDeltaV_;
+        (float(pixel.getY()) + pixelOffset.getY()) * pixelDeltaV_;
 
     const Point3<float> pixelCenter =
         pixelTopLeft_ + pixelUOffset + pixelVOffset;
 
-    return Ray {cameraCenter_, pixelCenter - cameraCenter_};
+    const Point3<float> target = pixelCenter - cameraCenter_;
+
+    return Ray {cameraCenter_, target};
+}
+
+Ray Camera::getRay(const Point2<uint32_t>& pixel) const {
+    return getRay(pixel, Point2<float> {0.0F, 0.0F});
+}
+
+[[nodiscard]] Ray Camera::getRandomizedRay(
+    const Point2<uint32_t>& pixel
+) const {
+    return getRay(pixel, getRandomPixelOffset());
 }
 }
