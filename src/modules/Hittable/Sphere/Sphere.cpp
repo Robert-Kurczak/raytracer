@@ -9,11 +9,18 @@ void Sphere::updateHitData(
     HitData& hitData
 ) const {
     const Point3<float> tPoint = ray.at(rayT);
-    const Vector3<float> normal = (tPoint - center_).getNormalized();
+    const Vector3<float> outwardNormal =
+        (tPoint - center_).getNormalized();
+    const bool isFrontFace =
+        getDotProduct(ray.getDirection(), outwardNormal) < 0;
+
+    const Vector3<float> normal =
+        isFrontFace ? outwardNormal : -outwardNormal;
 
     hitData.rayT = rayT;
     hitData.hitPoint = tPoint;
     hitData.hitNormal = normal;
+    hitData.isFrontFace = isFrontFace;
 }
 
 Sphere::Sphere(const Point3<float>& center, float radius) :
