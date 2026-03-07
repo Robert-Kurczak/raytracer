@@ -91,7 +91,7 @@ public:
         return std::sqrt(getSquaredLength());
     }
 
-    [[nodiscard]] constexpr Vector<Type, Size> getVersor() const noexcept {
+    [[nodiscard]] constexpr Vector<Type, Size> getNormalized() const noexcept {
         return *this / getLength();
     }
 

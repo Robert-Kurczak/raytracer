@@ -29,7 +29,7 @@ Color8Bit DefaultRenderer::getSkyColor(
 
 Color8Bit DefaultRenderer::calculateColor(Ray& ray) {
     const Vector3<float> rayDirectionVersor =
-        ray.getDirection().getVersor();
+        ray.getDirection().getNormalized();
 
     return getSkyColor(rayDirectionVersor);
 }

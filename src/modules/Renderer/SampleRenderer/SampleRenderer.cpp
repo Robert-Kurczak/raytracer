@@ -13,7 +13,7 @@ void SampleRenderer::render(
         for (uint32_t xIndex = 0; xIndex < resolution.getX(); xIndex++) {
             const Point2<uint32_t> pixel {xIndex, yIndex};
             const Vector3<float> rayDirection =
-                camera.getRay(pixel).getDirection().getVersor();
+                camera.getRay(pixel).getDirection().getNormalized();
 
             const Color8Bit color {
                 .red = uint8_t(
