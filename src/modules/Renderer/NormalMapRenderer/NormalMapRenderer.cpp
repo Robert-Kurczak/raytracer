@@ -20,7 +20,7 @@ inline constexpr Color<float> BLUEISH_COLOR {
 Color8Bit NormalMapRenderer::getSkyColor(
     const Vector3<float>& rayDirectionVersor
 ) {
-    const float a = (0.5F * rayDirectionVersor.getY()) + 1.0F;
+    const float a = (rayDirectionVersor.getY() + 1.0F) / 2.0F;
     const Color<float> color =
         (1.0F - a) * WHITE_COLOR + a * BLUEISH_COLOR;
 
@@ -43,7 +43,9 @@ void NormalMapRenderer::render(
     Framebuffer& framebuffer
 ) noexcept {
     const Vector2<uint32_t> resolution = framebuffer.getResolution();
-    const Interval<float> renderedInterval = Interval<float>::universe();
+    const Interval<float> renderedInterval {
+        0.0F, Interval<float>::infinity()
+    };
 
     HitData hitData {};
 

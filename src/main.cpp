@@ -36,8 +36,14 @@ int main() {
             RTC::Point3<float> {1.5F, 0.5F, -3.0F}, 0.85F
         );
 
+    std::unique_ptr<RTC::IHittable> sphere3 =
+        std::make_unique<RTC::Sphere>(
+            RTC::Point3<float> {0.0F, -100.5F, -1.0F}, 100.0F
+        );
+
     scene.addObject(std::move(sphere1));
     scene.addObject(std::move(sphere2));
+    scene.addObject(std::move(sphere3));
 
     renderer.render(camera, scene, framebuffer);
     writer.write(framebuffer);
