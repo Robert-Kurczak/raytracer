@@ -35,7 +35,11 @@ struct Interval {
     }
 
     static constexpr Interval universe() noexcept {
-        return {-infinity(), +infinity()};
+        if constexpr (std::is_signed_v<Type>) {
+            return {-infinity(), +infinity()};
+        } else {
+            return {0, +infinity()};
+        }
     }
 };
 }

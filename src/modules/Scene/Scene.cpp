@@ -10,14 +10,21 @@ bool Scene::hitRay(
     const Interval<float>& interval,
     HitData& hitData
 ) const {
+    Interval<float> tempInterval = interval;
+    HitData tempHitData {};
+    bool hitAnything = false;
+
     for (const auto& object : objects_) {
-        const bool wasObjectHit = object->isHit(ray, interval, hitData);
+        const bool wasObjectHit =
+            object->isHit(ray, tempInterval, tempHitData);
 
         if (wasObjectHit) {
-            return true;
+            hitAnything = true;
+            tempInterval.end = tempHitData.rayT;
+            hitData = tempHitData;
         }
     }
 
-    return false;
+    return hitAnything;
 }
 }
