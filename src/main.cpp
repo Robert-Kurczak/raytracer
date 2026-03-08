@@ -3,6 +3,7 @@
 #include "Framebuffer/Framebuffer.hpp"
 #include "Hittable/IHittable.hpp"
 #include "Hittable/Sphere/Sphere.hpp"
+#include "Hittable/Triangle/Triangle.hpp"
 #include "Renderer/NormalMapRenderer/NormalMapRenderer.hpp"
 #include "Scene/Scene.hpp"
 #include "Writer/PpmWriter/PpmWriter.hpp"
@@ -19,7 +20,7 @@ inline constexpr RTC::CameraParameters CAMERA_PARAMETERS {
     .center = {0.0F, 0.0F, 0.0F},
 };
 
-inline constexpr uint32_t SAMPLES_PER_PIXEL = 400;
+inline constexpr uint32_t SAMPLES_PER_PIXEL = 100;
 
 int main() {
     RTC::PpmWriter writer {OUTPUT_IMAGE_PATH};
@@ -43,9 +44,17 @@ int main() {
             RTC::Point3<float> {0.0F, -100.5F, -1.0F}, 100.0F
         );
 
+    std::unique_ptr<RTC::IHittable> triangle =
+        std::make_unique<RTC::Triangle>(
+            RTC::Point3<float> {-2.0F, -0.5F, -1.0F},
+            RTC::Point3<float> {0.0F, -0.5F, -1.0F},
+            RTC::Point3<float> {-1.0F, 0.7F, -1.5F}
+        );
+
     scene.addObject(std::move(sphere1));
     scene.addObject(std::move(sphere2));
     scene.addObject(std::move(sphere3));
+    scene.addObject(std::move(triangle));
 
     renderer.render(camera, scene, framebuffer);
     writer.write(framebuffer);
