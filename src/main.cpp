@@ -5,6 +5,7 @@
 #include "Hittable/Mesh/Mesh.hpp"
 #include "Hittable/Sphere/Sphere.hpp"
 #include "MeshBuilder/ObjMeshBuilder.hpp"
+#include "ProgressIndicator/CoutProgressIndicator/CoutProgressIndicator.hpp"
 #include "Renderer/NormalMapRenderer/NormalMapRenderer.hpp"
 #include "Scene/Scene.hpp"
 #include "Writer/PpmWriter/PpmWriter.hpp"
@@ -27,7 +28,10 @@ int main() {
     RTC::PpmWriter writer {OUTPUT_IMAGE_PATH};
     RTC::Camera camera {CAMERA_PARAMETERS};
     RTC::Framebuffer framebuffer {camera.getSceenSize()};
-    RTC::NormalMapRenderer renderer {SAMPLES_PER_PIXEL};
+    RTC::CoutProgressIndicator progressIndicator {};
+    RTC::NormalMapRenderer renderer {
+        progressIndicator, SAMPLES_PER_PIXEL
+    };
     RTC::Scene scene {};
     RTC::ObjMeshBuilder meshBuilder {};
 

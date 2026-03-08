@@ -5,6 +5,8 @@
 #include "Math/Interval.hpp"
 #include "Math/Vector.hpp"
 
+#include <iostream>
+
 namespace RTC {
 inline constexpr Color<float> WHITE_COLOR {
     .red = 255,
@@ -32,7 +34,11 @@ Color<float> NormalMapRenderer::calculateColor(const HitData& hitData) {
     return Color<float> {.red = red, .green = green, .blue = blue};
 }
 
-NormalMapRenderer::NormalMapRenderer(uint32_t samplesPerPixel) :
+NormalMapRenderer::NormalMapRenderer(
+    IProgressIndicator& progressIndicator,
+    uint32_t samplesPerPixel
+) :
+    progressIndicator_(progressIndicator),
     samplesPerPixel_(samplesPerPixel) {}
 
 void NormalMapRenderer::render(
@@ -44,6 +50,10 @@ void NormalMapRenderer::render(
     const Interval<float> renderedInterval {
         0.0F, Interval<float>::infinity()
     };
+
+    const uint32_t samplesToTake =
+        resolution.getX() * resolution.getY() * samplesPerPixel_;
+    uint32_t currentSample = 0;
 
     HitData hitData {};
 
@@ -68,6 +78,12 @@ void NormalMapRenderer::render(
                 }
 
                 resultColor += sampleColor;
+
+                currentSample++;
+                const float progress =
+                    float(currentSample) / float(samplesToTake);
+
+                progressIndicator_.showProgress(progress);
             }
 
             framebuffer.setColorAt(
@@ -76,5 +92,7 @@ void NormalMapRenderer::render(
             );
         }
     }
+
+    std::cout << "\n";
 }
 }
