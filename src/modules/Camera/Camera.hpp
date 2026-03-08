@@ -38,6 +38,8 @@ private:
 public:
     Camera(const CameraParameters& parameters);
 
+    [[nodiscard]] const Vector2<uint32_t>& getSceenSize() const;
+
     [[nodiscard]] Ray getRay(const Point2<uint32_t>& pixel) const;
 
     [[nodiscard]] Ray getRandomizedRay(

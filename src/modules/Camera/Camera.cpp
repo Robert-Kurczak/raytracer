@@ -53,6 +53,10 @@ Camera::Camera(const CameraParameters& parameters) {
     setupPixelData();
 }
 
+const Vector2<uint32_t>& Camera::getSceenSize() const {
+    return screenSize_;
+}
+
 Ray Camera::getRay(
     const Point2<uint32_t>& pixel,
     const Point2<float>& pixelOffset

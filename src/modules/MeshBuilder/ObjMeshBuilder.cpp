@@ -12,13 +12,104 @@
 #include <vector>
 
 namespace RTC {
-uint32_t ObjMeshBuilder::parseFaceEntry(const std::string& entry) const {
-    const uint32_t slashIndex = entry.find_first_of('/');
-    return std::stoi(entry.substr(0, slashIndex));
+
+void ObjMeshBuilder::parseVertex(
+    std::vector<Point3<float>>& vertexBuffer,
+    const Vector3<float>& offset,
+    std::stringstream& lineStream
+) const {
+    float x = NAN;
+    float y = NAN;
+    float z = NAN;
+
+    lineStream >> x >> y >> z;
+
+    vertexBuffer.push_back(Point3<float> {x, y, z});
+    vertexBuffer.back() += offset;
+}
+
+uint32_t ObjMeshBuilder::parseVertexIndex(
+    const std::string& entry,
+    uint32_t verticesAmount
+) const {
+    const auto slashIndex = entry.find_first_of('/');
+    int vertexIndex = 0;
+
+    if (slashIndex != std::string::npos) {
+        vertexIndex = std::stoi(entry.substr(0, slashIndex));
+    } else {
+        vertexIndex = std::stoi(entry);
+    }
+
+    if (vertexIndex < 0) {
+        return verticesAmount + vertexIndex;
+    }
+
+    return vertexIndex;
+}
+
+void ObjMeshBuilder::parseFace(
+    Mesh& mesh,
+    const std::vector<Point3<float>>& vertexBuffer,
+    std::stringstream& lineStream
+) const {
+    std::vector<uint32_t> indices {};
+
+    std::string vertexIndex;
+    while (lineStream >> vertexIndex) {
+        const uint32_t index =
+            parseVertexIndex(vertexIndex, vertexBuffer.size());
+
+        indices.push_back(index);
+    }
+
+    const uint32_t indexA = indices[0] - 1;
+    const uint32_t indexB = indices[1] - 1;
+    const uint32_t indexC = indices[2] - 1;
+
+    if (indices.size() == 3) {
+        auto triangle = std::make_unique<Triangle>(
+            vertexBuffer[indexA],
+            vertexBuffer[indexB],
+            vertexBuffer[indexC]
+        );
+
+        mesh.addTriangle(std::move(triangle));
+    } else if (indices.size() == 4) {
+        // A-----B
+        // |   / |
+        // | /   |
+        // C-----D
+        //
+        // Counter-clockwise
+        // ACB, BCD
+
+        const uint32_t indexD = indices[3] - 1;
+
+        auto triangle1 = std::make_unique<Triangle>(
+            vertexBuffer[indexA],
+            vertexBuffer[indexC],
+            vertexBuffer[indexB]
+        );
+        auto triangle2 = std::make_unique<Triangle>(
+            vertexBuffer[indexB],
+            vertexBuffer[indexC],
+            vertexBuffer[indexD]
+        );
+
+        mesh.addTriangle(std::move(triangle1));
+        mesh.addTriangle(std::move(triangle2));
+    } else {
+        throw std::runtime_error(
+            ".obj parser does not support more than 4 indices in face "
+            "the entry"
+        );
+    }
 }
 
 std::unique_ptr<Mesh> ObjMeshBuilder::buildFromFile(
-    const std::filesystem::path& path
+    const std::filesystem::path& path,
+    const Vector3<float>& position
 ) const {
     std::ifstream file {path};
 
@@ -32,7 +123,7 @@ std::unique_ptr<Mesh> ObjMeshBuilder::buildFromFile(
 
     auto mesh = std::make_unique<Mesh>();
 
-    std::vector<Point3<float>> vertices {};
+    std::vector<Point3<float>> vertexBuffer {};
 
     while (std::getline(file, line)) {
         std::stringstream lineStream {line};
@@ -41,32 +132,9 @@ std::unique_ptr<Mesh> ObjMeshBuilder::buildFromFile(
         lineStream >> dataType;
 
         if (dataType == "v") {
-            float x = NAN;
-            float y = NAN;
-            float z = NAN;
-
-            lineStream >> x >> y >> z;
-
-            vertices.push_back(Point3<float> {x, y, z});
+            parseVertex(vertexBuffer, position, lineStream);
         } else if (dataType == "f") {
-            std::string vertexIndex;
-
-            lineStream >> vertexIndex;
-            const uint32_t indexI = parseFaceEntry(vertexIndex);
-
-            lineStream >> vertexIndex;
-            const uint32_t indexJ = parseFaceEntry(vertexIndex);
-
-            lineStream >> vertexIndex;
-            const uint32_t indexK = parseFaceEntry(vertexIndex);
-
-            auto triangle = std::make_unique<Triangle>(
-                vertices[indexI - 1],
-                vertices[indexJ - 1],
-                vertices[indexK - 1]
-            );
-
-            mesh->addTriangle(std::move(triangle));
+            parseFace(*mesh, vertexBuffer, lineStream);
         }
     }
 

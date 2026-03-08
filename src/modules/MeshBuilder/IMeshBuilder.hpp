@@ -16,7 +16,8 @@ public:
     virtual ~IMeshBuilder() = default;
 
     [[nodiscard]] virtual std::unique_ptr<Mesh> buildFromFile(
-        const std::filesystem::path& path
+        const std::filesystem::path& path,
+        const Vector3<float>& position
     ) const = 0;
 };
 }
