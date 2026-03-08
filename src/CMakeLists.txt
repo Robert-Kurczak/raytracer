@@ -30,6 +30,17 @@ file(
   ${SOURCE_DIRECTORY}/*.cpp
 )
 
+include(FetchContent)
+cmake_policy(SET CMP0135 NEW)
+
+FetchContent_Declare(
+  json
+  URL
+  https://github.com/nlohmann/json/releases/download/v3.12.0/json.tar.xz
+)
+
+FetchContent_MakeAvailable(json)
+
 add_executable(
   ${PROJECT_NAME}
   ${SOURCE_FILES}
@@ -39,3 +50,9 @@ target_include_directories(
   ${PROJECT_NAME}
   PRIVATE
   ${INCLUDE_DIRECTORY})
+
+target_link_libraries(
+  ${PROJECT_NAME}
+  PRIVATE
+  nlohmann_json::nlohmann_json
+)
