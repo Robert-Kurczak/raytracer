@@ -71,6 +71,10 @@ bool Triangle::isHit(
         return false;
     }
 
+    if (weight1 + weight2 > 1) {
+        return false;
+    }
+
     const float rayTDeterminant =
         getDotProduct(edge1_, getCrossProduct(edge2_, solution));
 
