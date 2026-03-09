@@ -63,47 +63,18 @@ void ObjMeshBuilder::parseFace(
         indices.push_back(index);
     }
 
-    const uint32_t indexA = indices[0] - 1;
-    const uint32_t indexB = indices[1] - 1;
-    const uint32_t indexC = indices[2] - 1;
+    for (size_t i = 1; i + 1 < indices.size(); ++i) {
+        const uint32_t fanBaseIndex = indices[0] - 1;
+        const uint32_t fanIndexA = indices[i] - 1;
+        const uint32_t fanIndexB = indices[i + 1] - 1;
 
-    if (indices.size() == 3) {
         auto triangle = std::make_unique<Triangle>(
-            vertexBuffer[indexA],
-            vertexBuffer[indexB],
-            vertexBuffer[indexC]
+            vertexBuffer[fanBaseIndex],
+            vertexBuffer[fanIndexA],
+            vertexBuffer[fanIndexB]
         );
 
         mesh.addTriangle(std::move(triangle));
-    } else if (indices.size() == 4) {
-        // A-----B
-        // |   / |
-        // | /   |
-        // C-----D
-        //
-        // Counter-clockwise
-        // ACB, BCD
-
-        const uint32_t indexD = indices[3] - 1;
-
-        auto triangle1 = std::make_unique<Triangle>(
-            vertexBuffer[indexA],
-            vertexBuffer[indexC],
-            vertexBuffer[indexB]
-        );
-        auto triangle2 = std::make_unique<Triangle>(
-            vertexBuffer[indexB],
-            vertexBuffer[indexC],
-            vertexBuffer[indexD]
-        );
-
-        mesh.addTriangle(std::move(triangle1));
-        mesh.addTriangle(std::move(triangle2));
-    } else {
-        throw std::runtime_error(
-            ".obj parser does not support more than 4 indices in face "
-            "the entry"
-        );
     }
 }
 
