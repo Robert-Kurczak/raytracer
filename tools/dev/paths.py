@@ -3,7 +3,7 @@
 from pathlib import Path
 
 # === Base ===
-APPLICATION_NAME = "computer-graphics"
+APPLICATION_NAME = "raytracer"
 
 DEV_DIRECTORY_PATH = Path(__file__).parent
 REPOSITORY_ROOT_PATH = DEV_DIRECTORY_PATH.parent.parent
@@ -18,7 +18,7 @@ APPLICATION_BINARY_PATH = REPOSITORY_ROOT_PATH.joinpath(
 # ===
 
 # === Dockerfiles ===
-BUILDER_IMAGE_NAME = "computer-graphics-dev"
+BUILDER_IMAGE_NAME = "raytracer-dev"
 BUILDER_DOCKERFILE_PATH = DEV_DIRECTORY_PATH.joinpath("Dockerfile")
 # ===
 
