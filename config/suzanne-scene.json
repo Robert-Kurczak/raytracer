@@ -1,10 +1,10 @@
 {
-    "outputPath": "resources/renders/sample-scene.ppm",
+    "outputPath": "resources/renders/suzanne-scene.ppm",
     "renderer": {
         "samplesPerPixel": 10
     },
     "camera": {
-        "screenWidth": 720,
+        "screenWidth": 1280,
         "aspectRatio": 1.777777778,
         "position": [
             0.0,
@@ -15,11 +15,11 @@
     "objects": [
         {
             "type": "obj",
-            "filePath": "resources/objects/spot-rotated.obj",
+            "filePath": "resources/objects/suzanne.obj",
             "position": [
-                -0.5,
-                0.0,
-                -2.0
+                2.5,
+                -1.0,
+                -6.0
             ]
         },
         {

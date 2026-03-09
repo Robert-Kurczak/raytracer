@@ -1,0 +1,35 @@
+{
+    "outputPath": "resources/renders/dragon-scene.ppm",
+    "renderer": {
+        "samplesPerPixel": 5
+    },
+    "camera": {
+        "screenWidth": 720,
+        "aspectRatio": 1.777777778,
+        "position": [
+            0.0,
+            0.0,
+            0.0
+        ]
+    },
+    "objects": [
+        {
+            "type": "obj",
+            "filePath": "resources/objects/xyzrgb_dragon.obj",
+            "position": [
+                -3.5,
+                30.0,
+                -150.0
+            ]
+        },
+        {
+            "type": "sphere",
+            "position": [
+                0.0,
+                -110.5,
+                -1
+            ],
+            "radius": 100.0
+        }
+    ]
+}
