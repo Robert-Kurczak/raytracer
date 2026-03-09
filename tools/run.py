@@ -14,9 +14,11 @@ def run_application():
     Run built project
     """
 
+    args = sys.argv[1:]
+
     try:
         subprocess.run(
-            [paths.APPLICATION_BINARY_PATH],
+            [paths.APPLICATION_BINARY_PATH, *args],
             cwd=paths.REPOSITORY_ROOT_PATH,
             check=True
         )
