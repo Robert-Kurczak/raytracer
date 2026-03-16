@@ -21,7 +21,7 @@ set(
 
 set(
   INCLUDE_DIRECTORY
-  ${CMAKE_SOURCE_DIR}/modules
+  ${CMAKE_SOURCE_DIR}
 )
 
 file(

@@ -1,8 +1,11 @@
-#include "EnvironmentBuilder/JsonEnvironmentBuilder/JsonEnvironmentBuilder.hpp"
-#include "MeshBuilder/ObjMeshBuilder.hpp"
-#include "ProgressIndicator/CoutProgressIndicator/CoutProgressIndicator.hpp"
+#include "Builders/EnvironmentBuilder/JsonEnvironmentBuilder/JsonEnvironmentBuilder.hpp"
+#include "Builders/MeshBuilder/ObjMeshBuilder/ObjMeshBuilder.hpp"
+#include "Rendering/Framebuffer/Framebuffer.hpp"
+#include "Rendering/ProgressIndicator/CoutProgressIndicator/CoutProgressIndicator.hpp"
 
+#include <cassert>
 #include <filesystem>
+#include <span>
 
 int main(int argc, char* argv[]) {
     assert(argc > 1);
