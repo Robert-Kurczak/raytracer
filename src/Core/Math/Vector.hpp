@@ -96,6 +96,12 @@ public:
         return *this / getLength();
     }
 
+    constexpr Vector<Type, Size> getReflected(
+        const Vector<Type, Size>& normal
+    ) const noexcept {
+        return *this - (2 * getDotProduct(*this, normal) * normal);
+    }
+
     [[nodiscard]] constexpr const Type& getX() const noexcept
         requires(Size >= 1)
     {

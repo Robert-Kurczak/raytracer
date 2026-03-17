@@ -2,6 +2,9 @@
 
 #include "Geometry/Hittable/Mesh/Mesh.hpp"
 #include "Geometry/Hittable/Triangle/Triangle.hpp"
+#include "Geometry/Material/IMaterial.hpp"
+#include "Geometry/Material/MtlMaterial/MtlMaterial.hpp"
+#include "Geometry/Material/MtlMaterial/MtlParameters.hpp"
 
 #include <format>
 #include <fstream>
@@ -63,6 +66,15 @@ void ObjMeshBuilder::parseFace(
         indices.push_back(index);
     }
 
+    MtlParameters parameters {
+        .ambient = {.red = 0.0, .green = 0.0, .blue = 0.0},
+        .diffuse = {.red = 0.7, .green = 0.1, .blue = 0.5},
+        .specular = {.red = 0.0, .green = 0.0, .blue = 0.0}
+    };
+
+    std::shared_ptr<IMaterial> material =
+        std::make_shared<MtlMaterial>(parameters);
+
     for (size_t i = 1; i + 1 < indices.size(); ++i) {
         const uint32_t fanBaseIndex = indices[0] - 1;
         const uint32_t fanIndexA = indices[i] - 1;
@@ -71,7 +83,8 @@ void ObjMeshBuilder::parseFace(
         auto triangle = std::make_unique<Triangle>(
             vertexBuffer[fanBaseIndex],
             vertexBuffer[fanIndexA],
-            vertexBuffer[fanIndexB]
+            vertexBuffer[fanIndexB],
+            material
         );
 
         mesh.addTriangle(std::move(triangle));

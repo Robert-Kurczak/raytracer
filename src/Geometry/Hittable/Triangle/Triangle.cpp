@@ -3,6 +3,9 @@
 #include "Core/Math/Interval.hpp"
 #include "Core/Math/Numeric.hpp"
 #include "Core/Math/Vector.hpp"
+#include "Geometry/Material/IMaterial.hpp"
+
+#include <memory>
 
 namespace RTC {
 void Triangle::updateHitData(
@@ -21,16 +24,19 @@ void Triangle::updateHitData(
     hitData.hitPoint = tPoint;
     hitData.hitNormal = normal;
     hitData.isFrontFace = isFrontFace;
+    hitData.material = material_;
 }
 
 Triangle::Triangle(
     const Point3<float>& vertexA,
     const Point3<float>& vertexB,
-    const Point3<float>& vertexC
+    const Point3<float>& vertexC,
+    std::shared_ptr<IMaterial> material
 ) :
     vertexA_(vertexA),
     vertexB_(vertexB),
     vertexC_(vertexC),
+    material_(std::move(material)),
     edge1_(vertexA_ - vertexC_),
     edge2_(vertexB_ - vertexC_),
     outwardNormal_(getCrossProduct(edge1_, edge2_).getNormalized()) {}

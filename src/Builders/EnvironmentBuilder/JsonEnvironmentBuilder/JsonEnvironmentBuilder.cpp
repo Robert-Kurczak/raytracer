@@ -2,7 +2,9 @@
 
 #include "../RenderEnvironment.hpp"
 #include "Geometry/Hittable/Sphere/Sphere.hpp"
-#include "Rendering/Renderer/NormalMapRenderer/NormalMapRenderer.hpp"
+#include "Geometry/Material/IMaterial.hpp"
+#include "Geometry/Material/MtlMaterial/MtlMaterial.hpp"
+#include "Rendering/Renderer/MaterialRenderer/MaterialRenderer.hpp"
 #include "Rendering/Writer/PpmWriter/PpmWriter.hpp"
 #include "World/Camera/CameraParameters.hpp"
 
@@ -14,6 +16,14 @@
 using json = nlohmann::json;
 
 namespace RTC {
+static constexpr MtlParameters DEFAULT_MATERIAL_PARAMETERS {
+    .ambient = {.red = 0.0F, .green = 0.0F, .blue = 0.0F},
+    .diffuse = {.red = 0.8F, .green = 0.6F, .blue = 0.8F},
+    .specular = {.red = 0.0F, .green = 0.0F, .blue = 0.0F},
+    .shininess = 0.0F,
+    .transparency = 0.0F
+};
+
 [[nodiscard]] Point3<float> JsonEnvironmentBuilder::parsePosition(
     const nlohmann::json& jsonArray
 ) const {
@@ -38,8 +48,11 @@ std::unique_ptr<IWriter> JsonEnvironmentBuilder::parseWriter(
     const uint32_t samplesPerPixel =
         jsonContent["renderer"]["samplesPerPixel"].get<uint32_t>();
 
-    return std::make_unique<NormalMapRenderer>(
-        progressIndicator_, samplesPerPixel
+    std::shared_ptr<IMaterial> defaultMaterial =
+        std::make_shared<MtlMaterial>(DEFAULT_MATERIAL_PARAMETERS);
+
+    return std::make_unique<MaterialRenderer>(
+        progressIndicator_, samplesPerPixel, std::move(defaultMaterial)
     );
 }
 
