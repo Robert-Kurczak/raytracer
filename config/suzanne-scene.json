@@ -4,7 +4,7 @@
         "samplesPerPixel": 10
     },
     "camera": {
-        "screenWidth": 1280,
+        "screenWidth": 1920,
         "aspectRatio": 1.777777778,
         "position": [
             0.0,
