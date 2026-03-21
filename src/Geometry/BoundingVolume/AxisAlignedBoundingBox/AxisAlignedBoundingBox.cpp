@@ -23,7 +23,28 @@ AxisAlignedBoundingBox::AxisAlignedBoundingBox(
     }
 }
 
-[[nodiscard]] bool AxisAlignedBoundingBox::isHit(
+AxisAlignedBoundingBox::AxisAlignedBoundingBox(
+    const AxisAlignedBoundingBox& box1,
+    const AxisAlignedBoundingBox& box2
+) {
+    for (uint8_t axis = 0; axis < 3; axis++) {
+        axisIntervals_[axis].start = std::min(
+            box1.axisIntervals_[axis].start,
+            box2.axisIntervals_[axis].start
+        );
+
+        axisIntervals_[axis].end = std::max(
+            box1.axisIntervals_[axis].end, box2.axisIntervals_[axis].end
+        );
+    }
+}
+
+float AxisAlignedBoundingBox::getIntervalCenter(uint8_t axisIndex) const {
+    const Interval<float>& interval = axisIntervals_[axisIndex];
+    return (interval.end - interval.start) / 2.0F;
+}
+
+bool AxisAlignedBoundingBox::isHit(
     const Ray& ray,
     const Interval<float>& rayInterval
 ) const {

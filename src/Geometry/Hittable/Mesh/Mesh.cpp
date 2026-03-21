@@ -1,8 +1,19 @@
 #include "Mesh.hpp"
 
+#include "Core/Math/Point.hpp"
+#include "Geometry/BoundingVolume/AxisAlignedBoundingBox/AxisAlignedBoundingBox.hpp"
+
 namespace RTC {
 void Mesh::addTriangle(std::unique_ptr<Triangle> triangle) {
     triangles_.push_back(std::move(triangle));
+}
+
+const AxisAlignedBoundingBox& Mesh::getBoundingBox() const {
+    static AxisAlignedBoundingBox temporary {
+        Point3<float> {}, Point3<float> {}
+    };
+
+    return temporary;
 }
 
 bool Mesh::isHit(

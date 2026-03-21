@@ -14,6 +14,9 @@ private:
 public:
     void addTriangle(std::unique_ptr<Triangle> triangle);
 
+    [[nodiscard]] const AxisAlignedBoundingBox&
+    getBoundingBox() const override;
+
     bool isHit(
         const Ray& ray,
         const Interval<float>& interval,

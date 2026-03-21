@@ -3,11 +3,37 @@
 #include "Core/Math/Interval.hpp"
 #include "Core/Math/Numeric.hpp"
 #include "Core/Math/Vector.hpp"
+#include "Geometry/BoundingVolume/AxisAlignedBoundingBox/AxisAlignedBoundingBox.hpp"
 #include "Geometry/Material/IMaterial.hpp"
 
 #include <memory>
 
 namespace RTC {
+[[nodiscard]] AxisAlignedBoundingBox Triangle::createBoundingBox(
+    const Point3<float>& vertexA,
+    const Point3<float>& vertexB,
+    const Point3<float>& vertexC
+) const {
+    const float minX =
+        std::min({vertexA.getX(), vertexB.getX(), vertexC.getX()});
+    const float minY =
+        std::min({vertexA.getY(), vertexB.getY(), vertexC.getY()});
+    const float minZ =
+        std::min({vertexA.getZ(), vertexB.getZ(), vertexC.getZ()});
+
+    const float maxX =
+        std::max({vertexA.getX(), vertexB.getX(), vertexC.getX()});
+    const float maxY =
+        std::max({vertexA.getY(), vertexB.getY(), vertexC.getY()});
+    const float maxZ =
+        std::max({vertexA.getZ(), vertexB.getZ(), vertexC.getZ()});
+
+    const Point3<float> minPoint {minX, minY, minZ};
+    const Point3<float> maxPoint {maxX, maxY, maxZ};
+
+    return AxisAlignedBoundingBox {minPoint, maxPoint};
+}
+
 void Triangle::updateHitData(
     float rayT,
     const Ray& ray,
@@ -36,10 +62,16 @@ Triangle::Triangle(
     vertexA_(vertexA),
     vertexB_(vertexB),
     vertexC_(vertexC),
+    boundingBox_(createBoundingBox(vertexA, vertexB, vertexC)),
     material_(std::move(material)),
     edge1_(vertexA_ - vertexC_),
     edge2_(vertexB_ - vertexC_),
     outwardNormal_(getCrossProduct(edge1_, edge2_).getNormalized()) {}
+
+[[nodiscard]] const AxisAlignedBoundingBox& Triangle::
+    getBoundingBox() const {
+    return boundingBox_;
+}
 
 bool Triangle::isHit(
     const Ray& ray,

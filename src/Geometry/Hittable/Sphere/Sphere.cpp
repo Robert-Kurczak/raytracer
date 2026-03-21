@@ -1,8 +1,20 @@
 #include "Sphere.hpp"
 
 #include "Core/Math/Vector.hpp"
+#include "Geometry/BoundingVolume/AxisAlignedBoundingBox/AxisAlignedBoundingBox.hpp"
 
 namespace RTC {
+AxisAlignedBoundingBox Sphere::createBoundingBox(
+    const Point3<float>& center,
+    float radius
+) const {
+    const Vector3<float> radiusOffset {radius, radius, radius};
+
+    return AxisAlignedBoundingBox {
+        center - radiusOffset, center + radiusOffset
+    };
+}
+
 void Sphere::updateHitData(
     float rayT,
     const Ray& ray,
@@ -26,7 +38,12 @@ void Sphere::updateHitData(
 Sphere::Sphere(const Point3<float>& center, float radius) :
     center_(center),
     radius_(radius),
-    radiusSquared_(radius_ * radius_) {}
+    radiusSquared_(radius_ * radius_),
+    boundingBox_(createBoundingBox(center_, radius_)) {}
+
+const AxisAlignedBoundingBox& Sphere::getBoundingBox() const {
+    return boundingBox_;
+}
 
 bool Sphere::isHit(
     const Ray& ray,

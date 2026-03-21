@@ -4,6 +4,8 @@
 #include "Core/Math/Point.hpp"
 #include "Core/Ray/Ray.hpp"
 
+#include <cstdint>
+
 namespace RTC {
 class AxisAlignedBoundingBox {
 private:
@@ -24,6 +26,13 @@ public:
         const Point3<float>& startPoint,
         const Point3<float>& endPoint
     );
+
+    AxisAlignedBoundingBox(
+        const AxisAlignedBoundingBox& box1,
+        const AxisAlignedBoundingBox& box2
+    );
+
+    [[nodiscard]] float getIntervalCenter(uint8_t axisIndex) const;
 
     [[nodiscard]] bool isHit(
         const Ray& ray,
