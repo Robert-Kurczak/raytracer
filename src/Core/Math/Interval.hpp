@@ -1,5 +1,6 @@
 #pragma once
 
+#include <algorithm>
 #include <limits>
 #include <type_traits>
 
@@ -24,6 +25,13 @@ struct Interval {
 
     constexpr bool surrounds(Type value) const noexcept {
         return value > start && value < end;
+    }
+
+    constexpr bool overlaps(const Interval& interval) const noexcept {
+        const Type overlapStart = std::max(start, interval.start);
+        const Type overlapEnd = std::min(end, interval.end);
+
+        return overlapStart < overlapEnd;
     }
 
     constexpr Type clamp(Type value) const noexcept {
