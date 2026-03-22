@@ -1,10 +1,10 @@
 {
     "outputPath": "resources/renders/spot-scene.ppm",
     "renderer": {
-        "samplesPerPixel": 4
+        "samplesPerPixel": 10
     },
     "camera": {
-        "screenWidth": 720,
+        "screenWidth": 1920,
         "aspectRatio": 1.777777778,
         "position": [
             0.0,

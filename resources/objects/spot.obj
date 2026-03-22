@@ -1,6 +1,5 @@
 # Blender 5.0.1
 # www.blender.org
-mtllib spot.mtl
 o spot
 v -0.041542 -0.389274 0.295883
 v -0.906804 -0.440137 -0.133334
