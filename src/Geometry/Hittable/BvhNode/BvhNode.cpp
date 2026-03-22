@@ -25,7 +25,15 @@ bool BvhNode::isHit(
         return false;
     }
 
-    return left_->isHit(ray, interval, hitData) ||
-           right_->isHit(ray, interval, hitData);
+    const bool hitLeft = left_->isHit(ray, interval, hitData);
+
+    Interval<float> rightRayInterval = interval;
+    if (hitLeft) {
+        rightRayInterval.end = hitData.rayT;
+    }
+
+    const bool hitRight = right_->isHit(ray, rightRayInterval, hitData);
+
+    return hitLeft || hitRight;
 }
 }

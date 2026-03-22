@@ -1,6 +1,5 @@
 #include "ObjMeshBuilder.hpp"
 
-#include "Geometry/Hittable/Mesh/Mesh.hpp"
 #include "Geometry/Hittable/Triangle/Triangle.hpp"
 #include "Geometry/Material/IMaterial.hpp"
 #include "Geometry/Material/MtlMaterial/MtlMaterial.hpp"
@@ -141,7 +140,7 @@ uint32_t ObjMeshBuilder::parseVertexIndex(
 }
 
 void ObjMeshBuilder::parseFace(
-    Mesh& mesh,
+    TriangleBuffer& triangleBuffer,
     const std::shared_ptr<IMaterial>& material,
     const std::vector<Point3<float>>& vertexBuffer,
     std::stringstream& lineStream
@@ -168,11 +167,11 @@ void ObjMeshBuilder::parseFace(
             material
         );
 
-        mesh.addTriangle(std::move(triangle));
+        triangleBuffer.push_back(std::move(triangle));
     }
 }
 
-std::unique_ptr<Mesh> ObjMeshBuilder::buildFromFile(
+IMeshBuilder::TriangleBuffer ObjMeshBuilder::buildFromFile(
     const std::filesystem::path& path,
     const Vector3<float>& position
 ) const {
@@ -186,7 +185,7 @@ std::unique_ptr<Mesh> ObjMeshBuilder::buildFromFile(
 
     std::string line;
 
-    auto mesh = std::make_unique<Mesh>();
+    TriangleBuffer triangleBuffer {};
     std::vector<Point3<float>> vertexBuffer {};
 
     std::unordered_map<std::string, std::shared_ptr<IMaterial>> materials;
@@ -201,7 +200,9 @@ std::unique_ptr<Mesh> ObjMeshBuilder::buildFromFile(
         if (dataType == "v") {
             parseVertex(vertexBuffer, position, lineStream);
         } else if (dataType == "f") {
-            parseFace(*mesh, currentMaterial, vertexBuffer, lineStream);
+            parseFace(
+                triangleBuffer, currentMaterial, vertexBuffer, lineStream
+            );
         } else if (dataType == "mtllib") {
             parseMtlLib(materials, path, lineStream);
         } else if (dataType == "usemtl") {
@@ -209,6 +210,6 @@ std::unique_ptr<Mesh> ObjMeshBuilder::buildFromFile(
         }
     }
 
-    return mesh;
+    return triangleBuffer;
 }
 }

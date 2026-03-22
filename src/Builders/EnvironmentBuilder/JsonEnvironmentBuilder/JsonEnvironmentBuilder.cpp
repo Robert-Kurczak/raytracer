@@ -1,6 +1,8 @@
 #include "JsonEnvironmentBuilder.hpp"
 
 #include "../RenderEnvironment.hpp"
+#include "Builders/BvhBuilder/IBvhBuilder.hpp"
+#include "Geometry/Hittable/IHittable.hpp"
 #include "Geometry/Hittable/Sphere/Sphere.hpp"
 #include "Geometry/Material/IMaterial.hpp"
 #include "Geometry/Material/MtlMaterial/MtlMaterial.hpp"
@@ -85,10 +87,13 @@ std::unique_ptr<IWriter> JsonEnvironmentBuilder::parseWriter(
             const std::string filePath =
                 object["filePath"].get<std::string>();
 
-            std::unique_ptr<Mesh> mesh =
+            IMeshBuilder::TriangleBuffer mesh =
                 objMeshBuilder_.buildFromFile(filePath, objectPosition);
 
-            scene->addObject(std::move(mesh));
+            std::unique_ptr<IHittable> bvhMesh =
+                bvhBuilder_.build(std::move(mesh));
+
+            scene->addObject(std::move(bvhMesh));
         } else if (objectType == "sphere") {
             const float radius = object["radius"].get<float>();
 
@@ -104,10 +109,12 @@ std::unique_ptr<IWriter> JsonEnvironmentBuilder::parseWriter(
 
 JsonEnvironmentBuilder::JsonEnvironmentBuilder(
     IProgressIndicator& progressIndicator,
-    IMeshBuilder& objMeshBuilder
+    IMeshBuilder& objMeshBuilder,
+    IBvhBuilder& bvhBuilder
 ) :
     progressIndicator_(progressIndicator),
-    objMeshBuilder_(objMeshBuilder) {}
+    objMeshBuilder_(objMeshBuilder),
+    bvhBuilder_(bvhBuilder) {}
 
 RenderEnvironment JsonEnvironmentBuilder::build(
     const std::filesystem::path& path

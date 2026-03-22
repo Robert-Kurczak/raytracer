@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Builders/BvhBuilder/IBvhBuilder.hpp"
 #include "Builders/EnvironmentBuilder/IEnvironmentBuilder.hpp"
 #include "Builders/MeshBuilder/IMeshBuilder.hpp"
 #include "Core/Math/Point.hpp"
@@ -17,6 +18,7 @@ class JsonEnvironmentBuilder : public IEnvironmentBuilder {
 private:
     IProgressIndicator& progressIndicator_;
     IMeshBuilder& objMeshBuilder_;
+    IBvhBuilder& bvhBuilder_;
 
     [[nodiscard]] Point3<float> parsePosition(
         const nlohmann::json& jsonArray
@@ -41,7 +43,8 @@ private:
 public:
     JsonEnvironmentBuilder(
         IProgressIndicator& progressIndicator,
-        IMeshBuilder& objMeshBuilder
+        IMeshBuilder& objMeshBuilder,
+        IBvhBuilder& bvhBuilder
     );
 
     [[nodiscard]] RenderEnvironment build(

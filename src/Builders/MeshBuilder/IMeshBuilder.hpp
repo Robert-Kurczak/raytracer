@@ -1,9 +1,10 @@
 #pragma once
 
-#include "Geometry/Hittable/Mesh/Mesh.hpp"
+#include "Geometry/Hittable/IHittable.hpp"
 
 #include <filesystem>
 #include <memory>
+#include <vector>
 
 namespace RTC {
 class IMeshBuilder {
@@ -15,7 +16,9 @@ public:
     IMeshBuilder operator=(IMeshBuilder&&) = delete;
     virtual ~IMeshBuilder() = default;
 
-    [[nodiscard]] virtual std::unique_ptr<Mesh> buildFromFile(
+    using TriangleBuffer = std::vector<std::unique_ptr<IHittable>>;
+
+    [[nodiscard]] virtual TriangleBuffer buildFromFile(
         const std::filesystem::path& path,
         const Vector3<float>& position
     ) const = 0;

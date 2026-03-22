@@ -1,3 +1,4 @@
+#include "Builders/BvhBuilder/BvhBuilder.hpp"
 #include "Builders/EnvironmentBuilder/JsonEnvironmentBuilder/JsonEnvironmentBuilder.hpp"
 #include "Builders/MeshBuilder/ObjMeshBuilder/ObjMeshBuilder.hpp"
 #include "Rendering/Framebuffer/Framebuffer.hpp"
@@ -16,8 +17,9 @@ int main(int argc, char* argv[]) {
 
     RTC::CoutProgressIndicator progressIndicator {};
     RTC::ObjMeshBuilder objMeshBuilder {};
+    RTC::BvhBuilder bvhBuilder {};
     RTC::JsonEnvironmentBuilder environmentBuilder {
-        progressIndicator, objMeshBuilder
+        progressIndicator, objMeshBuilder, bvhBuilder
     };
     RTC::RenderEnvironment environment =
         environmentBuilder.build(configFilePath);

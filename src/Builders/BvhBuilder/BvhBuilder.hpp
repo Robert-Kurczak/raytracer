@@ -1,12 +1,13 @@
 #pragma once
 
+#include "Builders/BvhBuilder/IBvhBuilder.hpp"
 #include "Geometry/Hittable/IHittable.hpp"
 
 #include <memory>
 #include <vector>
 
 namespace RTC {
-class BvhBuilder {
+class BvhBuilder : public IBvhBuilder {
 private:
     [[nodiscard]] static bool compareBoxes(
         const std::unique_ptr<IHittable>& left,
@@ -38,6 +39,6 @@ private:
 public:
     [[nodiscard]] std::unique_ptr<IHittable> build(
         std::vector<std::unique_ptr<IHittable>>&& objects
-    ) const;
+    ) const override;
 };
 }

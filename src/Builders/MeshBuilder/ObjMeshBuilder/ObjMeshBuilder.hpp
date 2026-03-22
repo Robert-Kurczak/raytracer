@@ -7,6 +7,7 @@
 #include <memory>
 #include <string>
 #include <unordered_map>
+#include <vector>
 
 namespace RTC {
 using MaterialsMap =
@@ -42,14 +43,14 @@ private:
     ) const;
 
     void parseFace(
-        Mesh& mesh,
+        TriangleBuffer& triangleBuffer,
         const std::shared_ptr<IMaterial>& material,
         const std::vector<Point3<float>>& vertexBuffer,
         std::stringstream& lineStream
     ) const;
 
 public:
-    [[nodiscard]] std::unique_ptr<Mesh> buildFromFile(
+    [[nodiscard]] TriangleBuffer buildFromFile(
         const std::filesystem::path& path,
         const Vector3<float>& position
     ) const override;
