@@ -32,7 +32,12 @@ public:
         const AxisAlignedBoundingBox& box2
     );
 
+    [[nodiscard]] const Interval<float>& getXAxisInterval() const;
+    [[nodiscard]] const Interval<float>& getYAxisInterval() const;
+    [[nodiscard]] const Interval<float>& getZAxisInterval() const;
+
     [[nodiscard]] float getIntervalCenter(uint8_t axisIndex) const;
+    [[nodiscard]] uint8_t getLongestAxisIndex() const;
 
     [[nodiscard]] bool isHit(
         const Ray& ray,

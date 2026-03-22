@@ -22,13 +22,30 @@ bool BvhBuilder::compareBoxes(
     return leftCenter < rightCenter;
 }
 
+uint8_t BvhBuilder::getLongestAxisIndex(
+    const std::vector<std::unique_ptr<IHittable>>& objects,
+    uint32_t rangeStart,
+    uint32_t rangeEnd
+) const {
+    AxisAlignedBoundingBox boundingBox =
+        objects[rangeStart]->getBoundingBox();
+
+    for (uint32_t i = rangeStart + 1; i < rangeEnd; i++) {
+        boundingBox = AxisAlignedBoundingBox {
+            boundingBox, objects[i]->getBoundingBox()
+        };
+    }
+
+    return boundingBox.getLongestAxisIndex();
+}
+
 void BvhBuilder::sortBoxes(
     std::vector<std::unique_ptr<IHittable>>& objects,
     uint32_t rangeStart,
-    uint32_t rangeEnd,
-    uint32_t depth
+    uint32_t rangeEnd
 ) const {
-    const uint8_t axisIndex = depth % 3;
+    const uint8_t axisIndex =
+        getLongestAxisIndex(objects, rangeStart, rangeEnd);
 
     auto comparator = [axisIndex](const auto& left, const auto& right) {
         return compareBoxes(left, right, axisIndex);
@@ -44,19 +61,18 @@ void BvhBuilder::sortBoxes(
 std::unique_ptr<IHittable> BvhBuilder::createInternalNode(
     std::vector<std::unique_ptr<IHittable>>& objects,
     uint32_t rangeStart,
-    uint32_t rangeEnd,
-    uint32_t depth
+    uint32_t rangeEnd
 ) const {
-    sortBoxes(objects, rangeStart, rangeEnd, depth);
+    sortBoxes(objects, rangeStart, rangeEnd);
 
     const uint32_t objectSpan = rangeEnd - rangeStart;
     const uint32_t rangeMid = rangeStart + (objectSpan / 2);
 
     std::unique_ptr<IHittable> leftNode =
-        buildRecursively(objects, rangeStart, rangeMid, depth + 1);
+        buildRecursively(objects, rangeStart, rangeMid);
 
     std::unique_ptr<IHittable> rightNode =
-        buildRecursively(objects, rangeMid, rangeEnd, depth + 1);
+        buildRecursively(objects, rangeMid, rangeEnd);
 
     const AxisAlignedBoundingBox surroundingBox {
         leftNode->getBoundingBox(), rightNode->getBoundingBox()
@@ -70,8 +86,7 @@ std::unique_ptr<IHittable> BvhBuilder::createInternalNode(
 std::unique_ptr<IHittable> BvhBuilder::buildRecursively(
     std::vector<std::unique_ptr<IHittable>>& objects,
     uint32_t rangeStart,
-    uint32_t rangeEnd,
-    uint32_t currentDepth
+    uint32_t rangeEnd
 ) const {
     const uint32_t objectSpan = rangeEnd - rangeStart;
 
@@ -95,9 +110,7 @@ std::unique_ptr<IHittable> BvhBuilder::buildRecursively(
         );
     }
 
-    return createInternalNode(
-        objects, rangeStart, rangeEnd, currentDepth
-    );
+    return createInternalNode(objects, rangeStart, rangeEnd);
 }
 
 [[nodiscard]] std::unique_ptr<IHittable> BvhBuilder::build(

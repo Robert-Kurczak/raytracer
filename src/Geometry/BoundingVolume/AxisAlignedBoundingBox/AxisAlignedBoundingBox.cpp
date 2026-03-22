@@ -3,6 +3,10 @@
 #include <cstdint>
 
 namespace RTC {
+static constexpr uint8_t X_AXIS_INDEX = 0;
+static constexpr uint8_t Y_AXIS_INDEX = 1;
+static constexpr uint8_t Z_AXIS_INDEX = 2;
+
 AxisAlignedBoundingBox::AxisAlignedBoundingBox(
     const Interval<float>& xInterval,
     const Interval<float>& yInterval,
@@ -39,9 +43,35 @@ AxisAlignedBoundingBox::AxisAlignedBoundingBox(
     }
 }
 
+const Interval<float>& AxisAlignedBoundingBox::getXAxisInterval() const {
+    return axisIntervals_[X_AXIS_INDEX];
+}
+
+const Interval<float>& AxisAlignedBoundingBox::getYAxisInterval() const {
+    return axisIntervals_[Y_AXIS_INDEX];
+}
+
+const Interval<float>& AxisAlignedBoundingBox::getZAxisInterval() const {
+    return axisIntervals_[Z_AXIS_INDEX];
+}
+
 float AxisAlignedBoundingBox::getIntervalCenter(uint8_t axisIndex) const {
     const Interval<float>& interval = axisIntervals_[axisIndex];
-    return (interval.end - interval.start) / 2.0F;
+    return (interval.start + interval.end) / 2.0F;
+}
+
+uint8_t AxisAlignedBoundingBox::getLongestAxisIndex() const {
+    const float xSize = getXAxisInterval().getSize();
+    const float ySize = getYAxisInterval().getSize();
+    const float zSize = getZAxisInterval().getSize();
+
+    if (xSize > ySize && xSize > zSize) {
+        return X_AXIS_INDEX;
+    }
+    if (ySize > zSize) {
+        return Y_AXIS_INDEX;
+    }
+    return Z_AXIS_INDEX;
 }
 
 bool AxisAlignedBoundingBox::isHit(

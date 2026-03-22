@@ -15,25 +15,28 @@ private:
         uint8_t axis
     );
 
+    [[nodiscard]] uint8_t getLongestAxisIndex(
+        const std::vector<std::unique_ptr<IHittable>>& objects,
+        uint32_t rangeStart,
+        uint32_t rangeEnd
+    ) const;
+
     void sortBoxes(
         std::vector<std::unique_ptr<IHittable>>& objects,
         uint32_t rangeStart,
-        uint32_t rangeEnd,
-        uint32_t depth
+        uint32_t rangeEnd
     ) const;
 
     std::unique_ptr<IHittable> createInternalNode(
         std::vector<std::unique_ptr<IHittable>>& objects,
         uint32_t rangeStart,
-        uint32_t rangeEnd,
-        uint32_t depth
+        uint32_t rangeEnd
     ) const;
 
     [[nodiscard]] std::unique_ptr<IHittable> buildRecursively(
         std::vector<std::unique_ptr<IHittable>>& objects,
         uint32_t rangeStart,
-        uint32_t rangeEnd,
-        uint32_t currentDepth = 0
+        uint32_t rangeEnd
     ) const;
 
 public:
