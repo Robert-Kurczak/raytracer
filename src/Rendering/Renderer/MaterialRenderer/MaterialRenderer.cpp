@@ -5,6 +5,7 @@
 #include "Core/Math/Vector.hpp"
 #include "Core/Ray/Ray.hpp"
 #include "Geometry/Hittable/HitData.hpp"
+#include "Geometry/Light/LightData.hpp"
 #include "Geometry/Material/IMaterial.hpp"
 #include "World/Scene/Scene.hpp"
 
@@ -29,6 +30,16 @@ static constexpr Color<float> BLUEISH_ATTENUATION {
     .blue = 1.0F
 };
 
+Ray MaterialRenderer::createShadowRay(
+    const HitData& hitData,
+    const LightData& lightData
+) const {
+    const Point3<float> origin =
+        hitData.hitPoint + hitData.hitNormal * epsilon;
+
+    return Ray {origin, lightData.toLight};
+}
+
 Color<float> MaterialRenderer::getSkyAttenuation(
     const Vector3<float>& rayDirectionVersor
 ) const {
@@ -43,7 +54,7 @@ Color<float> MaterialRenderer::getAttenuationRecursively(
     int32_t depth
 ) const {
     if (depth <= 0) {
-        return {.red = 0, .green = 0, .blue = 0};
+        return Color<float>::black();
     }
 
     HitData hitData {};
@@ -52,6 +63,27 @@ Color<float> MaterialRenderer::getAttenuationRecursively(
 
     if (!objectHit) {
         return getSkyAttenuation(ray.getDirection().getNormalized());
+    }
+
+    Color<float> illuminationColor = Color<float>::black();
+
+    for (const auto& light : scene.getLights()) {
+        const LightData lightData = light->getSample(hitData.hitPoint);
+        const Ray shadowRay = createShadowRay(hitData, lightData);
+
+        const bool shadowRayHit =
+            scene.hitAny(shadowRay, {epsilon, 1.0F});
+
+        if (shadowRayHit) {
+            continue;
+        }
+
+        const float cosinus = getDotProduct(
+            hitData.hitNormal, lightData.toLight.getNormalized()
+        );
+
+        const float intensity = std::max(cosinus, 0.0F);
+        illuminationColor += lightData.illumination * intensity;
     }
 
     Ray scatteredRay {};
@@ -74,7 +106,14 @@ Color<float> MaterialRenderer::getAttenuationRecursively(
         scatteredRay, scene, interval, depth - 1
     );
 
-    return attenuation * newAttenuation;
+    const Color<float> resultColor =
+        illuminationColor + (attenuation * newAttenuation);
+
+    return Color<float> {
+        .red = std::min(resultColor.red, 1.0F),
+        .green = std::min(resultColor.green, 1.0F),
+        .blue = std::min(resultColor.blue, 1.0F)
+    };
 }
 
 MaterialRenderer::MaterialRenderer(
@@ -116,7 +155,7 @@ void MaterialRenderer::render(
                         ray, scene, renderedInterval, MAX_DEPTH
                     );
 
-                resultColor += attenuation * 255.0F;
+                resultColor += attenuation;
 
                 currentSample++;
 
@@ -128,7 +167,9 @@ void MaterialRenderer::render(
 
             framebuffer.setColorAt(
                 {xIndex, yIndex},
-                castColorTo8Bit(resultColor / float(samplesPerPixel_))
+                castColorTo8Bit(
+                    resultColor * 255.0F / float(samplesPerPixel_)
+                )
             );
         }
     }

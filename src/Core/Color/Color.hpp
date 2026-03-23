@@ -13,6 +13,10 @@ struct Color {
     Type green = 0;
     Type blue = 0;
 
+    static constexpr Color black() noexcept {
+        return Color {Type {0}, Type {0}, Type {0}};
+    }
+
     Color<Type>& operator+=(const Type& scalar) noexcept {
         red += scalar;
         green += scalar;

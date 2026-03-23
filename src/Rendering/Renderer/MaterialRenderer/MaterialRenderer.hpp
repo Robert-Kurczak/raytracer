@@ -4,6 +4,7 @@
 #include "Core/Color/Color.hpp"
 #include "Core/Math/Interval.hpp"
 #include "Geometry/Hittable/HitData.hpp"
+#include "Geometry/Light/ILight.hpp"
 #include "Geometry/Material/IMaterial.hpp"
 #include "Rendering/Framebuffer/Framebuffer.hpp"
 #include "Rendering/ProgressIndicator/IProgressIndicator.hpp"
@@ -17,6 +18,11 @@ private:
     const uint32_t samplesPerPixel_;
     std::shared_ptr<IMaterial> defaultMaterial_;
 
+    [[nodiscard]] Ray createShadowRay(
+        const HitData& hitData,
+        const LightData& lightData
+    ) const;
+
     [[nodiscard]] Color<float> getSkyAttenuation(
         const Vector3<float>& rayDirectionVersor
     ) const;
@@ -26,11 +32,6 @@ private:
         const Scene& scene,
         const Interval<float>& interval,
         int32_t depth
-    ) const;
-
-    [[nodiscard]] Color<float> calculateColor(
-        const Ray& ray,
-        const HitData& hitData
     ) const;
 
 public:
