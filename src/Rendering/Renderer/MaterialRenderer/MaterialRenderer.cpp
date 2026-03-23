@@ -30,16 +30,6 @@ static constexpr Color<float> BLUEISH_ATTENUATION {
     .blue = 1.0F
 };
 
-Ray MaterialRenderer::createShadowRay(
-    const HitData& hitData,
-    const LightData& lightData
-) const {
-    const Point3<float> origin =
-        hitData.hitPoint + hitData.hitNormal * epsilon;
-
-    return Ray {origin, lightData.toLight};
-}
-
 Color<float> MaterialRenderer::getSkyAttenuation(
     const Vector3<float>& rayDirectionVersor
 ) const {
@@ -47,7 +37,72 @@ Color<float> MaterialRenderer::getSkyAttenuation(
     return (1.0F - a) * WHITE_ATTENUATION + a * BLUEISH_ATTENUATION;
 }
 
-Color<float> MaterialRenderer::getAttenuationRecursively(
+bool MaterialRenderer::isInShadow(
+    const HitData& hitData,
+    const LightData& lightData,
+    const Scene& scene
+) const {
+    const Point3<float> origin =
+        hitData.hitPoint + hitData.hitNormal * epsilon;
+
+    const Ray shadowRay {origin, lightData.toLight};
+
+    const Interval<float> interval {
+        epsilon, // ray origin is at hit point
+        1.0F // ray end (light) is at the end of unnormalized direction
+    };
+
+    return scene.hitAny(shadowRay, interval);
+}
+
+Color<float> MaterialRenderer::getDirectLight(
+    const HitData& hitData,
+    const Scene& scene
+) const {
+    Color<float> illuminationColor = Color<float>::black();
+
+    for (const auto& light : scene.getLights()) {
+        const LightData lightData = light->getSample(hitData.hitPoint);
+
+        if (isInShadow(hitData, lightData, scene)) {
+            continue;
+        }
+
+        const float cosinus = getDotProduct(
+            hitData.hitNormal, lightData.toLight.getNormalized()
+        );
+
+        const float intensity = std::max(cosinus, 0.0F);
+        illuminationColor += lightData.illumination * intensity;
+    }
+
+    return illuminationColor;
+}
+
+Color<float> MaterialRenderer::getIndirectLight(
+    Color<float>& attenuation,
+    const Ray& ray,
+    const Interval<float>& interval,
+    const HitData& hitData,
+    const Scene& scene,
+    int32_t depth
+) const {
+    Ray scatteredRay {};
+
+    const std::shared_ptr<IMaterial> material =
+        hitData.material ? hitData.material : defaultMaterial_;
+
+    const bool wasScattered =
+        material->scatter(ray, hitData, attenuation, scatteredRay);
+
+    if (!wasScattered) {
+        return Color<float> {.red = 0, .green = 0, .blue = 0};
+    }
+
+    return traceRay(scatteredRay, scene, interval, depth - 1);
+}
+
+Color<float> MaterialRenderer::traceRay(
     const Ray& ray,
     const Scene& scene,
     const Interval<float>& interval,
@@ -65,55 +120,52 @@ Color<float> MaterialRenderer::getAttenuationRecursively(
         return getSkyAttenuation(ray.getDirection().getNormalized());
     }
 
-    Color<float> illuminationColor = Color<float>::black();
-
-    for (const auto& light : scene.getLights()) {
-        const LightData lightData = light->getSample(hitData.hitPoint);
-        const Ray shadowRay = createShadowRay(hitData, lightData);
-
-        const bool shadowRayHit =
-            scene.hitAny(shadowRay, {epsilon, 1.0F});
-
-        if (shadowRayHit) {
-            continue;
-        }
-
-        const float cosinus = getDotProduct(
-            hitData.hitNormal, lightData.toLight.getNormalized()
-        );
-
-        const float intensity = std::max(cosinus, 0.0F);
-        illuminationColor += lightData.illumination * intensity;
-    }
-
-    Ray scatteredRay {};
-    Color<float> attenuation {.red = 0, .green = 0, .blue = 0};
-
-    std::shared_ptr<IMaterial> material = defaultMaterial_;
-
-    if (hitData.material) {
-        material = hitData.material;
-    }
-
-    const bool wasScattered =
-        material->scatter(ray, hitData, attenuation, scatteredRay);
-
-    if (!wasScattered) {
-        return Color<float> {.red = 0, .green = 0, .blue = 0};
-    }
-
-    const Color<float> newAttenuation = getAttenuationRecursively(
-        scatteredRay, scene, interval, depth - 1
+    const Color<float> directLight = getDirectLight(hitData, scene);
+    Color<float> indirectLightAttenuation = Color<float>::black();
+    const Color<float> indirectLight = getIndirectLight(
+        indirectLightAttenuation, ray, interval, hitData, scene, depth
     );
 
     const Color<float> resultColor =
-        illuminationColor + (attenuation * newAttenuation);
+        directLight + (indirectLight * indirectLightAttenuation);
 
     return Color<float> {
         .red = std::min(resultColor.red, 1.0F),
         .green = std::min(resultColor.green, 1.0F),
         .blue = std::min(resultColor.blue, 1.0F)
     };
+}
+
+void MaterialRenderer::renderSection(
+    const Camera& camera,
+    const Scene& scene,
+    const Interval<float>& renderInterval,
+    const Interval<uint32_t>& xIndices,
+    const Interval<uint32_t>& yIndices,
+    Framebuffer& framebuffer
+) const {
+    for (uint32_t y = yIndices.start; y < yIndices.end; y++) {
+        for (uint32_t x = xIndices.start; x < xIndices.end; x++) {
+            const Point2<uint32_t> pixel {x, y};
+
+            Color<float> resultColor = Color<float>::black();
+
+            for (uint32_t i = 0; i < samplesPerPixel_; i++) {
+                Ray ray = camera.getRandomizedRay(pixel);
+
+                const Color<float> color =
+                    traceRay(ray, scene, renderInterval, MAX_DEPTH);
+
+                resultColor += color;
+            }
+
+            const Color8Bit color8Bit = castColorTo8Bit(
+                resultColor * 255.0F / float(samplesPerPixel_)
+            );
+
+            framebuffer.setColorAt(pixel, color8Bit);
+        }
+    }
 }
 
 MaterialRenderer::MaterialRenderer(
@@ -130,49 +182,17 @@ void MaterialRenderer::render(
     const Scene& scene,
     Framebuffer& framebuffer
 ) noexcept {
-    const Vector2<uint32_t> resolution = framebuffer.getResolution();
-    const Interval<float> renderedInterval {
+    constexpr Interval<float> renderInterval {
         epsilon, Interval<float>::infinity()
     };
+    const Vector2<uint32_t> resolution = framebuffer.getResolution();
 
-    const uint32_t samplesToTake =
-        resolution.getX() * resolution.getY() * samplesPerPixel_;
-    uint32_t currentSample = 0;
+    const Interval<uint32_t> xIndices {0, resolution.getX()};
+    const Interval<uint32_t> yIndices {0, resolution.getY()};
 
-    HitData hitData {};
-
-    for (uint32_t yIndex = 0; yIndex < resolution.getY(); yIndex++) {
-        for (uint32_t xIndex = 0; xIndex < resolution.getX(); xIndex++) {
-            const Point2<uint32_t> pixel {xIndex, yIndex};
-
-            Color<float> resultColor {.red = 0, .green = 0, .blue = 0};
-
-            for (uint32_t i = 0; i < samplesPerPixel_; i++) {
-                Ray ray = camera.getRandomizedRay(pixel);
-
-                const Color<float> attenuation =
-                    getAttenuationRecursively(
-                        ray, scene, renderedInterval, MAX_DEPTH
-                    );
-
-                resultColor += attenuation;
-
-                currentSample++;
-
-                const float progress =
-                    float(currentSample) / float(samplesToTake);
-
-                progressIndicator_.showProgress(progress);
-            }
-
-            framebuffer.setColorAt(
-                {xIndex, yIndex},
-                castColorTo8Bit(
-                    resultColor * 255.0F / float(samplesPerPixel_)
-                )
-            );
-        }
-    }
+    renderSection(
+        camera, scene, renderInterval, xIndices, yIndices, framebuffer
+    );
 
     std::cout << "\n";
 }

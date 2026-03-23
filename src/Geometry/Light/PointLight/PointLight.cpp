@@ -22,10 +22,6 @@ LightData PointLight::getSample(
     const float distanceSquared = toLight.getSquaredLength();
     Color<float> illumination = color_ / (distanceSquared * decay_);
 
-    return LightData {
-        .toLight = toLight,
-        .distance = toLight.getLength(),
-        .illumination = illumination
-    };
+    return LightData {.toLight = toLight, .illumination = illumination};
 }
 }
