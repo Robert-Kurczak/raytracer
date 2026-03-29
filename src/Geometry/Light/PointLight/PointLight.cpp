@@ -15,6 +15,21 @@ PointLight::PointLight(
     color_(color),
     decay_(std::max(decay, epsilon)) {}
 
+PointLight::PointLight(
+    const Point3<float>& position,
+    const Color8Bit& color,
+    float decay
+) :
+    PointLight(
+        position,
+        Color<float> {
+            .red = float(color.red) / 255.0F,
+            .green = float(color.green) / 255.0F,
+            .blue = float(color.blue) / 255.0F
+        },
+        decay
+    ) {}
+
 LightData PointLight::getSample(
     const Point3<float>& worldPosition
 ) const {

@@ -16,9 +16,8 @@ private:
     std::vector<std::unique_ptr<ILight>> lights_;
 
 public:
-    Scene();
-
     void addObject(std::unique_ptr<IHittable> object);
+    void addLight(std::unique_ptr<ILight> light);
 
     [[nodiscard]] const std::vector<std::unique_ptr<IHittable>>&
     getObjects() const;

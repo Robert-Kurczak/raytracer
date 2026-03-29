@@ -3,6 +3,7 @@
 #include "Builders/BvhBuilder/IBvhBuilder.hpp"
 #include "Builders/EnvironmentBuilder/IEnvironmentBuilder.hpp"
 #include "Builders/MeshBuilder/IMeshBuilder.hpp"
+#include "Core/Color/Color.hpp"
 #include "Core/Math/Point.hpp"
 #include "Rendering/ProgressIndicator/IProgressIndicator.hpp"
 #include "Rendering/Renderer/IRenderer.hpp"
@@ -24,6 +25,10 @@ private:
         const nlohmann::json& jsonArray
     ) const;
 
+    [[nodiscard]] Color8Bit parse8BitColor(
+        const nlohmann::json& jsonArray
+    ) const;
+
     [[nodiscard]] std::unique_ptr<IWriter> parseWriter(
         const nlohmann::json& jsonContent
     ) const;
@@ -33,6 +38,16 @@ private:
     ) const;
 
     [[nodiscard]] std::unique_ptr<Camera> parseCamera(
+        const nlohmann::json& jsonContent
+    ) const;
+
+    void parseObjects(
+        Scene& scene,
+        const nlohmann::json& jsonContent
+    ) const;
+
+    void parseLights(
+        Scene& scene,
         const nlohmann::json& jsonContent
     ) const;
 

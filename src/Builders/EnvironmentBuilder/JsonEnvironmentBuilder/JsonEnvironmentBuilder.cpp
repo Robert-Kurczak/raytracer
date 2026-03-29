@@ -2,8 +2,11 @@
 
 #include "../RenderEnvironment.hpp"
 #include "Builders/BvhBuilder/IBvhBuilder.hpp"
+#include "Core/Color/Color.hpp"
 #include "Geometry/Hittable/IHittable.hpp"
 #include "Geometry/Hittable/Sphere/Sphere.hpp"
+#include "Geometry/Light/ILight.hpp"
+#include "Geometry/Light/PointLight/PointLight.hpp"
 #include "Geometry/Material/IMaterial.hpp"
 #include "Geometry/Material/MtlMaterial/MtlMaterial.hpp"
 #include "Rendering/Renderer/MaterialRenderer/MaterialRenderer.hpp"
@@ -26,13 +29,23 @@ static constexpr MtlParameters DEFAULT_MATERIAL_PARAMETERS {
     .transparency = 0.0F
 };
 
-[[nodiscard]] Point3<float> JsonEnvironmentBuilder::parsePosition(
+Point3<float> JsonEnvironmentBuilder::parsePosition(
     const nlohmann::json& jsonArray
 ) const {
     return Point3<float> {
         jsonArray[0].get<float>(),
         jsonArray[1].get<float>(),
         jsonArray[2].get<float>()
+    };
+}
+
+Color8Bit JsonEnvironmentBuilder::parse8BitColor(
+    const nlohmann::json& jsonArray
+) const {
+    return Color8Bit {
+        jsonArray[0].get<uint8_t>(),
+        jsonArray[1].get<uint8_t>(),
+        jsonArray[2].get<uint8_t>()
     };
 }
 
@@ -45,8 +58,9 @@ std::unique_ptr<IWriter> JsonEnvironmentBuilder::parseWriter(
     return std::make_unique<PpmWriter>(outputPath);
 }
 
-[[nodiscard]] std::unique_ptr<IRenderer> JsonEnvironmentBuilder::
-    parseRenderer(const nlohmann::json& jsonContent) const {
+std::unique_ptr<IRenderer> JsonEnvironmentBuilder::parseRenderer(
+    const nlohmann::json& jsonContent
+) const {
     const uint32_t samplesPerPixel =
         jsonContent["renderer"]["samplesPerPixel"].get<uint32_t>();
 
@@ -58,7 +72,7 @@ std::unique_ptr<IWriter> JsonEnvironmentBuilder::parseWriter(
     );
 }
 
-[[nodiscard]] std::unique_ptr<Camera> JsonEnvironmentBuilder::parseCamera(
+std::unique_ptr<Camera> JsonEnvironmentBuilder::parseCamera(
     const nlohmann::json& jsonContent
 ) const {
     const CameraParameters parameters {
@@ -71,11 +85,10 @@ std::unique_ptr<IWriter> JsonEnvironmentBuilder::parseWriter(
     return std::make_unique<Camera>(parameters);
 }
 
-[[nodiscard]] std::unique_ptr<Scene> JsonEnvironmentBuilder::parseScene(
+void JsonEnvironmentBuilder::parseObjects(
+    Scene& scene,
     const nlohmann::json& jsonContent
 ) const {
-    std::unique_ptr<Scene> scene = std::make_unique<Scene>();
-
     const auto& objectsInScene = jsonContent["objects"];
 
     for (const auto& object : objectsInScene) {
@@ -93,16 +106,50 @@ std::unique_ptr<IWriter> JsonEnvironmentBuilder::parseWriter(
             std::unique_ptr<IHittable> bvhMesh =
                 bvhBuilder_.build(std::move(mesh));
 
-            scene->addObject(std::move(bvhMesh));
+            scene.addObject(std::move(bvhMesh));
         } else if (objectType == "sphere") {
             const float radius = object["radius"].get<float>();
 
             std::unique_ptr<Sphere> sphere =
                 std::make_unique<Sphere>(objectPosition, radius);
 
-            scene->addObject(std::move(sphere));
+            scene.addObject(std::move(sphere));
         }
     }
+}
+
+void JsonEnvironmentBuilder::parseLights(
+    Scene& scene,
+    const nlohmann::json& jsonContent
+) const {
+    const auto& lightsInScene = jsonContent["lights"];
+
+    for (const auto& light : lightsInScene) {
+        const std::string objectType = light["type"].get<std::string>();
+
+        if (objectType == "point") {
+            const Point3<float> position =
+                parsePosition(light["position"]);
+
+            const Color8Bit color = parse8BitColor(light["color"]);
+
+            const float decay = light["decay"].get<float>();
+
+            std::unique_ptr<ILight> pointLight =
+                std::make_unique<PointLight>(position, color, decay);
+
+            scene.addLight(std::move(pointLight));
+        }
+    }
+}
+
+std::unique_ptr<Scene> JsonEnvironmentBuilder::parseScene(
+    const nlohmann::json& jsonContent
+) const {
+    std::unique_ptr<Scene> scene = std::make_unique<Scene>();
+
+    parseObjects(*scene, jsonContent);
+    parseLights(*scene, jsonContent);
 
     return scene;
 }

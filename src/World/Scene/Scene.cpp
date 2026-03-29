@@ -1,20 +1,12 @@
 #include "Scene.hpp"
 
-#include "Geometry/Light/PointLight/PointLight.hpp"
-
 namespace RTC {
-Scene::Scene() {
-    std::unique_ptr<ILight> light = std::make_unique<PointLight>(
-        Point3<float> {0.0, 1, -2.0},
-        Color<float> {.red = 1.0F, .green = 0.3, .blue = 0.5},
-        1
-    );
-
-    lights_.push_back(std::move(light));
-}
-
 void Scene::addObject(std::unique_ptr<IHittable> object) {
     objects_.push_back(std::move(object));
+}
+
+void Scene::addLight(std::unique_ptr<ILight> light) {
+    lights_.push_back(std::move(light));
 }
 
 const std::vector<std::unique_ptr<IHittable>>& Scene::getObjects() const {
