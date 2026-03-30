@@ -14,8 +14,6 @@
 #include <utility>
 
 namespace RTC {
-static constexpr uint32_t MAX_DEPTH = 10;
-
 static constexpr float epsilon = 0.001F;
 
 static constexpr Color<float> WHITE_ATTENUATION {
@@ -85,12 +83,13 @@ Color<float> MaterialRenderer::getIndirectLight(
     const Interval<float>& interval,
     const HitData& hitData,
     const Scene& scene,
-    int32_t depth
+    uint32_t depth
 ) const {
     Ray scatteredRay {};
 
     const std::shared_ptr<IMaterial> material =
-        hitData.material ? hitData.material : defaultMaterial_;
+        hitData.material ? hitData.material
+                         : parameters_.defaultMaterial_;
 
     const bool wasScattered =
         material->scatter(ray, hitData, attenuation, scatteredRay);
@@ -106,9 +105,9 @@ Color<float> MaterialRenderer::traceRay(
     const Ray& ray,
     const Scene& scene,
     const Interval<float>& interval,
-    int32_t depth
+    uint32_t depth
 ) const {
-    if (depth <= 0) {
+    if (depth == 0) {
         return Color<float>::black();
     }
 
@@ -150,17 +149,21 @@ void MaterialRenderer::renderSection(
 
             Color<float> resultColor = Color<float>::black();
 
-            for (uint32_t i = 0; i < samplesPerPixel_; i++) {
+            for (uint32_t i = 0; i < parameters_.samplesPerPixel; i++) {
                 Ray ray = camera.getRandomizedRay(pixel);
 
-                const Color<float> color =
-                    traceRay(ray, scene, renderInterval, MAX_DEPTH);
+                const Color<float> color = traceRay(
+                    ray,
+                    scene,
+                    renderInterval,
+                    parameters_.scatterRecursionDepth
+                );
 
                 resultColor += color;
             }
 
             const Color8Bit color8Bit = castColorTo8Bit(
-                resultColor * 255.0F / float(samplesPerPixel_)
+                resultColor * 255.0F / float(parameters_.samplesPerPixel)
             );
 
             framebuffer.setColorAt(pixel, color8Bit);
@@ -169,13 +172,11 @@ void MaterialRenderer::renderSection(
 }
 
 MaterialRenderer::MaterialRenderer(
-    IProgressIndicator& progressIndicator,
-    uint32_t samplesPerPixel,
-    std::shared_ptr<IMaterial> defaultMaterial
+    MaterialRendererParameters parameters,
+    IProgressIndicator& progressIndicator
 ) :
-    progressIndicator_(progressIndicator),
-    samplesPerPixel_(samplesPerPixel),
-    defaultMaterial_(std::move(defaultMaterial)) {}
+    parameters_(std::move(parameters)),
+    progressIndicator_(progressIndicator) {}
 
 void MaterialRenderer::render(
     const Camera& camera,

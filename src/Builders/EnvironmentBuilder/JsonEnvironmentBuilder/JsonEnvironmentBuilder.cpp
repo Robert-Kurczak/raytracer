@@ -7,9 +7,9 @@
 #include "Geometry/Hittable/Sphere/Sphere.hpp"
 #include "Geometry/Light/ILight.hpp"
 #include "Geometry/Light/PointLight/PointLight.hpp"
-#include "Geometry/Material/IMaterial.hpp"
 #include "Geometry/Material/MtlMaterial/MtlMaterial.hpp"
 #include "Rendering/Renderer/MaterialRenderer/MaterialRenderer.hpp"
+#include "Rendering/Renderer/MaterialRenderer/MaterialRendererParameters.hpp"
 #include "Rendering/Writer/PpmWriter/PpmWriter.hpp"
 #include "World/Camera/CameraParameters.hpp"
 
@@ -61,14 +61,18 @@ std::unique_ptr<IWriter> JsonEnvironmentBuilder::parseWriter(
 std::unique_ptr<IRenderer> JsonEnvironmentBuilder::parseRenderer(
     const nlohmann::json& jsonContent
 ) const {
-    const uint32_t samplesPerPixel =
-        jsonContent["renderer"]["samplesPerPixel"].get<uint32_t>();
-
-    std::shared_ptr<IMaterial> defaultMaterial =
-        std::make_shared<MtlMaterial>(DEFAULT_MATERIAL_PARAMETERS);
+    const MaterialRendererParameters parameters {
+        .samplesPerPixel =
+            jsonContent["renderer"]["samplesPerPixel"].get<uint32_t>(),
+        .scatterRecursionDepth =
+            jsonContent["renderer"]["scatterRecursionDepth"]
+                .get<uint32_t>(),
+        .defaultMaterial_ =
+            std::make_shared<MtlMaterial>(DEFAULT_MATERIAL_PARAMETERS)
+    };
 
     return std::make_unique<MaterialRenderer>(
-        progressIndicator_, samplesPerPixel, std::move(defaultMaterial)
+        parameters, progressIndicator_
     );
 }
 

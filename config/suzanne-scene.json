@@ -1,7 +1,8 @@
 {
     "outputPath": "resources/renders/suzanne-scene.ppm",
     "renderer": {
-        "samplesPerPixel": 10
+        "samplesPerPixel": 10,
+        "scatterRecursionDepth": 10
     },
     "camera": {
         "screenWidth": 1920,

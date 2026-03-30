@@ -6,18 +6,15 @@
 #include "Geometry/Hittable/HitData.hpp"
 #include "Geometry/Light/ILight.hpp"
 #include "Geometry/Light/LightData.hpp"
-#include "Geometry/Material/IMaterial.hpp"
 #include "Rendering/Framebuffer/Framebuffer.hpp"
 #include "Rendering/ProgressIndicator/IProgressIndicator.hpp"
-
-#include <memory>
+#include "Rendering/Renderer/MaterialRenderer/MaterialRendererParameters.hpp"
 
 namespace RTC {
 class MaterialRenderer : public IRenderer {
 private:
+    MaterialRendererParameters parameters_;
     IProgressIndicator& progressIndicator_;
-    const uint32_t samplesPerPixel_;
-    std::shared_ptr<IMaterial> defaultMaterial_;
 
     [[nodiscard]] Color<float> getSkyAttenuation(
         const Vector3<float>& rayDirectionVersor
@@ -40,14 +37,14 @@ private:
         const Interval<float>& interval,
         const HitData& hitData,
         const Scene& scene,
-        int32_t depth
+        uint32_t depth
     ) const;
 
     [[nodiscard]] Color<float> traceRay(
         const Ray& ray,
         const Scene& scene,
         const Interval<float>& interval,
-        int32_t depth
+        uint32_t depth
     ) const;
 
     void renderSection(
@@ -61,9 +58,8 @@ private:
 
 public:
     MaterialRenderer(
-        IProgressIndicator& progressIndicator,
-        uint32_t samplesPerPixel,
-        std::shared_ptr<IMaterial> defaultMaterial
+        MaterialRendererParameters parameters,
+        IProgressIndicator& progressIndicator
     );
 
     void render(
