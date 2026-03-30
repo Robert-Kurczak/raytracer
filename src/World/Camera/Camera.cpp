@@ -1,34 +1,44 @@
 #include "Camera.hpp"
 
 #include "CameraParameters.hpp"
+#include "Core/Math/Numeric.hpp"
 #include "Core/Math/Random.hpp"
 #include "Core/Math/Vector.hpp"
 #include "Core/Ray/Ray.hpp"
 
+#include <cmath>
+
 namespace RTC {
-void Camera::setupScreenData(const CameraParameters& parameters) {
-    cameraCenter_ = parameters.center;
+void Camera::setupViewportData(const CameraParameters& parameters) {
+    const double actualAspectRatio =
+        double(screenSize_.getX()) / double(screenSize_.getY());
 
-    const auto imageHeight =
-        int32_t(float(parameters.screenWidth) / parameters.aspectRatio);
+    const double fovRadians =
+        degreesToRadians(parameters.fieldOfViewDegrees);
 
-    if (imageHeight < 0) {
-        screenSize_ = {parameters.screenWidth, 1};
-    } else {
-        screenSize_ = {parameters.screenWidth, uint32_t(imageHeight)};
-    }
-}
+    const double tanTheta = std::tan(fovRadians / 2.0);
+    const auto viewportHeight = float(2.0 * focalLength * tanTheta);
 
-void Camera::setupViewportData() {
-    const float actualAspectRatio =
-        float(screenSize_.getX()) / float(screenSize_.getY());
+    viewportSize_ = {
+        float(viewportHeight * actualAspectRatio), viewportHeight
+    };
 
-    viewportSize_ = {viewportHeight * actualAspectRatio, viewportHeight};
-    viewportU_ = {viewportSize_.getX(), 0.0F, 0.0F};
-    viewportV_ = {0.0F, -viewportSize_.getY(), 0.0F};
+    const Vector3<float> lookDirection =
+        parameters.direction.getNormalized();
+
+    const Vector3<float> upDirection =
+        parameters.upDirection.getNormalized();
+
+    viewportU_ =
+        getCrossProduct(upDirection, -lookDirection).getNormalized();
+    viewportV_ =
+        getCrossProduct(-lookDirection, viewportU_).getNormalized();
+
+    viewportU_ *= viewportSize_.getX();
+    viewportV_ *= -viewportSize_.getY();
 
     const Point3<float> viewportCenter =
-        cameraCenter_ - Vector3<float> {0.0F, 0.0F, focalLength};
+        cameraCenter_ + lookDirection * focalLength;
 
     viewportTopLeft_ =
         viewportCenter - (viewportU_ / 2.0F) - (viewportV_ / 2.0F);
@@ -47,9 +57,10 @@ Vector2<float> Camera::getRandomPixelOffset() const {
     };
 }
 
-Camera::Camera(const CameraParameters& parameters) {
-    setupScreenData(parameters);
-    setupViewportData();
+Camera::Camera(const CameraParameters& parameters) :
+    cameraCenter_(parameters.position),
+    screenSize_({parameters.screenWidth, parameters.screenHeight}) {
+    setupViewportData(parameters);
     setupPixelData();
 }
 

@@ -5,12 +5,23 @@
     },
     "camera": {
         "screenWidth": 1920,
-        "aspectRatio": 1.777777778,
+        "screenHeight": 1080,
         "position": [
             0.0,
             0.0,
             0.0
-        ]
+        ],
+        "direction": [
+            0.0,
+            0.0,
+            -1.0
+        ],
+        "upDirection": [
+            0.0,
+            1.0,
+            0.0
+        ],
+        "fieldOfViewDegrees": 90
     },
     "objects": [
         {

@@ -10,7 +10,6 @@ namespace RTC {
 class Camera {
 private:
     static constexpr float focalLength = 1.0F;
-    static constexpr float viewportHeight = 2.0F;
 
     Point3<float> cameraCenter_ {0, 0, 0};
     Vector2<uint32_t> screenSize_ {0, 0};
@@ -24,8 +23,7 @@ private:
     Vector3<float> pixelDeltaV_ {0, 0, 0};
     Point3<float> pixelTopLeft_ {0, 0, 0};
 
-    void setupScreenData(const CameraParameters& parameters);
-    void setupViewportData();
+    void setupViewportData(const CameraParameters& parameters);
     void setupPixelData();
 
     [[nodiscard]] Vector2<float> getRandomPixelOffset() const;

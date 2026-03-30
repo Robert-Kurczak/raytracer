@@ -78,8 +78,14 @@ std::unique_ptr<Camera> JsonEnvironmentBuilder::parseCamera(
     const CameraParameters parameters {
         .screenWidth =
             jsonContent["camera"]["screenWidth"].get<uint32_t>(),
-        .aspectRatio = jsonContent["camera"]["aspectRatio"].get<double>(),
-        .center = parsePosition(jsonContent["camera"]["position"])
+        .screenHeight =
+            jsonContent["camera"]["screenHeight"].get<uint32_t>(),
+        .position = parsePosition(jsonContent["camera"]["position"]),
+        .direction = parsePosition(jsonContent["camera"]["direction"]),
+        .upDirection =
+            parsePosition(jsonContent["camera"]["upDirection"]),
+        .fieldOfViewDegrees =
+            jsonContent["camera"]["fieldOfViewDegrees"].get<float>()
     };
 
     return std::make_unique<Camera>(parameters);
