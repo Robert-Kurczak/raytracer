@@ -52,6 +52,11 @@ private:
         std::stringstream& lineStream
     ) const;
 
+    [[nodiscard]] TriangleBuffer buildBuffer(
+        const std::filesystem::path& path,
+        const Vector3<float>& position
+    ) const;
+
 public:
     ObjMeshBuilder(std::shared_ptr<ILogger> logger);
 

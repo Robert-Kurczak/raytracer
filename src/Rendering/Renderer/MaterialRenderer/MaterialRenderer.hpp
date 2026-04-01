@@ -8,10 +8,14 @@
 #include "Geometry/Light/LightData.hpp"
 #include "Rendering/Framebuffer/Framebuffer.hpp"
 #include "Rendering/Renderer/MaterialRenderer/MaterialRendererParameters.hpp"
+#include "Utils/Logger/ILogger.hpp"
+
+#include <memory>
 
 namespace RTC {
 class MaterialRenderer : public IRenderer {
 private:
+    std::shared_ptr<ILogger> logger_;
     MaterialRendererParameters parameters_;
 
     [[nodiscard]] Color<float> getSkyAttenuation(
@@ -35,6 +39,7 @@ private:
         const Interval<float>& interval,
         const HitData& hitData,
         const Scene& scene,
+        uint32_t& tracedRaysCount,
         uint32_t depth
     ) const;
 
@@ -42,10 +47,11 @@ private:
         const Ray& ray,
         const Scene& scene,
         const Interval<float>& interval,
+        uint32_t& tracedRaysCount,
         uint32_t depth
     ) const;
 
-    void renderSection(
+    uint32_t renderSection(
         const Camera& camera,
         const Scene& scene,
         const Interval<float>& renderInterval,
@@ -55,7 +61,10 @@ private:
     ) const;
 
 public:
-    MaterialRenderer(MaterialRendererParameters parameters);
+    MaterialRenderer(
+        std::shared_ptr<ILogger> logger,
+        MaterialRendererParameters parameters
+    );
 
     void render(
         const Camera& camera,

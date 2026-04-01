@@ -6,6 +6,7 @@
 #include "Geometry/Material/MtlMaterial/MtlParameters.hpp"
 #include "Utils/Logger/ILogger.hpp"
 
+#include <chrono>
 #include <filesystem>
 #include <format>
 #include <fstream>
@@ -176,7 +177,7 @@ void ObjMeshBuilder::parseFace(
 ObjMeshBuilder::ObjMeshBuilder(std::shared_ptr<ILogger> logger) :
     logger_(std::move(logger)) {}
 
-IMeshBuilder::TriangleBuffer ObjMeshBuilder::buildFromFile(
+IMeshBuilder::TriangleBuffer ObjMeshBuilder::buildBuffer(
     const std::filesystem::path& path,
     const Vector3<float>& position
 ) const {
@@ -216,5 +217,27 @@ IMeshBuilder::TriangleBuffer ObjMeshBuilder::buildFromFile(
     }
 
     return triangleBuffer;
+}
+
+IMeshBuilder::TriangleBuffer ObjMeshBuilder::buildFromFile(
+    const std::filesystem::path& path,
+    const Vector3<float>& position
+) const {
+    logger_->log(LogLevel::Info, "Building mesh from .obj file");
+
+    const auto startTime = std::chrono::high_resolution_clock::now();
+    auto result = buildBuffer(path, position);
+    const auto endTime = std::chrono::high_resolution_clock::now();
+
+    const auto executionTime =
+        std::chrono::duration_cast<std::chrono::milliseconds>(
+            endTime - startTime
+        );
+
+    logger_->log(
+        LogLevel::Info, std::format("Mesh built in {}", executionTime)
+    );
+
+    return result;
 }
 }

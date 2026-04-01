@@ -34,6 +34,7 @@ private:
     ) const;
 
     [[nodiscard]] std::unique_ptr<IRenderer> parseRenderer(
+        const std::shared_ptr<ILogger>& logger,
         const nlohmann::json& jsonContent
     ) const;
 

@@ -7,9 +7,11 @@
 #include "Geometry/Hittable/HitData.hpp"
 #include "Geometry/Light/LightData.hpp"
 #include "Geometry/Material/IMaterial.hpp"
+#include "Utils/Logger/ILogger.hpp"
 #include "World/Scene/Scene.hpp"
 
-#include <iostream>
+#include <chrono>
+#include <format>
 #include <memory>
 #include <utility>
 
@@ -83,6 +85,7 @@ Color<float> MaterialRenderer::getIndirectLight(
     const Interval<float>& interval,
     const HitData& hitData,
     const Scene& scene,
+    uint32_t& tracedRaysCount,
     uint32_t depth
 ) const {
     Ray scatteredRay {};
@@ -98,13 +101,18 @@ Color<float> MaterialRenderer::getIndirectLight(
         return Color<float> {.red = 0, .green = 0, .blue = 0};
     }
 
-    return traceRay(scatteredRay, scene, interval, depth - 1);
+    tracedRaysCount++;
+
+    return traceRay(
+        scatteredRay, scene, interval, tracedRaysCount, depth - 1
+    );
 }
 
 Color<float> MaterialRenderer::traceRay(
     const Ray& ray,
     const Scene& scene,
     const Interval<float>& interval,
+    uint32_t& tracedRaysCount,
     uint32_t depth
 ) const {
     if (depth == 0) {
@@ -120,9 +128,17 @@ Color<float> MaterialRenderer::traceRay(
     }
 
     const Color<float> directLight = getDirectLight(hitData, scene);
+    tracedRaysCount += scene.getLights().size();
+
     Color<float> indirectLightAttenuation = Color<float>::black();
     const Color<float> indirectLight = getIndirectLight(
-        indirectLightAttenuation, ray, interval, hitData, scene, depth
+        indirectLightAttenuation,
+        ray,
+        interval,
+        hitData,
+        scene,
+        tracedRaysCount,
+        depth
     );
 
     const Color<float> resultColor =
@@ -135,7 +151,7 @@ Color<float> MaterialRenderer::traceRay(
     };
 }
 
-void MaterialRenderer::renderSection(
+uint32_t MaterialRenderer::renderSection(
     const Camera& camera,
     const Scene& scene,
     const Interval<float>& renderInterval,
@@ -143,6 +159,8 @@ void MaterialRenderer::renderSection(
     const Interval<uint32_t>& yIndices,
     Framebuffer& framebuffer
 ) const {
+    uint32_t tracedRaysCount = 0;
+
     for (uint32_t y = yIndices.start; y < yIndices.end; y++) {
         for (uint32_t x = xIndices.start; x < xIndices.end; x++) {
             const Point2<uint32_t> pixel {x, y};
@@ -156,6 +174,7 @@ void MaterialRenderer::renderSection(
                     ray,
                     scene,
                     renderInterval,
+                    tracedRaysCount,
                     parameters_.scatterRecursionDepth
                 );
 
@@ -169,11 +188,15 @@ void MaterialRenderer::renderSection(
             framebuffer.setColorAt(pixel, color8Bit);
         }
     }
+
+    return tracedRaysCount;
 }
 
 MaterialRenderer::MaterialRenderer(
+    std::shared_ptr<ILogger> logger,
     MaterialRendererParameters parameters
 ) :
+    logger_(std::move(logger)),
     parameters_(std::move(parameters)) {}
 
 void MaterialRenderer::render(
@@ -189,10 +212,24 @@ void MaterialRenderer::render(
     const Interval<uint32_t> xIndices {0, resolution.getX()};
     const Interval<uint32_t> yIndices {0, resolution.getY()};
 
-    renderSection(
+    logger_->log(LogLevel::Info, "Tracing rays");
+
+    const auto startTime = std::chrono::high_resolution_clock::now();
+    const uint32_t tracedRays = renderSection(
         camera, scene, renderInterval, xIndices, yIndices, framebuffer
     );
+    const auto endTime = std::chrono::high_resolution_clock::now();
 
-    std::cout << "\n";
+    const auto executionTime =
+        std::chrono::duration_cast<std::chrono::milliseconds>(
+            endTime - startTime
+        );
+
+    logger_->log(
+        LogLevel::Info, std::format("Traced rays in: {}", executionTime)
+    );
+    logger_->log(
+        LogLevel::Info, std::format("Traced rays count: {}", tracedRays)
+    );
 }
 }

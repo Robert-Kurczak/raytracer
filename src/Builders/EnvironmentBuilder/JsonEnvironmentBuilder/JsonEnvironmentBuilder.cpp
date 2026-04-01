@@ -11,6 +11,7 @@
 #include "Geometry/Light/ILight.hpp"
 #include "Geometry/Light/PointLight/PointLight.hpp"
 #include "Geometry/Material/MtlMaterial/MtlMaterial.hpp"
+#include "Rendering/Renderer/IRenderer.hpp"
 #include "Rendering/Renderer/MaterialRenderer/MaterialRenderer.hpp"
 #include "Rendering/Renderer/MaterialRenderer/MaterialRendererParameters.hpp"
 #include "Rendering/Writer/PpmWriter/PpmWriter.hpp"
@@ -77,6 +78,7 @@ std::unique_ptr<IWriter> JsonEnvironmentBuilder::parseWriter(
 }
 
 std::unique_ptr<IRenderer> JsonEnvironmentBuilder::parseRenderer(
+    const std::shared_ptr<ILogger>& logger,
     const nlohmann::json& jsonContent
 ) const {
     const MaterialRendererParameters parameters {
@@ -89,7 +91,7 @@ std::unique_ptr<IRenderer> JsonEnvironmentBuilder::parseRenderer(
             std::make_shared<MtlMaterial>(DEFAULT_MATERIAL_PARAMETERS)
     };
 
-    return std::make_unique<MaterialRenderer>(parameters);
+    return std::make_unique<MaterialRenderer>(logger, parameters);
 }
 
 std::unique_ptr<Camera> JsonEnvironmentBuilder::parseCamera(
@@ -205,6 +207,9 @@ RenderEnvironment JsonEnvironmentBuilder::build(
     std::unique_ptr<IBvhBuilder> bvhBuilder =
         std::make_unique<BvhBuilder>(logger);
 
+    std::unique_ptr<IRenderer> renderer =
+        parseRenderer(logger, jsonContent);
+
     std::unique_ptr<Scene> scene =
         parseScene(*meshBuilder, *bvhBuilder, jsonContent);
 
@@ -213,7 +218,7 @@ RenderEnvironment JsonEnvironmentBuilder::build(
         .meshBuilder = std::move(meshBuilder),
         .bvhBuilder = std::move(bvhBuilder),
         .writer = parseWriter(jsonContent),
-        .renderer = parseRenderer(jsonContent),
+        .renderer = std::move(renderer),
         .camera = parseCamera(jsonContent),
         .scene = std::move(scene)
     };
