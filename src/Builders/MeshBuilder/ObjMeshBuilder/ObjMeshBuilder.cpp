@@ -139,7 +139,7 @@ uint32_t ObjMeshBuilder::parseVertexIndex(
         return verticesAmount + vertexIndex;
     }
 
-    return vertexIndex;
+    return vertexIndex - 1;
 }
 
 void ObjMeshBuilder::parseFace(
@@ -158,10 +158,10 @@ void ObjMeshBuilder::parseFace(
         indices.push_back(index);
     }
 
-    for (size_t i = 1; i + 1 < indices.size(); ++i) {
-        const uint32_t fanBaseIndex = indices[0] - 1;
-        const uint32_t fanIndexA = indices[i] - 1;
-        const uint32_t fanIndexB = indices[i + 1] - 1;
+    for (size_t i = 1; i + 1 < indices.size(); i++) {
+        const uint32_t fanBaseIndex = indices[0];
+        const uint32_t fanIndexA = indices[i];
+        const uint32_t fanIndexB = indices[i + 1];
 
         auto triangle = std::make_unique<Triangle>(
             vertexBuffer[fanBaseIndex],
