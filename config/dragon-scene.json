@@ -2,8 +2,8 @@
     "outputPath": "resources/renders/dragon-scene.ppm",
     "verbose": true,
     "renderer": {
-        "samplesPerPixel": 20,
-        "scatterRecursionDepth": 10
+        "samplesPerPixel": 50,
+        "scatterRecursionDepth": 20
     },
     "camera": {
         "screenWidth": 1920,
@@ -39,11 +39,72 @@
             "type": "sphere",
             "position": [
                 0.0,
-                -110.5,
-                -1
+                -100,
+                -120
             ],
-            "radius": 100.0
+            "radius": 75.0
+        },
+        {
+            "type": "sphere",
+            "position": [
+                200.0,
+                40,
+                -170
+            ],
+            "radius": 40.0
+        },
+        {
+            "type": "sphere",
+            "position": [
+                -200.0,
+                25,
+                -110
+            ],
+            "radius": 40.0
         }
     ],
-    "lights": []
+    "lights": [
+        {
+            "type": "point",
+            "position": [
+                -55,
+                0.0,
+                -100.0
+            ],
+            "color": [
+                200,
+                10,
+                150
+            ],
+            "decay": 0.0008
+        },
+        {
+            "type": "point",
+            "position": [
+                55,
+                0.0,
+                -95.0
+            ],
+            "color": [
+                10,
+                100,
+                200
+            ],
+            "decay": 0.005
+        },
+        {
+            "type": "point",
+            "position": [
+                0.0,
+                50.0,
+                -100.0
+            ],
+            "color": [
+                240,
+                0,
+                40
+            ],
+            "decay": 0.0005
+        }
+    ]
 }
