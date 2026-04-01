@@ -1,8 +1,5 @@
-#include "Builders/BvhBuilder/BvhBuilder.hpp"
 #include "Builders/EnvironmentBuilder/JsonEnvironmentBuilder/JsonEnvironmentBuilder.hpp"
-#include "Builders/MeshBuilder/ObjMeshBuilder/ObjMeshBuilder.hpp"
 #include "Rendering/Framebuffer/Framebuffer.hpp"
-#include "Rendering/ProgressIndicator/CoutProgressIndicator/CoutProgressIndicator.hpp"
 
 #include <cassert>
 #include <filesystem>
@@ -15,14 +12,11 @@ int main(int argc, char* argv[]) {
 
     const std::filesystem::path configFilePath {args[1]};
 
-    RTC::CoutProgressIndicator progressIndicator {};
-    RTC::ObjMeshBuilder objMeshBuilder {};
-    RTC::BvhBuilder bvhBuilder {};
-    RTC::JsonEnvironmentBuilder environmentBuilder {
-        progressIndicator, objMeshBuilder, bvhBuilder
-    };
+    RTC::JsonEnvironmentBuilder environmentBuilder {};
+
     RTC::RenderEnvironment environment =
         environmentBuilder.build(configFilePath);
+
     RTC::Framebuffer framebuffer {environment.camera->getSceenSize()};
 
     environment.renderer->render(

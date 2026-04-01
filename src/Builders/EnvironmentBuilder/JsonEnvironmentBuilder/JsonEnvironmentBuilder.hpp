@@ -5,9 +5,9 @@
 #include "Builders/MeshBuilder/IMeshBuilder.hpp"
 #include "Core/Color/Color.hpp"
 #include "Core/Math/Point.hpp"
-#include "Rendering/ProgressIndicator/IProgressIndicator.hpp"
 #include "Rendering/Renderer/IRenderer.hpp"
 #include "Rendering/Writer/IWriter.hpp"
+#include "Utils/Logger/ILogger.hpp"
 #include "World/Camera/Camera.hpp"
 #include "World/Scene/Scene.hpp"
 
@@ -17,9 +17,9 @@
 namespace RTC {
 class JsonEnvironmentBuilder : public IEnvironmentBuilder {
 private:
-    IProgressIndicator& progressIndicator_;
-    IMeshBuilder& objMeshBuilder_;
-    IBvhBuilder& bvhBuilder_;
+    [[nodiscard]] std::shared_ptr<ILogger> parseLogger(
+        const nlohmann::json& jsonContent
+    ) const;
 
     [[nodiscard]] Point3<float> parsePosition(
         const nlohmann::json& jsonArray
@@ -43,6 +43,8 @@ private:
 
     void parseObjects(
         Scene& scene,
+        IMeshBuilder& meshBuilder,
+        IBvhBuilder& bvhBuilder,
         const nlohmann::json& jsonContent
     ) const;
 
@@ -52,16 +54,12 @@ private:
     ) const;
 
     [[nodiscard]] std::unique_ptr<Scene> parseScene(
+        IMeshBuilder& meshBuilder,
+        IBvhBuilder& bvhBuilder,
         const nlohmann::json& jsonContent
     ) const;
 
 public:
-    JsonEnvironmentBuilder(
-        IProgressIndicator& progressIndicator,
-        IMeshBuilder& objMeshBuilder,
-        IBvhBuilder& bvhBuilder
-    );
-
     [[nodiscard]] RenderEnvironment build(
         const std::filesystem::path& path
     ) const override;

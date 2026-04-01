@@ -4,6 +4,7 @@
 #include "Geometry/Material/IMaterial.hpp"
 #include "Geometry/Material/MtlMaterial/MtlMaterial.hpp"
 #include "Geometry/Material/MtlMaterial/MtlParameters.hpp"
+#include "Utils/Logger/ILogger.hpp"
 
 #include <filesystem>
 #include <format>
@@ -13,6 +14,7 @@
 #include <sstream>
 #include <string>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 namespace RTC {
@@ -170,6 +172,9 @@ void ObjMeshBuilder::parseFace(
         triangleBuffer.push_back(std::move(triangle));
     }
 }
+
+ObjMeshBuilder::ObjMeshBuilder(std::shared_ptr<ILogger> logger) :
+    logger_(std::move(logger)) {}
 
 IMeshBuilder::TriangleBuffer ObjMeshBuilder::buildFromFile(
     const std::filesystem::path& path,

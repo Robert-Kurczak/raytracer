@@ -172,11 +172,9 @@ void MaterialRenderer::renderSection(
 }
 
 MaterialRenderer::MaterialRenderer(
-    MaterialRendererParameters parameters,
-    IProgressIndicator& progressIndicator
+    MaterialRendererParameters parameters
 ) :
-    parameters_(std::move(parameters)),
-    progressIndicator_(progressIndicator) {}
+    parameters_(std::move(parameters)) {}
 
 void MaterialRenderer::render(
     const Camera& camera,

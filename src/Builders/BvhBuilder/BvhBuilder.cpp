@@ -3,9 +3,12 @@
 #include "Geometry/BoundingVolume/AxisAlignedBoundingBox/AxisAlignedBoundingBox.hpp"
 #include "Geometry/Hittable/BvhNode/BvhNode.hpp"
 #include "Geometry/Hittable/IHittable.hpp"
+#include "Utils/Logger/ILogger.hpp"
 
 #include <algorithm>
+#include <chrono>
 #include <memory>
+#include <utility>
 
 namespace RTC {
 bool BvhBuilder::compareBoxes(
@@ -113,9 +116,27 @@ std::unique_ptr<IHittable> BvhBuilder::buildRecursively(
     return createInternalNode(objects, rangeStart, rangeEnd);
 }
 
+BvhBuilder::BvhBuilder(std::shared_ptr<ILogger> logger) :
+    logger_(std::move(logger)) {}
+
 [[nodiscard]] std::unique_ptr<IHittable> BvhBuilder::build(
     std::vector<std::unique_ptr<IHittable>>&& objects
 ) const {
-    return buildRecursively(objects, 0, objects.size());
+    logger_->log(LogLevel::Info, "Building BVH tree");
+
+    const auto timeStart = std::chrono::high_resolution_clock::now();
+    auto result = buildRecursively(objects, 0, objects.size());
+    const auto timeEnd = std::chrono::high_resolution_clock::now();
+
+    const auto executionTime =
+        std::chrono::duration_cast<std::chrono::milliseconds>(
+            timeEnd - timeStart
+        );
+
+    logger_->log(
+        LogLevel::Info, std::format("BVH built in {}", executionTime)
+    );
+
+    return result;
 }
 }

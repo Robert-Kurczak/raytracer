@@ -1,5 +1,6 @@
 {
     "outputPath": "resources/renders/dragon-scene.ppm",
+    "verbose": true,
     "renderer": {
         "samplesPerPixel": 20,
         "scatterRecursionDepth": 10

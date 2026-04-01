@@ -7,14 +7,12 @@
 #include "Geometry/Light/ILight.hpp"
 #include "Geometry/Light/LightData.hpp"
 #include "Rendering/Framebuffer/Framebuffer.hpp"
-#include "Rendering/ProgressIndicator/IProgressIndicator.hpp"
 #include "Rendering/Renderer/MaterialRenderer/MaterialRendererParameters.hpp"
 
 namespace RTC {
 class MaterialRenderer : public IRenderer {
 private:
     MaterialRendererParameters parameters_;
-    IProgressIndicator& progressIndicator_;
 
     [[nodiscard]] Color<float> getSkyAttenuation(
         const Vector3<float>& rayDirectionVersor
@@ -57,10 +55,7 @@ private:
     ) const;
 
 public:
-    MaterialRenderer(
-        MaterialRendererParameters parameters,
-        IProgressIndicator& progressIndicator
-    );
+    MaterialRenderer(MaterialRendererParameters parameters);
 
     void render(
         const Camera& camera,

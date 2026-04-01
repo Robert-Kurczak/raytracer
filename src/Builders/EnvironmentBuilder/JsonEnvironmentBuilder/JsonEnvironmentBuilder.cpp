@@ -1,7 +1,10 @@
 #include "JsonEnvironmentBuilder.hpp"
 
 #include "../RenderEnvironment.hpp"
+#include "Builders/BvhBuilder/BvhBuilder.hpp"
 #include "Builders/BvhBuilder/IBvhBuilder.hpp"
+#include "Builders/MeshBuilder/IMeshBuilder.hpp"
+#include "Builders/MeshBuilder/ObjMeshBuilder/ObjMeshBuilder.hpp"
 #include "Core/Color/Color.hpp"
 #include "Geometry/Hittable/IHittable.hpp"
 #include "Geometry/Hittable/Sphere/Sphere.hpp"
@@ -11,6 +14,9 @@
 #include "Rendering/Renderer/MaterialRenderer/MaterialRenderer.hpp"
 #include "Rendering/Renderer/MaterialRenderer/MaterialRendererParameters.hpp"
 #include "Rendering/Writer/PpmWriter/PpmWriter.hpp"
+#include "Utils/Logger/CoutLogger/CoutLogger.hpp"
+#include "Utils/Logger/ILogger.hpp"
+#include "Utils/Logger/NullLogger/NullLogger.hpp"
 #include "World/Camera/CameraParameters.hpp"
 
 #include <format>
@@ -28,6 +34,18 @@ static constexpr MtlParameters DEFAULT_MATERIAL_PARAMETERS {
     .shininess = 0.0F,
     .transparency = 0.0F
 };
+
+std::shared_ptr<ILogger> JsonEnvironmentBuilder::parseLogger(
+    const nlohmann::json& jsonContent
+) const {
+    const bool verbose = jsonContent["verbose"].get<bool>();
+
+    if (verbose) {
+        return std::make_shared<CoutLogger>();
+    }
+
+    return std::make_shared<NullLogger>();
+}
 
 Point3<float> JsonEnvironmentBuilder::parsePosition(
     const nlohmann::json& jsonArray
@@ -71,9 +89,7 @@ std::unique_ptr<IRenderer> JsonEnvironmentBuilder::parseRenderer(
             std::make_shared<MtlMaterial>(DEFAULT_MATERIAL_PARAMETERS)
     };
 
-    return std::make_unique<MaterialRenderer>(
-        parameters, progressIndicator_
-    );
+    return std::make_unique<MaterialRenderer>(parameters);
 }
 
 std::unique_ptr<Camera> JsonEnvironmentBuilder::parseCamera(
@@ -97,6 +113,8 @@ std::unique_ptr<Camera> JsonEnvironmentBuilder::parseCamera(
 
 void JsonEnvironmentBuilder::parseObjects(
     Scene& scene,
+    IMeshBuilder& meshBuilder,
+    IBvhBuilder& bvhBuilder,
     const nlohmann::json& jsonContent
 ) const {
     const auto& objectsInScene = jsonContent["objects"];
@@ -111,10 +129,10 @@ void JsonEnvironmentBuilder::parseObjects(
                 object["filePath"].get<std::string>();
 
             IMeshBuilder::TriangleBuffer mesh =
-                objMeshBuilder_.buildFromFile(filePath, objectPosition);
+                meshBuilder.buildFromFile(filePath, objectPosition);
 
             std::unique_ptr<IHittable> bvhMesh =
-                bvhBuilder_.build(std::move(mesh));
+                bvhBuilder.build(std::move(mesh));
 
             scene.addObject(std::move(bvhMesh));
         } else if (objectType == "sphere") {
@@ -154,24 +172,17 @@ void JsonEnvironmentBuilder::parseLights(
 }
 
 std::unique_ptr<Scene> JsonEnvironmentBuilder::parseScene(
+    IMeshBuilder& meshBuilder,
+    IBvhBuilder& bvhBuilder,
     const nlohmann::json& jsonContent
 ) const {
     std::unique_ptr<Scene> scene = std::make_unique<Scene>();
 
-    parseObjects(*scene, jsonContent);
+    parseObjects(*scene, meshBuilder, bvhBuilder, jsonContent);
     parseLights(*scene, jsonContent);
 
     return scene;
 }
-
-JsonEnvironmentBuilder::JsonEnvironmentBuilder(
-    IProgressIndicator& progressIndicator,
-    IMeshBuilder& objMeshBuilder,
-    IBvhBuilder& bvhBuilder
-) :
-    progressIndicator_(progressIndicator),
-    objMeshBuilder_(objMeshBuilder),
-    bvhBuilder_(bvhBuilder) {}
 
 RenderEnvironment JsonEnvironmentBuilder::build(
     const std::filesystem::path& path
@@ -186,11 +197,25 @@ RenderEnvironment JsonEnvironmentBuilder::build(
 
     const json jsonContent = json::parse(file);
 
+    std::shared_ptr<ILogger> logger = parseLogger(jsonContent);
+
+    std::unique_ptr<IMeshBuilder> meshBuilder =
+        std::make_unique<ObjMeshBuilder>(logger);
+
+    std::unique_ptr<IBvhBuilder> bvhBuilder =
+        std::make_unique<BvhBuilder>(logger);
+
+    std::unique_ptr<Scene> scene =
+        parseScene(*meshBuilder, *bvhBuilder, jsonContent);
+
     return RenderEnvironment {
+        .logger = std::move(logger),
+        .meshBuilder = std::move(meshBuilder),
+        .bvhBuilder = std::move(bvhBuilder),
         .writer = parseWriter(jsonContent),
         .renderer = parseRenderer(jsonContent),
         .camera = parseCamera(jsonContent),
-        .scene = parseScene(jsonContent)
+        .scene = std::move(scene)
     };
 }
 }

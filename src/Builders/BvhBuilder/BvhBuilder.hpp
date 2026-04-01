@@ -2,6 +2,7 @@
 
 #include "Builders/BvhBuilder/IBvhBuilder.hpp"
 #include "Geometry/Hittable/IHittable.hpp"
+#include "Utils/Logger/ILogger.hpp"
 
 #include <memory>
 #include <vector>
@@ -9,6 +10,8 @@
 namespace RTC {
 class BvhBuilder : public IBvhBuilder {
 private:
+    std::shared_ptr<ILogger> logger_;
+
     [[nodiscard]] static bool compareBoxes(
         const std::unique_ptr<IHittable>& left,
         const std::unique_ptr<IHittable>& right,
@@ -40,6 +43,8 @@ private:
     ) const;
 
 public:
+    BvhBuilder(std::shared_ptr<ILogger> logger);
+
     [[nodiscard]] std::unique_ptr<IHittable> build(
         std::vector<std::unique_ptr<IHittable>>&& objects
     ) const override;

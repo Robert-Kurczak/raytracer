@@ -2,6 +2,7 @@
 
 #include "../IMeshBuilder.hpp"
 #include "Geometry/Material/IMaterial.hpp"
+#include "Utils/Logger/ILogger.hpp"
 
 #include <filesystem>
 #include <memory>
@@ -15,6 +16,8 @@ using MaterialsMap =
 
 class ObjMeshBuilder : public IMeshBuilder {
 private:
+    std::shared_ptr<ILogger> logger_;
+
     [[nodiscard]] MaterialsMap extractMaterials(
         const std::filesystem::path& path
     ) const;
@@ -50,6 +53,8 @@ private:
     ) const;
 
 public:
+    ObjMeshBuilder(std::shared_ptr<ILogger> logger);
+
     [[nodiscard]] TriangleBuffer buildFromFile(
         const std::filesystem::path& path,
         const Vector3<float>& position
