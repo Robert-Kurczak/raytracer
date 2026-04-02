@@ -1,8 +1,8 @@
 #include "ObjMeshBuilder.hpp"
 
 #include "Geometry/Hittable/Triangle/Triangle.hpp"
+#include "Geometry/Material/DiffuseMaterial/DiffuseMaterial.hpp"
 #include "Geometry/Material/IMaterial.hpp"
-#include "Geometry/Material/MtlMaterial/MtlMaterial.hpp"
 #include "Geometry/Material/MtlMaterial/MtlParameters.hpp"
 #include "Utils/Logger/ILogger.hpp"
 
@@ -47,7 +47,7 @@ MaterialsMap ObjMeshBuilder::extractMaterials(
         if (dataType == "newmtl") {
             if (!mtlName.empty()) {
                 materials_[mtlName] =
-                    std::make_shared<MtlMaterial>(mtlParameters);
+                    std::make_shared<DiffuseMaterial>(mtlParameters);
             }
 
             lineStream >> mtlName;
@@ -73,7 +73,7 @@ MaterialsMap ObjMeshBuilder::extractMaterials(
 
     if (!mtlName.empty()) {
         materials_[mtlName] =
-            std::make_shared<MtlMaterial>(mtlParameters);
+            std::make_shared<DiffuseMaterial>(mtlParameters);
     }
 
     return materials_;

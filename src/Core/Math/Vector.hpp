@@ -1,9 +1,12 @@
 #pragma once
 
+#include "Core/Math/Random.hpp"
+
 #include <algorithm>
 #include <array>
 #include <cmath>
 #include <initializer_list>
+#include <numbers>
 #include <ostream>
 
 namespace RTC {
@@ -22,6 +25,34 @@ public:
         for (size_t i = 0; i < elementsAmount; i++) {
             dimensions[i] = list.begin()[i];
         }
+    }
+
+    static Vector randomVersor() noexcept {
+        const auto polarAngle =
+            getRandomNumber<float>(0, 2 * std::numbers::pi);
+
+        const auto azimuthalCos = getRandomNumber<float>(-1.0, 1.0);
+
+        const auto azimuthalSin =
+            float(std::sqrt(1.0 - (azimuthalCos * azimuthalCos)));
+
+        return {
+            Type {azimuthalSin * std::cos(polarAngle)},
+            Type {azimuthalSin * std::sin(polarAngle)},
+            Type {azimuthalCos}
+        };
+    }
+
+    static Vector randomVersorOnHemisphere(
+        const Vector& normal
+    ) noexcept {
+        const Vector result = randomVersor();
+
+        if (getDotProduct(normal, result) < 0) {
+            return -result;
+        }
+
+        return result;
     }
 
     [[nodiscard]] constexpr Type& operator[](size_t index) noexcept {
@@ -96,7 +127,7 @@ public:
         return *this / getLength();
     }
 
-    constexpr Vector<Type, Size> getReflected(
+    [[nodiscard]] constexpr Vector<Type, Size> getReflected(
         const Vector<Type, Size>& normal
     ) const noexcept {
         return *this - (2 * getDotProduct(*this, normal) * normal);

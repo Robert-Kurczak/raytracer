@@ -3,8 +3,6 @@
 #include "Geometry/Material/MtlMaterial/MtlParameters.hpp"
 
 namespace RTC {
-static constexpr float epsilon = 0.001F;
-
 MtlMaterial::MtlMaterial(const MtlParameters& parameters) :
     parameters_(parameters) {}
 
@@ -14,17 +12,12 @@ bool MtlMaterial::scatter(
     Color<float>& attenuation,
     Ray& scatteredRay
 ) const {
+    (void) ray;
+    (void) hitData;
+    (void) scatteredRay;
+
     attenuation = parameters_.diffuse;
 
-    const Point3 reflectedOrigin =
-        hitData.hitPoint + epsilon * hitData.hitNormal;
-
-    const Vector3 reflectedDirection =
-        ray.getDirection().getReflected(hitData.hitNormal);
-
-    const Ray reflectedRay {reflectedOrigin, reflectedDirection};
-
-    scatteredRay = reflectedRay;
-    return true;
+    return false;
 }
 }

@@ -1,0 +1,40 @@
+{
+    "outputPath": "resources/renders/cornell-scene.ppm",
+    "verbose": true,
+    "renderer": {
+        "samplesPerPixel": 10,
+        "scatterRecursionDepth": 10
+    },
+    "camera": {
+        "screenWidth": 1920,
+        "screenHeight": 1080,
+        "position": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "direction": [
+            0.0,
+            0.0,
+            -1.0
+        ],
+        "upDirection": [
+            0.0,
+            1.0,
+            0.0
+        ],
+        "fieldOfViewDegrees": 90
+    },
+    "objects": [
+        {
+            "type": "obj",
+            "filePath": "resources/objects/cornell-box/CornellBox-Original.obj",
+            "position": [
+                0.0,
+                -1,
+                -2.0
+            ]
+        }
+    ],
+    "lights": []
+}

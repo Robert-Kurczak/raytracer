@@ -10,7 +10,8 @@
 #include "Geometry/Hittable/Sphere/Sphere.hpp"
 #include "Geometry/Light/ILight.hpp"
 #include "Geometry/Light/PointLight/PointLight.hpp"
-#include "Geometry/Material/MtlMaterial/MtlMaterial.hpp"
+#include "Geometry/Material/DiffuseMaterial/DiffuseMaterial.hpp"
+#include "Geometry/Material/DiffuseMaterial/DiffuseParameters.hpp"
 #include "Rendering/Renderer/IRenderer.hpp"
 #include "Rendering/Renderer/MaterialRenderer/MaterialRenderer.hpp"
 #include "Rendering/Renderer/MaterialRenderer/MaterialRendererParameters.hpp"
@@ -28,12 +29,9 @@
 using json = nlohmann::json;
 
 namespace RTC {
-static constexpr MtlParameters DEFAULT_MATERIAL_PARAMETERS {
-    .ambient = {.red = 0.0F, .green = 0.0F, .blue = 0.0F},
-    .diffuse = {.red = 0.8F, .green = 0.6F, .blue = 0.8F},
-    .specular = {.red = 0.0F, .green = 0.0F, .blue = 0.0F},
-    .shininess = 0.0F,
-    .transparency = 0.0F
+static constexpr DiffuseParameters DEFAULT_MATERIAL_PARAMETERS {
+    .baseColor {.red = 0.30F, .green = 0.30F, .blue = 0.30F},
+    .roughness = 1.0F
 };
 
 std::shared_ptr<ILogger> JsonEnvironmentBuilder::parseLogger(
@@ -88,7 +86,7 @@ std::unique_ptr<IRenderer> JsonEnvironmentBuilder::parseRenderer(
             jsonContent["renderer"]["scatterRecursionDepth"]
                 .get<uint32_t>(),
         .defaultMaterial_ =
-            std::make_shared<MtlMaterial>(DEFAULT_MATERIAL_PARAMETERS)
+            std::make_shared<DiffuseMaterial>(DEFAULT_MATERIAL_PARAMETERS)
     };
 
     return std::make_unique<MaterialRenderer>(logger, parameters);
