@@ -6,6 +6,9 @@
 #include "Builders/MeshBuilder/IMeshBuilder.hpp"
 #include "Builders/MeshBuilder/ObjMeshBuilder/ObjMeshBuilder.hpp"
 #include "Core/Color/Color.hpp"
+#include "Geometry/Background/IBackground.hpp"
+#include "Geometry/Background/SkyBackground/SkyBackground.hpp"
+#include "Geometry/Background/SolidBackground/SolidBackground.hpp"
 #include "Geometry/Hittable/IHittable.hpp"
 #include "Geometry/Hittable/Sphere/Sphere.hpp"
 #include "Geometry/Light/ILight.hpp"
@@ -20,6 +23,7 @@
 #include "Utils/Logger/ILogger.hpp"
 #include "Utils/Logger/NullLogger/NullLogger.hpp"
 #include "World/Camera/CameraParameters.hpp"
+#include "nlohmann/json_fwd.hpp"
 
 #include <format>
 #include <fstream>
@@ -32,6 +36,12 @@ namespace RTC {
 static constexpr DiffuseParameters DEFAULT_MATERIAL_PARAMETERS {
     .baseColor {.red = 0.30F, .green = 0.30F, .blue = 0.30F},
     .roughness = 1.0F
+};
+
+static constexpr Color<float> DEFAULT_BACKGROUND_COLOR {
+    .red = 0.3F,
+    .green = 0.3F,
+    .blue = 0.3F
 };
 
 std::shared_ptr<ILogger> JsonEnvironmentBuilder::parseLogger(
@@ -60,10 +70,40 @@ Color8Bit JsonEnvironmentBuilder::parse8BitColor(
     const nlohmann::json& jsonArray
 ) const {
     return Color8Bit {
-        jsonArray[0].get<uint8_t>(),
-        jsonArray[1].get<uint8_t>(),
-        jsonArray[2].get<uint8_t>()
+        .red = jsonArray[0].get<uint8_t>(),
+        .green = jsonArray[1].get<uint8_t>(),
+        .blue = jsonArray[2].get<uint8_t>()
     };
+}
+
+Color<float> JsonEnvironmentBuilder::parseNormalizedColor(
+    const nlohmann::json& jsonArray
+) const {
+    return Color<float> {
+        .red = float(jsonArray[0].get<uint8_t>()) / 255.0F,
+        .green = float(jsonArray[1].get<uint8_t>()) / 255.0F,
+        .blue = float(jsonArray[2].get<uint8_t>()) / 255.0F
+    };
+}
+
+std::unique_ptr<IBackground> JsonEnvironmentBuilder::parseBackground(
+    const nlohmann::json& jsonContent
+) const {
+    const std::string backgroundType =
+        jsonContent["background"]["type"].get<std::string>();
+
+    if (backgroundType == "sky") {
+        return std::make_unique<SkyBackground>();
+    }
+
+    if (backgroundType == "solid") {
+        const Color<float> color =
+            parseNormalizedColor(jsonContent["background"]["color"]);
+
+        return std::make_unique<SolidBackground>(color);
+    }
+
+    return std::make_unique<SolidBackground>(DEFAULT_BACKGROUND_COLOR);
 }
 
 std::unique_ptr<IWriter> JsonEnvironmentBuilder::parseWriter(
@@ -89,7 +129,12 @@ std::unique_ptr<IRenderer> JsonEnvironmentBuilder::parseRenderer(
             std::make_shared<DiffuseMaterial>(DEFAULT_MATERIAL_PARAMETERS)
     };
 
-    return std::make_unique<MaterialRenderer>(logger, parameters);
+    std::unique_ptr<IBackground> background =
+        parseBackground(jsonContent);
+
+    return std::make_unique<MaterialRenderer>(
+        logger, std::move(background), parameters
+    );
 }
 
 std::unique_ptr<Camera> JsonEnvironmentBuilder::parseCamera(

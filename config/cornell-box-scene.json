@@ -25,6 +25,14 @@
         ],
         "fieldOfViewDegrees": 90
     },
+    "background": {
+        "type": "solid",
+        "color": [
+            10,
+            10,
+            10
+        ]
+    },
     "objects": [
         {
             "type": "obj",

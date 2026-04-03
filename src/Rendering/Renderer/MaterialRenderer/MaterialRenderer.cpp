@@ -18,25 +18,6 @@
 namespace RTC {
 static constexpr float epsilon = 0.001F;
 
-static constexpr Color<float> WHITE_ATTENUATION {
-    .red = 1.0F,
-    .green = 1.0F,
-    .blue = 1.0F
-};
-
-static constexpr Color<float> BLUEISH_ATTENUATION {
-    .red = 0.5F,
-    .green = 0.7F,
-    .blue = 1.0F
-};
-
-Color<float> MaterialRenderer::getSkyAttenuation(
-    const Vector3<float>& rayDirectionVersor
-) const {
-    const float a = (rayDirectionVersor.getY() + 1.0F) / 2.0F;
-    return (1.0F - a) * WHITE_ATTENUATION + a * BLUEISH_ATTENUATION;
-}
-
 bool MaterialRenderer::isInShadow(
     const HitData& hitData,
     const LightData& lightData,
@@ -124,7 +105,7 @@ Color<float> MaterialRenderer::traceRay(
     const bool objectHit = scene.hitRay(ray, interval, hitData);
 
     if (!objectHit) {
-        return getSkyAttenuation(ray.getDirection().getNormalized());
+        return background_->sample(ray);
     }
 
     const Color<float> directLight = getDirectLight(hitData, scene);
@@ -194,9 +175,11 @@ uint32_t MaterialRenderer::renderSection(
 
 MaterialRenderer::MaterialRenderer(
     std::shared_ptr<ILogger> logger,
+    std::unique_ptr<IBackground> background,
     MaterialRendererParameters parameters
 ) :
     logger_(std::move(logger)),
+    background_(std::move(background)),
     parameters_(std::move(parameters)) {}
 
 void MaterialRenderer::render(

@@ -3,6 +3,7 @@
 #include "../IRenderer.hpp"
 #include "Core/Color/Color.hpp"
 #include "Core/Math/Interval.hpp"
+#include "Geometry/Background/IBackground.hpp"
 #include "Geometry/Hittable/HitData.hpp"
 #include "Geometry/Light/ILight.hpp"
 #include "Geometry/Light/LightData.hpp"
@@ -16,6 +17,7 @@ namespace RTC {
 class MaterialRenderer : public IRenderer {
 private:
     std::shared_ptr<ILogger> logger_;
+    std::unique_ptr<IBackground> background_;
     MaterialRendererParameters parameters_;
 
     [[nodiscard]] Color<float> getSkyAttenuation(
@@ -63,6 +65,7 @@ private:
 public:
     MaterialRenderer(
         std::shared_ptr<ILogger> logger,
+        std::unique_ptr<IBackground> background,
         MaterialRendererParameters parameters
     );
 

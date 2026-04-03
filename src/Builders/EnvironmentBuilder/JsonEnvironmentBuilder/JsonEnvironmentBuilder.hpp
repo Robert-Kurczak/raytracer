@@ -5,11 +5,13 @@
 #include "Builders/MeshBuilder/IMeshBuilder.hpp"
 #include "Core/Color/Color.hpp"
 #include "Core/Math/Point.hpp"
+#include "Geometry/Background/IBackground.hpp"
 #include "Rendering/Renderer/IRenderer.hpp"
 #include "Rendering/Writer/IWriter.hpp"
 #include "Utils/Logger/ILogger.hpp"
 #include "World/Camera/Camera.hpp"
 #include "World/Scene/Scene.hpp"
+#include "nlohmann/json_fwd.hpp"
 
 #include <memory>
 #include <nlohmann/json.hpp>
@@ -27,6 +29,14 @@ private:
 
     [[nodiscard]] Color8Bit parse8BitColor(
         const nlohmann::json& jsonArray
+    ) const;
+
+    [[nodiscard]] Color<float> parseNormalizedColor(
+        const nlohmann::json& jsonArray
+    ) const;
+
+    [[nodiscard]] std::unique_ptr<IBackground> parseBackground(
+        const nlohmann::json& jsonContent
     ) const;
 
     [[nodiscard]] std::unique_ptr<IWriter> parseWriter(
