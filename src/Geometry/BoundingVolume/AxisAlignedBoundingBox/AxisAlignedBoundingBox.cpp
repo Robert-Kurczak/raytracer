@@ -3,16 +3,30 @@
 #include <cstdint>
 
 namespace RTC {
+static constexpr float EPSILON = 0.0001F;
+
 static constexpr uint8_t X_AXIS_INDEX = 0;
 static constexpr uint8_t Y_AXIS_INDEX = 1;
 static constexpr uint8_t Z_AXIS_INDEX = 2;
+
+void AxisAlignedBoundingBox::padIntervals() {
+    for (uint8_t axis = 0; axis < 3; axis++) {
+        auto& interval = axisIntervals_[axis];
+
+        if (interval.getSize() < EPSILON) {
+            interval.expand(EPSILON);
+        }
+    }
+}
 
 AxisAlignedBoundingBox::AxisAlignedBoundingBox(
     const Interval<float>& xInterval,
     const Interval<float>& yInterval,
     const Interval<float>& zInterval
 ) :
-    axisIntervals_({xInterval, yInterval, zInterval}) {}
+    axisIntervals_({xInterval, yInterval, zInterval}) {
+    padIntervals();
+}
 
 AxisAlignedBoundingBox::AxisAlignedBoundingBox(
     const Point3<float>& startPoint,
@@ -25,6 +39,8 @@ AxisAlignedBoundingBox::AxisAlignedBoundingBox(
             axisIntervals_.at(axis) = {endPoint[axis], startPoint[axis]};
         }
     }
+
+    padIntervals();
 }
 
 AxisAlignedBoundingBox::AxisAlignedBoundingBox(
@@ -41,6 +57,8 @@ AxisAlignedBoundingBox::AxisAlignedBoundingBox(
             box1.axisIntervals_[axis].end, box2.axisIntervals_[axis].end
         );
     }
+
+    padIntervals();
 }
 
 const Interval<float>& AxisAlignedBoundingBox::getXAxisInterval() const {

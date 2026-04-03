@@ -15,6 +15,8 @@ private:
         Interval<float> {0, 0}
     };
 
+    void padIntervals();
+
 public:
     AxisAlignedBoundingBox(
         const Interval<float>& xInterval,

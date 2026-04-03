@@ -46,6 +46,13 @@ struct Interval {
         return value;
     }
 
+    constexpr void expand(Type value) noexcept {
+        const Type padding = value / 2.0F;
+
+        start -= padding;
+        end += padding;
+    }
+
     static constexpr Type infinity() noexcept {
         if constexpr (std::is_floating_point_v<Type>) {
             return std::numeric_limits<Type>::infinity();
