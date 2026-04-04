@@ -247,8 +247,6 @@ RendererStatistics MaterialRenderer::render(
     const Scene& scene,
     Framebuffer& framebuffer
 ) noexcept {
-    logger_->log(LogLevel::Info, "Rendering");
-
     RendererStatistics totalStatistics;
 
     const std::vector<RendererStatistics> threadStatistics =
