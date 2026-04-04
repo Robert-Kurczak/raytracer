@@ -63,6 +63,12 @@ private:
         Framebuffer& framebuffer
     ) const;
 
+    std::vector<RendererStatistics> renderAll(
+        const Camera& camera,
+        const Scene& scene,
+        Framebuffer& framebuffer
+    ) const;
+
 public:
     MaterialRenderer(
         std::shared_ptr<ILogger> logger,

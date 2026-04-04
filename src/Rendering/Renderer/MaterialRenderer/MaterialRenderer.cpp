@@ -11,7 +11,9 @@
 #include "Utils/Logger/ILogger.hpp"
 #include "World/Scene/Scene.hpp"
 
+#include <format>
 #include <memory>
+#include <thread>
 #include <utility>
 
 namespace RTC {
@@ -170,6 +172,67 @@ RendererStatistics MaterialRenderer::renderSection(
     return statistics;
 }
 
+std::vector<RendererStatistics> MaterialRenderer::renderAll(
+    const Camera& camera,
+    const Scene& scene,
+    Framebuffer& framebuffer
+) const {
+    const uint32_t threadCount = std::thread::hardware_concurrency();
+    logger_->log(
+        LogLevel::Info,
+        std::format("Rendering on {} threads", threadCount)
+    );
+
+    const Vector2<uint32_t> resolution = framebuffer.getResolution();
+    const uint32_t sectionWidth = resolution.getX() / threadCount;
+
+    const Interval<float> renderInterval {
+        epsilon, Interval<float>::infinity()
+    };
+    const Interval<uint32_t> yIndices {0, resolution.getY()};
+
+    std::vector<RendererStatistics> statistics(threadCount);
+
+    {
+        std::vector<std::jthread> threads(threadCount);
+
+        for (uint32_t i = 0; i < threadCount - 1; i++) {
+            threads[i] = std::jthread {[&, i]() {
+                const uint32_t sectionStart = i * sectionWidth;
+                const Interval<uint32_t> xIndices {
+                    sectionStart, sectionStart + sectionWidth
+                };
+
+                statistics[i] = renderSection(
+                    camera,
+                    scene,
+                    renderInterval,
+                    xIndices,
+                    yIndices,
+                    framebuffer
+                );
+            }};
+        }
+
+        const Interval<uint32_t> xIndices {
+            (threadCount - 1) * sectionWidth, resolution.getX()
+        };
+
+        threads[threadCount - 1] = std::jthread {[&]() {
+            statistics[threadCount - 1] = renderSection(
+                camera,
+                scene,
+                renderInterval,
+                xIndices,
+                yIndices,
+                framebuffer
+            );
+        }};
+    }
+
+    return statistics;
+}
+
 MaterialRenderer::MaterialRenderer(
     std::shared_ptr<ILogger> logger,
     std::unique_ptr<IBackground> background,
@@ -184,20 +247,18 @@ RendererStatistics MaterialRenderer::render(
     const Scene& scene,
     Framebuffer& framebuffer
 ) noexcept {
-    constexpr Interval<float> renderInterval {
-        epsilon, Interval<float>::infinity()
-    };
-    const Vector2<uint32_t> resolution = framebuffer.getResolution();
-
-    const Interval<uint32_t> xIndices {0, resolution.getX()};
-    const Interval<uint32_t> yIndices {0, resolution.getY()};
-
     logger_->log(LogLevel::Info, "Rendering");
 
-    RendererStatistics statistics = renderSection(
-        camera, scene, renderInterval, xIndices, yIndices, framebuffer
-    );
+    RendererStatistics totalStatistics;
 
-    return statistics;
+    const std::vector<RendererStatistics> threadStatistics =
+        renderAll(camera, scene, framebuffer);
+
+    for (const auto& stats : threadStatistics) {
+        totalStatistics.rays += stats.rays;
+        totalStatistics.shadowRays += stats.shadowRays;
+    }
+
+    return totalStatistics;
 }
 }
