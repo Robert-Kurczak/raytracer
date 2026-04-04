@@ -34,6 +34,7 @@ class Args:
     resolution: list[float]
     recursion_depth: int
     output_path: str
+    samples_per_pixel: int
 
 def load_scene():
     "Loads initial scene json config"
@@ -65,6 +66,9 @@ def modify_scene(scene: dict, args: Args):
 
     if args.recursion_depth:
         scene["renderer"]["scatterRecursionDepth"] = args.recursion_depth
+
+    if args.samples_per_pixel:
+        scene["renderer"]["samplesPerPixel"] = args.samples_per_pixel
 
     if args.output_path:
         scene["outputPath"] = args.output_path
@@ -178,6 +182,12 @@ def parse_arguments() -> Args:
         help="Output file path"
     )
 
+    parser.add_argument(
+        "-s",
+        type=int,
+        help="Samples per pixel"
+    )
+
     parsed_args = parser.parse_args()
 
     return Args(
@@ -189,7 +199,8 @@ def parse_arguments() -> Args:
         light_positions = parsed_args.ltpos,
         recursion_depth = parsed_args.r,
         resolution = parsed_args.res,
-        output_path = parsed_args.o
+        output_path = parsed_args.o,
+        samples_per_pixel=parsed_args.s
     )
 
 def main():
