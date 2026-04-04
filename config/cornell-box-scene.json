@@ -3,15 +3,15 @@
     "verbose": true,
     "renderer": {
         "samplesPerPixel": 10,
-        "scatterRecursionDepth": 10
+        "scatterRecursionDepth": 5
     },
     "camera": {
-        "screenWidth": 1920,
+        "screenWidth": 1080,
         "screenHeight": 1080,
         "position": [
             0.0,
             0.0,
-            0.0
+            -0.2
         ],
         "direction": [
             0.0,
@@ -44,5 +44,20 @@
             ]
         }
     ],
-    "lights": []
+    "lights": [
+        {
+            "type": "point",
+            "position": [
+                0.0,
+                0.5,
+                -2.0
+            ],
+            "color": [
+                65,
+                65,
+                65
+            ],
+            "decay": 1
+        }
+    ]
 }

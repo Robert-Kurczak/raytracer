@@ -255,6 +255,16 @@ requires std::is_arithmetic_v<Type>
 
 template<typename Type, size_t Size>
 requires std::is_arithmetic_v<Type>
+[[nodiscard]] constexpr Vector<Type, Size> interpolateLineary(
+    const Vector<Type, Size>& vector1,
+    const Vector<Type, Size>& vector2,
+    float factor
+) noexcept {
+    return (1.0F - factor) * vector1 + factor * vector2;
+}
+
+template<typename Type, size_t Size>
+requires std::is_arithmetic_v<Type>
 [[nodiscard]] constexpr Type getDotProduct(
     const Vector<Type, Size>& vector1,
     const Vector<Type, Size>& vector2

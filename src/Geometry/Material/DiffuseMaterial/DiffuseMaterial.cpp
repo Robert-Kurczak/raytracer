@@ -31,15 +31,17 @@ bool DiffuseMaterial::scatter(
     attenuation = parameters_.baseColor;
 
     const Vector3<float> diffusedDirection =
-        Vector3<float>::randomVersorOnHemisphere(hitData.hitNormal) *
-        parameters_.roughness;
+        Vector3<float>::randomVersorOnHemisphere(hitData.hitNormal);
+
+    const Vector3<float> specularDirection =
+        ray.getDirection().getReflected(hitData.hitNormal);
+
+    const Vector3 reflectedDirection = interpolateLineary(
+        specularDirection, diffusedDirection, parameters_.roughness
+    );
 
     const Point3 reflectedOrigin =
         hitData.hitPoint + epsilon * hitData.hitNormal;
-
-    const Vector3 reflectedDirection =
-        ray.getDirection().getReflected(hitData.hitNormal) +
-        diffusedDirection;
 
     const Ray reflectedRay {reflectedOrigin, reflectedDirection};
 
