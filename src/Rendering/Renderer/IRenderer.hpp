@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Rendering/Framebuffer/Framebuffer.hpp"
+#include "Rendering/Renderer/RendererStatistics.hpp"
 #include "World/Camera/Camera.hpp"
 #include "World/Scene/Scene.hpp"
 
@@ -14,7 +15,7 @@ public:
     void operator=(IRenderer&&) = delete;
     virtual ~IRenderer() = default;
 
-    virtual void render(
+    virtual RendererStatistics render(
         const Camera& camera,
         const Scene& scene,
         Framebuffer& framebuffer

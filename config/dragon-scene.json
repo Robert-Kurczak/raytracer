@@ -25,6 +25,9 @@
         ],
         "fieldOfViewDegrees": 90
     },
+    "background": {
+        "type": "sky"
+    },
     "objects": [
         {
             "type": "obj",

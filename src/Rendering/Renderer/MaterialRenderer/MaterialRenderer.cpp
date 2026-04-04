@@ -7,11 +7,10 @@
 #include "Geometry/Hittable/HitData.hpp"
 #include "Geometry/Light/LightData.hpp"
 #include "Geometry/Material/IMaterial.hpp"
+#include "Rendering/Renderer/RendererStatistics.hpp"
 #include "Utils/Logger/ILogger.hpp"
 #include "World/Scene/Scene.hpp"
 
-#include <chrono>
-#include <format>
 #include <memory>
 #include <utility>
 
@@ -66,7 +65,7 @@ Color<float> MaterialRenderer::getIndirectLight(
     const Interval<float>& interval,
     const HitData& hitData,
     const Scene& scene,
-    uint32_t& tracedRaysCount,
+    RendererStatistics& statistics,
     uint32_t depth
 ) const {
     Ray scatteredRay {};
@@ -82,23 +81,21 @@ Color<float> MaterialRenderer::getIndirectLight(
         return Color<float> {.red = 0, .green = 0, .blue = 0};
     }
 
-    tracedRaysCount++;
-
-    return traceRay(
-        scatteredRay, scene, interval, tracedRaysCount, depth - 1
-    );
+    return traceRay(scatteredRay, scene, interval, statistics, depth - 1);
 }
 
 Color<float> MaterialRenderer::traceRay(
     const Ray& ray,
     const Scene& scene,
     const Interval<float>& interval,
-    uint32_t& tracedRaysCount,
+    RendererStatistics& statistics,
     uint32_t depth
 ) const {
     if (depth == 0) {
         return Color<float>::black();
     }
+
+    statistics.rays++;
 
     HitData hitData {};
 
@@ -109,7 +106,7 @@ Color<float> MaterialRenderer::traceRay(
     }
 
     const Color<float> directLight = getDirectLight(hitData, scene);
-    tracedRaysCount += scene.getLights().size();
+    statistics.shadowRays += scene.getLights().size();
 
     Color<float> indirectLightAttenuation = Color<float>::black();
     const Color<float> indirectLight = getIndirectLight(
@@ -118,7 +115,7 @@ Color<float> MaterialRenderer::traceRay(
         interval,
         hitData,
         scene,
-        tracedRaysCount,
+        statistics,
         depth
     );
 
@@ -132,7 +129,7 @@ Color<float> MaterialRenderer::traceRay(
     };
 }
 
-uint32_t MaterialRenderer::renderSection(
+RendererStatistics MaterialRenderer::renderSection(
     const Camera& camera,
     const Scene& scene,
     const Interval<float>& renderInterval,
@@ -140,7 +137,7 @@ uint32_t MaterialRenderer::renderSection(
     const Interval<uint32_t>& yIndices,
     Framebuffer& framebuffer
 ) const {
-    uint32_t tracedRaysCount = 0;
+    RendererStatistics statistics {};
 
     for (uint32_t y = yIndices.start; y < yIndices.end; y++) {
         for (uint32_t x = xIndices.start; x < xIndices.end; x++) {
@@ -155,7 +152,7 @@ uint32_t MaterialRenderer::renderSection(
                     ray,
                     scene,
                     renderInterval,
-                    tracedRaysCount,
+                    statistics,
                     parameters_.scatterRecursionDepth
                 );
 
@@ -170,7 +167,7 @@ uint32_t MaterialRenderer::renderSection(
         }
     }
 
-    return tracedRaysCount;
+    return statistics;
 }
 
 MaterialRenderer::MaterialRenderer(
@@ -182,7 +179,7 @@ MaterialRenderer::MaterialRenderer(
     background_(std::move(background)),
     parameters_(std::move(parameters)) {}
 
-void MaterialRenderer::render(
+RendererStatistics MaterialRenderer::render(
     const Camera& camera,
     const Scene& scene,
     Framebuffer& framebuffer
@@ -195,24 +192,12 @@ void MaterialRenderer::render(
     const Interval<uint32_t> xIndices {0, resolution.getX()};
     const Interval<uint32_t> yIndices {0, resolution.getY()};
 
-    logger_->log(LogLevel::Info, "Tracing rays");
+    logger_->log(LogLevel::Info, "Rendering");
 
-    const auto startTime = std::chrono::high_resolution_clock::now();
-    const uint32_t tracedRays = renderSection(
+    RendererStatistics statistics = renderSection(
         camera, scene, renderInterval, xIndices, yIndices, framebuffer
     );
-    const auto endTime = std::chrono::high_resolution_clock::now();
 
-    const auto executionTime =
-        std::chrono::duration_cast<std::chrono::milliseconds>(
-            endTime - startTime
-        );
-
-    logger_->log(
-        LogLevel::Info, std::format("Traced rays in: {}", executionTime)
-    );
-    logger_->log(
-        LogLevel::Info, std::format("Traced rays count: {}", tracedRays)
-    );
+    return statistics;
 }
 }

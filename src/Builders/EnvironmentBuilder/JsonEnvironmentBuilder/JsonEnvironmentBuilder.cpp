@@ -34,8 +34,8 @@ using json = nlohmann::json;
 
 namespace RTC {
 static constexpr DiffuseParameters DEFAULT_MATERIAL_PARAMETERS {
-    .baseColor {.red = 0.30F, .green = 0.30F, .blue = 0.30F},
-    .roughness = 1.0F
+    .baseColor {.red = 0.50F, .green = 0.10F, .blue = 0.40F},
+    .roughness = 0.0F
 };
 
 static constexpr Color<float> DEFAULT_BACKGROUND_COLOR {

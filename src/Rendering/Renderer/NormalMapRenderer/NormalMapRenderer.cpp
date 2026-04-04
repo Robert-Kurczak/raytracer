@@ -5,8 +5,6 @@
 #include "Core/Math/Vector.hpp"
 #include "Geometry/Hittable/HitData.hpp"
 
-#include <iostream>
-
 namespace RTC {
 inline constexpr Color<float> WHITE_COLOR {
     .red = 255,
@@ -41,11 +39,13 @@ NormalMapRenderer::NormalMapRenderer(
     progressIndicator_(progressIndicator),
     samplesPerPixel_(samplesPerPixel) {}
 
-void NormalMapRenderer::render(
+RendererStatistics NormalMapRenderer::render(
     const Camera& camera,
     const Scene& scene,
     Framebuffer& framebuffer
 ) noexcept {
+    RendererStatistics statistics {};
+
     const Vector2<uint32_t> resolution = framebuffer.getResolution();
     const Interval<float> renderedInterval {
         0.0F, Interval<float>::infinity()
@@ -68,6 +68,8 @@ void NormalMapRenderer::render(
 
                 const bool objectHit =
                     scene.hitRay(ray, renderedInterval, hitData);
+
+                statistics.rays++;
 
                 Color<float> sampleColor;
                 if (objectHit) {
@@ -93,6 +95,6 @@ void NormalMapRenderer::render(
         }
     }
 
-    std::cout << "\n";
+    return statistics;
 }
 }

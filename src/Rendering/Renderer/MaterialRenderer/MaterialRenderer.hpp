@@ -9,6 +9,7 @@
 #include "Geometry/Light/LightData.hpp"
 #include "Rendering/Framebuffer/Framebuffer.hpp"
 #include "Rendering/Renderer/MaterialRenderer/MaterialRendererParameters.hpp"
+#include "Rendering/Renderer/RendererStatistics.hpp"
 #include "Utils/Logger/ILogger.hpp"
 
 #include <memory>
@@ -41,7 +42,7 @@ private:
         const Interval<float>& interval,
         const HitData& hitData,
         const Scene& scene,
-        uint32_t& tracedRaysCount,
+        RendererStatistics& statistics,
         uint32_t depth
     ) const;
 
@@ -49,11 +50,11 @@ private:
         const Ray& ray,
         const Scene& scene,
         const Interval<float>& interval,
-        uint32_t& tracedRaysCount,
+        RendererStatistics& statistics,
         uint32_t depth
     ) const;
 
-    uint32_t renderSection(
+    RendererStatistics renderSection(
         const Camera& camera,
         const Scene& scene,
         const Interval<float>& renderInterval,
@@ -69,7 +70,7 @@ public:
         MaterialRendererParameters parameters
     );
 
-    void render(
+    RendererStatistics render(
         const Camera& camera,
         const Scene& scene,
         Framebuffer& framebuffer

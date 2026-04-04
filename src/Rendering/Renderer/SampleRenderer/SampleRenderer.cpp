@@ -3,7 +3,7 @@
 #include "Core/Color/Color.hpp"
 
 namespace RTC {
-void SampleRenderer::render(
+RendererStatistics SampleRenderer::render(
     const Camera& camera,
     const Scene& scene,
     Framebuffer& framebuffer
@@ -33,5 +33,7 @@ void SampleRenderer::render(
             framebuffer.setColorAt({xIndex, yIndex}, color);
         }
     }
+
+    return RendererStatistics {};
 }
 }

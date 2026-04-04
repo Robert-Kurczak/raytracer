@@ -235,6 +235,10 @@ IMeshBuilder::TriangleBuffer ObjMeshBuilder::buildFromFile(
         );
 
     logger_->log(
+        LogLevel::Info,
+        std::format("Triangles in mesh: {}", result.size())
+    );
+    logger_->log(
         LogLevel::Info, std::format("Mesh built in {}", executionTime)
     );
 

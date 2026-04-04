@@ -5,6 +5,7 @@
 #include "Geometry/Hittable/HitData.hpp"
 #include "Rendering/Framebuffer/Framebuffer.hpp"
 #include "Rendering/ProgressIndicator/IProgressIndicator.hpp"
+#include "Rendering/Renderer/RendererStatistics.hpp"
 
 namespace RTC {
 class NormalMapRenderer : public IRenderer {
@@ -21,7 +22,7 @@ public:
         uint32_t samplesPerPixel
     );
 
-    void render(
+    RendererStatistics render(
         const Camera& camera,
         const Scene& scene,
         Framebuffer& framebuffer
