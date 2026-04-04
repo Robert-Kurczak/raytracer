@@ -99,7 +99,7 @@ def main(clean):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        prog="Erosion Simulator Builder",
+        prog="Raytracer builder",
         description="Builds application inside the dev container"
     )
 

@@ -1,5 +1,5 @@
 {
-    "outputPath": "resources/renders/cornell-scene.ppm",
+    "outputPath": "resources/renders/cornell-original-scene.ppm",
     "verbose": true,
     "renderer": {
         "samplesPerPixel": 10,

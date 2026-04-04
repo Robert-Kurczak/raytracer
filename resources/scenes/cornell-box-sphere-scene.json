@@ -1,0 +1,63 @@
+{
+    "outputPath": "resources/renders/cornell-sphere-scene.ppm",
+    "verbose": true,
+    "renderer": {
+        "samplesPerPixel": 10,
+        "scatterRecursionDepth": 5
+    },
+    "camera": {
+        "screenWidth": 1080,
+        "screenHeight": 1080,
+        "position": [
+            0.0,
+            0.0,
+            -0.2
+        ],
+        "direction": [
+            0.0,
+            0.0,
+            -1.0
+        ],
+        "upDirection": [
+            0.0,
+            1.0,
+            0.0
+        ],
+        "fieldOfViewDegrees": 90
+    },
+    "background": {
+        "type": "solid",
+        "color": [
+            10,
+            10,
+            10
+        ]
+    },
+    "objects": [
+        {
+            "type": "obj",
+            "filePath": "resources/objects/cornell-box/CornellBox-Sphere.obj",
+            "position": [
+                0.0,
+                -0.8,
+                -2.0
+            ]
+        }
+    ],
+    "lights": [
+        {
+            "type": "point",
+            "position": [
+                0.0,
+                0.35,
+                -2.0
+            ],
+            "color": [
+                65,
+                65,
+                65
+            ],
+            "decay": 1
+        }
+    ]
+}
