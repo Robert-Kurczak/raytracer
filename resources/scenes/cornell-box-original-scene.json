@@ -2,12 +2,12 @@
     "outputPath": "resources/renders/cornell-original-scene.ppm",
     "verbose": true,
     "renderer": {
-        "samplesPerPixel": 10,
-        "scatterRecursionDepth": 5
+        "samplesPerPixel": 100,
+        "scatterRecursionDepth": 10
     },
     "camera": {
-        "screenWidth": 1080,
-        "screenHeight": 1080,
+        "screenWidth": 1000,
+        "screenHeight": 1000,
         "position": [
             0.0,
             0.0,

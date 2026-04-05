@@ -2,7 +2,7 @@
     "outputPath": "resources/renders/spot-scene.ppm",
     "verbose": true,
     "renderer": {
-        "samplesPerPixel": 10,
+        "samplesPerPixel": 100,
         "scatterRecursionDepth": 10
     },
     "camera": {
