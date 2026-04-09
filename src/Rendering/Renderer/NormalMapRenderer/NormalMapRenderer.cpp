@@ -6,30 +6,30 @@
 #include "Geometry/Hittable/HitData.hpp"
 
 namespace RTC {
-inline constexpr Color<float> WHITE_COLOR {
+inline constexpr LinearColor WHITE_COLOR {
     .red = 255,
     .green = 255,
     .blue = 255
 };
-inline constexpr Color<float> BLUEISH_COLOR {
+inline constexpr LinearColor BLUEISH_COLOR {
     .red = 128,
     .green = 179,
     .blue = 255
 };
 
-Color<float> NormalMapRenderer::getSkyColor(
+LinearColor NormalMapRenderer::getSkyColor(
     const Vector3<float>& rayDirectionVersor
 ) {
     const float a = (rayDirectionVersor.getY() + 1.0F) / 2.0F;
     return (1.0F - a) * WHITE_COLOR + a * BLUEISH_COLOR;
 }
 
-Color<float> NormalMapRenderer::calculateColor(const HitData& hitData) {
+LinearColor NormalMapRenderer::calculateColor(const HitData& hitData) {
     const float red = 255.0F * (hitData.hitNormal.getX() + 1.0F) / 2.0F;
     const float green = 255.0F * (hitData.hitNormal.getY() + 1.0F) / 2.0F;
     const float blue = 255.0F * (hitData.hitNormal.getZ() + 1.0F) / 2.0F;
 
-    return Color<float> {.red = red, .green = green, .blue = blue};
+    return LinearColor {.red = red, .green = green, .blue = blue};
 }
 
 NormalMapRenderer::NormalMapRenderer(
@@ -61,7 +61,7 @@ RendererStatistics NormalMapRenderer::render(
         for (uint32_t xIndex = 0; xIndex < resolution.getX(); xIndex++) {
             const Point2<uint32_t> pixel {xIndex, yIndex};
 
-            Color<float> resultColor {.red = 0, .green = 0, .blue = 0};
+            LinearColor resultColor {.red = 0, .green = 0, .blue = 0};
 
             for (uint32_t i = 0; i < samplesPerPixel_; i++) {
                 Ray ray = camera.getRandomizedRay(pixel);
@@ -71,7 +71,7 @@ RendererStatistics NormalMapRenderer::render(
 
                 statistics.rays++;
 
-                Color<float> sampleColor;
+                LinearColor sampleColor;
                 if (objectHit) {
                     sampleColor = calculateColor(hitData);
                 } else {

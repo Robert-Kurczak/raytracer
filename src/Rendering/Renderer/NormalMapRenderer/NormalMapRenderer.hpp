@@ -13,8 +13,8 @@ private:
     IProgressIndicator& progressIndicator_;
     const uint32_t samplesPerPixel_;
 
-    Color<float> getSkyColor(const Vector3<float>& rayDirectionVersor);
-    Color<float> calculateColor(const HitData& hitData);
+    LinearColor getSkyColor(const Vector3<float>& rayDirectionVersor);
+    LinearColor calculateColor(const HitData& hitData);
 
 public:
     NormalMapRenderer(

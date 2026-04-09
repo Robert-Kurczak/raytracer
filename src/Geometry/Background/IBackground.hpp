@@ -13,6 +13,6 @@ public:
     IBackground operator=(IBackground&&) = delete;
     virtual ~IBackground() = default;
 
-    [[nodiscard]] virtual Color<float> sample(const Ray& ray) const = 0;
+    [[nodiscard]] virtual LinearColor sample(const Ray& ray) const = 0;
 };
 }

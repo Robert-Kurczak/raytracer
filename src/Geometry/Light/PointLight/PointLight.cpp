@@ -8,7 +8,7 @@ static constexpr float epsilon = 0.001;
 
 PointLight::PointLight(
     const Point3<float>& position,
-    const Color<float>& color,
+    const LinearColor& color,
     float decay
 ) :
     position_(position),
@@ -22,7 +22,7 @@ PointLight::PointLight(
 ) :
     PointLight(
         position,
-        Color<float> {
+        LinearColor {
             .red = float(color.red) / 255.0F,
             .green = float(color.green) / 255.0F,
             .blue = float(color.blue) / 255.0F
@@ -35,7 +35,7 @@ LightData PointLight::getSample(
 ) const {
     const Vector3<float> toLight = position_ - worldPosition;
     const float distanceSquared = toLight.getSquaredLength();
-    Color<float> illumination = color_ / (distanceSquared * decay_);
+    LinearColor illumination = color_ / (distanceSquared * decay_);
 
     return LightData {.toLight = toLight, .illumination = illumination};
 }

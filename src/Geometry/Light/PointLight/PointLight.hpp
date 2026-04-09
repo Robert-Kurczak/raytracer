@@ -7,13 +7,13 @@ namespace RTC {
 class PointLight : public ILight {
 private:
     Point3<float> position_;
-    Color<float> color_;
+    LinearColor color_;
     float decay_;
 
 public:
     PointLight(
         const Point3<float>& position,
-        const Color<float>& color,
+        const LinearColor& color,
         float decay
     );
 

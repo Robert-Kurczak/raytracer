@@ -6,11 +6,11 @@
 namespace RTC {
 class SolidBackground : public IBackground {
 private:
-    Color<float> color_;
+    LinearColor color_;
 
 public:
-    SolidBackground(Color<float> color);
+    SolidBackground(LinearColor color);
 
-    [[nodiscard]] Color<float> sample(const Ray& ray) const override;
+    [[nodiscard]] LinearColor sample(const Ray& ray) const override;
 };
 }

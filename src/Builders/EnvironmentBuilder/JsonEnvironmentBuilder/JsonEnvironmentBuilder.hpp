@@ -31,7 +31,7 @@ private:
         const nlohmann::json& jsonArray
     ) const;
 
-    [[nodiscard]] Color<float> parseNormalizedColor(
+    [[nodiscard]] LinearColor parseNormalizedColor(
         const nlohmann::json& jsonArray
     ) const;
 

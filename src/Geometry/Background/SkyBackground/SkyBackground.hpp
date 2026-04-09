@@ -5,6 +5,6 @@
 namespace RTC {
 class SkyBackground : public IBackground {
 public:
-    [[nodiscard]] Color<float> sample(const Ray& ray) const override;
+    [[nodiscard]] LinearColor sample(const Ray& ray) const override;
 };
 }

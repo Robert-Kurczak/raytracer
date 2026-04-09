@@ -9,7 +9,7 @@ MtlMaterial::MtlMaterial(const MtlParameters& parameters) :
 bool MtlMaterial::scatter(
     const Ray& ray,
     const HitData& hitData,
-    Color<float>& attenuation,
+    LinearColor& attenuation,
     Ray& scatteredRay
 ) const {
     (void) ray;

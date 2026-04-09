@@ -17,7 +17,7 @@ public:
     virtual bool scatter(
         const Ray& ray,
         const HitData& hitData,
-        Color<float>& attenuation,
+        LinearColor& attenuation,
         Ray& scatteredRay
     ) const = 0;
 };

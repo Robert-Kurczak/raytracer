@@ -6,6 +6,6 @@
 namespace RTC {
 struct LightData {
     Vector3<float> toLight;
-    Color<float> illumination;
+    LinearColor illumination;
 };
 }

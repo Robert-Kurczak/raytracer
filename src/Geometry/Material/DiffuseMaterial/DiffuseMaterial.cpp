@@ -25,7 +25,7 @@ DiffuseMaterial::DiffuseMaterial(MtlParameters parameters) :
 bool DiffuseMaterial::scatter(
     const Ray& ray,
     const HitData& hitData,
-    Color<float>& attenuation,
+    LinearColor& attenuation,
     Ray& scatteredRay
 ) const {
     attenuation = parameters_.baseColor;

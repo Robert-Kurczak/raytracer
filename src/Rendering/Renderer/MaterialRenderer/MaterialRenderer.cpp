@@ -37,11 +37,11 @@ bool MaterialRenderer::isInShadow(
     return scene.hitAny(shadowRay, interval);
 }
 
-Color<float> MaterialRenderer::getDirectLight(
+LinearColor MaterialRenderer::getDirectLight(
     const HitData& hitData,
     const Scene& scene
 ) const {
-    Color<float> illuminationColor = Color<float>::black();
+    LinearColor illuminationColor = LinearColor::black();
 
     for (const auto& light : scene.getLights()) {
         const LightData lightData = light->getSample(hitData.hitPoint);
@@ -61,8 +61,8 @@ Color<float> MaterialRenderer::getDirectLight(
     return illuminationColor;
 }
 
-Color<float> MaterialRenderer::getIndirectLight(
-    Color<float>& attenuation,
+LinearColor MaterialRenderer::getIndirectLight(
+    LinearColor& attenuation,
     const Ray& ray,
     const Interval<float>& interval,
     const HitData& hitData,
@@ -80,13 +80,13 @@ Color<float> MaterialRenderer::getIndirectLight(
         material->scatter(ray, hitData, attenuation, scatteredRay);
 
     if (!wasScattered) {
-        return Color<float> {.red = 0, .green = 0, .blue = 0};
+        return LinearColor {.red = 0, .green = 0, .blue = 0};
     }
 
     return traceRay(scatteredRay, scene, interval, statistics, depth - 1);
 }
 
-Color<float> MaterialRenderer::traceRay(
+LinearColor MaterialRenderer::traceRay(
     const Ray& ray,
     const Scene& scene,
     const Interval<float>& interval,
@@ -94,7 +94,7 @@ Color<float> MaterialRenderer::traceRay(
     uint32_t depth
 ) const {
     if (depth == 0) {
-        return Color<float>::black();
+        return LinearColor::black();
     }
 
     statistics.rays++;
@@ -107,11 +107,11 @@ Color<float> MaterialRenderer::traceRay(
         return background_->sample(ray);
     }
 
-    const Color<float> directLight = getDirectLight(hitData, scene);
+    const LinearColor directLight = getDirectLight(hitData, scene);
     statistics.shadowRays += scene.getLights().size();
 
-    Color<float> indirectLightAttenuation = Color<float>::black();
-    const Color<float> indirectLight = getIndirectLight(
+    LinearColor indirectLightAttenuation = LinearColor::black();
+    const LinearColor indirectLight = getIndirectLight(
         indirectLightAttenuation,
         ray,
         interval,
@@ -121,10 +121,10 @@ Color<float> MaterialRenderer::traceRay(
         depth
     );
 
-    const Color<float> resultColor =
+    const LinearColor resultColor =
         directLight + (indirectLight * indirectLightAttenuation);
 
-    return Color<float> {
+    return LinearColor {
         .red = std::min(resultColor.red, 1.0F),
         .green = std::min(resultColor.green, 1.0F),
         .blue = std::min(resultColor.blue, 1.0F)
@@ -145,12 +145,12 @@ RendererStatistics MaterialRenderer::renderSection(
         for (uint32_t x = xIndices.start; x < xIndices.end; x++) {
             const Point2<uint32_t> pixel {x, y};
 
-            Color<float> resultColor = Color<float>::black();
+            LinearColor resultColor = LinearColor::black();
 
             for (uint32_t i = 0; i < parameters_.samplesPerPixel; i++) {
                 Ray ray = camera.getRandomizedRay(pixel);
 
-                const Color<float> color = traceRay(
+                const LinearColor color = traceRay(
                     ray,
                     scene,
                     renderInterval,

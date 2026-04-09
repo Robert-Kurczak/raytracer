@@ -38,7 +38,7 @@ static constexpr DiffuseParameters DEFAULT_MATERIAL_PARAMETERS {
     .roughness = 0.0F
 };
 
-static constexpr Color<float> DEFAULT_BACKGROUND_COLOR {
+static constexpr LinearColor DEFAULT_BACKGROUND_COLOR {
     .red = 0.3F,
     .green = 0.3F,
     .blue = 0.3F
@@ -76,10 +76,10 @@ Color8Bit JsonEnvironmentBuilder::parse8BitColor(
     };
 }
 
-Color<float> JsonEnvironmentBuilder::parseNormalizedColor(
+LinearColor JsonEnvironmentBuilder::parseNormalizedColor(
     const nlohmann::json& jsonArray
 ) const {
-    return Color<float> {
+    return LinearColor {
         .red = float(jsonArray[0].get<uint8_t>()) / 255.0F,
         .green = float(jsonArray[1].get<uint8_t>()) / 255.0F,
         .blue = float(jsonArray[2].get<uint8_t>()) / 255.0F
@@ -97,7 +97,7 @@ std::unique_ptr<IBackground> JsonEnvironmentBuilder::parseBackground(
     }
 
     if (backgroundType == "solid") {
-        const Color<float> color =
+        const LinearColor color =
             parseNormalizedColor(jsonContent["background"]["color"]);
 
         return std::make_unique<SolidBackground>(color);

@@ -20,7 +20,7 @@ public:
     bool scatter(
         const Ray& ray,
         const HitData& hitData,
-        Color<float>& attenuation,
+        LinearColor& attenuation,
         Ray& scatteredRay
     ) const override;
 };

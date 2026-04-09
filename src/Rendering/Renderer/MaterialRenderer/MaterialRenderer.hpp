@@ -21,7 +21,7 @@ private:
     std::unique_ptr<IBackground> background_;
     MaterialRendererParameters parameters_;
 
-    [[nodiscard]] Color<float> getSkyAttenuation(
+    [[nodiscard]] LinearColor getSkyAttenuation(
         const Vector3<float>& rayDirectionVersor
     ) const;
 
@@ -31,13 +31,13 @@ private:
         const Scene& scene
     ) const;
 
-    [[nodiscard]] Color<float> getDirectLight(
+    [[nodiscard]] LinearColor getDirectLight(
         const HitData& hitData,
         const Scene& scene
     ) const;
 
-    [[nodiscard]] Color<float> getIndirectLight(
-        Color<float>& attenuation,
+    [[nodiscard]] LinearColor getIndirectLight(
+        LinearColor& attenuation,
         const Ray& ray,
         const Interval<float>& interval,
         const HitData& hitData,
@@ -46,7 +46,7 @@ private:
         uint32_t depth
     ) const;
 
-    [[nodiscard]] Color<float> traceRay(
+    [[nodiscard]] LinearColor traceRay(
         const Ray& ray,
         const Scene& scene,
         const Interval<float>& interval,
