@@ -10,7 +10,7 @@ Framebuffer::Framebuffer(const Vector2<uint32_t>& resolution) :
 
 void Framebuffer::setColorAt(
     const Point2<uint32_t>& point,
-    const Color8Bit& color
+    const LinearColor& color
 ) noexcept {
     const size_t index =
         point.getX() + (resolution_.getX() * point.getY());
@@ -22,11 +22,12 @@ void Framebuffer::setColorAt(
     return resolution_;
 }
 
-std::span<const Color8Bit> Framebuffer::getConstBuffer() const noexcept {
+std::span<const LinearColor> Framebuffer::
+    getConstBuffer() const noexcept {
     return buffer_;
 }
 
-const Color8Bit& Framebuffer::getColorAt(
+const LinearColor& Framebuffer::getColorAt(
     const Point2<uint32_t>& point
 ) const noexcept {
     const size_t index =

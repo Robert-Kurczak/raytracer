@@ -1,6 +1,5 @@
 #pragma once
 
-#include <algorithm>
 #include <cstdint>
 #include <ostream>
 #include <type_traits>
@@ -139,16 +138,4 @@ struct Color8BitTag {};
 
 using LinearColor = Color<float, Tags::LinearColorTag>;
 using Color8Bit = Color<uint8_t, Tags::Color8BitTag>;
-
-template<typename Type, typename Tag>
-requires std::is_arithmetic_v<Type>
-[[nodiscard]] Color8Bit castColorTo8Bit(
-    const Color<Type, Tag>& color
-) noexcept {
-    return {
-        .red = uint8_t(std::clamp(color.red, Type {0}, Type {255})),
-        .green = uint8_t(std::clamp(color.green, Type {0}, Type {255})),
-        .blue = uint8_t(std::clamp(color.blue, Type {0}, Type {255}))
-    };
-}
 }

@@ -124,11 +124,7 @@ LinearColor MaterialRenderer::traceRay(
     const LinearColor resultColor =
         directLight + (indirectLight * indirectLightAttenuation);
 
-    return LinearColor {
-        .red = std::min(resultColor.red, 1.0F),
-        .green = std::min(resultColor.green, 1.0F),
-        .blue = std::min(resultColor.blue, 1.0F)
-    };
+    return resultColor;
 }
 
 RendererStatistics MaterialRenderer::renderSection(
@@ -161,11 +157,9 @@ RendererStatistics MaterialRenderer::renderSection(
                 resultColor += color;
             }
 
-            const Color8Bit color8Bit = castColorTo8Bit(
-                resultColor * 255.0F / float(parameters_.samplesPerPixel)
-            );
+            resultColor /= float(parameters_.samplesPerPixel);
 
-            framebuffer.setColorAt(pixel, color8Bit);
+            framebuffer.setColorAt(pixel, resultColor);
         }
     }
 

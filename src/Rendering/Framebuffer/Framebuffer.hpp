@@ -12,22 +12,22 @@ namespace RTC {
 class Framebuffer {
 private:
     Vector2<uint32_t> resolution_;
-    std::vector<Color8Bit> buffer_;
+    std::vector<LinearColor> buffer_;
 
 public:
     Framebuffer(const Vector2<uint32_t>& resolution);
 
     void setColorAt(
         const Point2<uint32_t>& point,
-        const Color8Bit& color
+        const LinearColor& color
     ) noexcept;
 
     [[nodiscard]] const Vector2<uint32_t>& getResolution() const noexcept;
 
-    [[nodiscard]] std::span<const Color8Bit>
+    [[nodiscard]] std::span<const LinearColor>
     getConstBuffer() const noexcept;
 
-    [[nodiscard]] const Color8Bit& getColorAt(
+    [[nodiscard]] const LinearColor& getColorAt(
         const Point2<uint32_t>& point
     ) const noexcept;
 };
