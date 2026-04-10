@@ -18,6 +18,7 @@
 #include "Rendering/Renderer/IRenderer.hpp"
 #include "Rendering/Renderer/MaterialRenderer/MaterialRenderer.hpp"
 #include "Rendering/Renderer/MaterialRenderer/MaterialRendererParameters.hpp"
+#include "Rendering/Writer/ExrWriter/ExrWriter.hpp"
 #include "Rendering/Writer/PpmWriter/PpmWriter.hpp"
 #include "Utils/Logger/CoutLogger/CoutLogger.hpp"
 #include "Utils/Logger/ILogger.hpp"
@@ -25,6 +26,7 @@
 #include "World/Camera/CameraParameters.hpp"
 #include "nlohmann/json_fwd.hpp"
 
+#include <filesystem>
 #include <format>
 #include <fstream>
 #include <memory>
@@ -109,8 +111,14 @@ std::unique_ptr<IBackground> JsonEnvironmentBuilder::parseBackground(
 std::unique_ptr<IWriter> JsonEnvironmentBuilder::parseWriter(
     const nlohmann::json& jsonContent
 ) const {
-    const std::string outputPath =
-        jsonContent["outputPath"].get<std::string>();
+    const std::filesystem::path outputPath =
+        jsonContent["outputPath"].get<std::filesystem::path>();
+
+    const std::filesystem::path fileFormat = outputPath.extension();
+
+    if (fileFormat == ".exr") {
+        return std::make_unique<ExrWriter>(outputPath);
+    }
 
     return std::make_unique<PpmWriter>(outputPath);
 }

@@ -1,5 +1,5 @@
 {
-    "outputPath": "resources/renders/spot-scene.ppm",
+    "outputPath": "resources/renders/spot-scene.exr",
     "verbose": true,
     "renderer": {
         "samplesPerPixel": 100,

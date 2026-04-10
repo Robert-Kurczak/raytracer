@@ -76,7 +76,7 @@ def build_application(clean):
                 "--volume", f"{paths.REPOSITORY_ROOT_PATH}:{paths.REPOSITORY_ROOT_MOUNT_PATH}:z",
                 paths.BUILDER_IMAGE_NAME,
                 "sh", "-c",
-                f"{clean_command} && {cmake_command} && {build_command}"
+                full_command
             ],
             check=True
         )
