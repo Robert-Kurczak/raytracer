@@ -3,6 +3,7 @@
 #include "Core/Color/Color.hpp"
 #include "Core/Math/Vector.hpp"
 
+#include <cmath>
 #include <fstream>
 #include <utility>
 
@@ -17,18 +18,24 @@ void PpmWriter::writePpmHeader(
 }
 
 Color8Bit PpmWriter::castTo8Bit(LinearColor color) const {
-    const LinearColor mappedColor {
-        .red = color.red / (color.red + 1.0F),
-        .green = color.green / (color.green + 1.0F),
-        .blue = color.blue / (color.blue + 1.0F)
-    };
+    color.red = color.red / (color.red + 1.0F);
+    color.green = color.green / (color.green + 1.0F);
+    color.blue = color.blue / (color.blue + 1.0F);
 
-    const LinearColor scaledColor = mappedColor * 255.0F;
+    color.red = std::pow(color.red, 1.0F / 2.2F);
+    color.green = std::pow(color.green, 1.0F / 2.2F);
+    color.blue = std::pow(color.blue, 1.0F / 2.2F);
+
+    color.red = std::clamp(color.red, 0.0F, 1.0F);
+    color.green = std::clamp(color.green, 0.0F, 1.0F);
+    color.blue = std::clamp(color.blue, 0.0F, 1.0F);
+
+    color *= 255.0F;
 
     return {
-        .red = uint8_t(scaledColor.red),
-        .green = uint8_t(scaledColor.green),
-        .blue = uint8_t(scaledColor.blue)
+        .red = uint8_t(color.red),
+        .green = uint8_t(color.green),
+        .blue = uint8_t(color.blue)
     };
 }
 
