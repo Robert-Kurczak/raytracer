@@ -101,7 +101,7 @@ LinearColor MaterialRenderer::traceRay(
 
     HitData hitData {};
 
-    const bool objectHit = scene.hitRay(ray, interval, hitData);
+    const bool objectHit = scene.hitClosest(ray, interval, hitData);
 
     if (!objectHit) {
         return background_->sample(ray);

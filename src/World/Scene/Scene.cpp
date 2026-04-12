@@ -1,57 +1,33 @@
 #include "Scene.hpp"
 
+#include "Geometry/Hittable/IHittable.hpp"
+
+#include <memory>
+
 namespace RTC {
-void Scene::addObject(std::unique_ptr<IHittable> object) {
-    objects_.push_back(std::move(object));
-}
-
-void Scene::addLight(std::unique_ptr<ILight> light) {
-    lights_.push_back(std::move(light));
-}
-
-const std::vector<std::unique_ptr<IHittable>>& Scene::getObjects() const {
-    return objects_;
-}
+Scene::Scene(
+    std::unique_ptr<IHittable> sceneRoot,
+    std::vector<std::unique_ptr<ILight>> lights
+) :
+    sceneRoot_(std::move(sceneRoot)),
+    lights_(std::move(lights)) {}
 
 const std::vector<std::unique_ptr<ILight>>& Scene::getLights() const {
     return lights_;
 }
 
-bool Scene::hitRay(
+bool Scene::hitClosest(
     const Ray& ray,
     const Interval<float>& interval,
     HitData& hitData
 ) const {
-    Interval<float> tempInterval = interval;
-    HitData tempHitData {};
-    bool hitAnything = false;
-
-    for (const auto& object : objects_) {
-        const bool wasObjectHit =
-            object->isHit(ray, tempInterval, tempHitData);
-
-        if (wasObjectHit) {
-            hitAnything = true;
-            tempInterval.end = tempHitData.rayT;
-            hitData = tempHitData;
-        }
-    }
-
-    return hitAnything;
+    return sceneRoot_->hitClosest(ray, interval, hitData);
 }
 
 bool Scene::hitAny(
     const Ray& ray,
     const Interval<float>& interval
 ) const {
-    HitData hitData {};
-
-    for (const auto& object : objects_) {
-        if (object->isHit(ray, interval, hitData)) {
-            return true;
-        }
-    }
-
-    return false;
+    return sceneRoot_->hitAny(ray, interval);
 }
 }

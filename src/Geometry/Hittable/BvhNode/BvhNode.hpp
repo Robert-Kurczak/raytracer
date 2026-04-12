@@ -22,10 +22,15 @@ public:
     [[nodiscard]] const AxisAlignedBoundingBox&
     getBoundingBox() const override;
 
-    bool isHit(
+    bool hitClosest(
         const Ray& ray,
         const Interval<float>& interval,
         HitData& hitData
+    ) const override;
+
+    [[nodiscard]] bool hitAny(
+        const Ray& ray,
+        const Interval<float>& interval
     ) const override;
 };
 }

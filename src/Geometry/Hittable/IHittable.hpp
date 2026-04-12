@@ -18,10 +18,15 @@ public:
     [[nodiscard]] virtual const AxisAlignedBoundingBox&
     getBoundingBox() const = 0;
 
-    virtual bool isHit(
+    virtual bool hitClosest(
         const Ray& ray,
         const Interval<float>& interval,
         HitData& hitData
+    ) const = 0;
+
+    [[nodiscard]] virtual bool hitAny(
+        const Ray& ray,
+        const Interval<float>& interval
     ) const = 0;
 };
 }

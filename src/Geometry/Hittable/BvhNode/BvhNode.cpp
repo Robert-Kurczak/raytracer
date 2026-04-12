@@ -16,24 +16,44 @@ const AxisAlignedBoundingBox& BvhNode::getBoundingBox() const {
     return boundingBox_;
 }
 
-bool BvhNode::isHit(
+bool BvhNode::hitClosest(
     const Ray& ray,
     const Interval<float>& interval,
     HitData& hitData
 ) const {
-    if (!boundingBox_.isHit(ray, interval)) {
+    if (not boundingBox_.isHit(ray, interval)) {
         return false;
     }
 
-    const bool hitLeft = left_->isHit(ray, interval, hitData);
+    const bool hitLeft = left_->hitClosest(ray, interval, hitData);
 
     Interval<float> rightRayInterval = interval;
     if (hitLeft) {
         rightRayInterval.end = hitData.rayT;
     }
 
-    const bool hitRight = right_->isHit(ray, rightRayInterval, hitData);
+    const bool hitRight =
+        right_->hitClosest(ray, rightRayInterval, hitData);
 
     return hitLeft || hitRight;
+}
+
+bool BvhNode::hitAny(
+    const Ray& ray,
+    const Interval<float>& interval
+) const {
+    if (not boundingBox_.isHit(ray, interval)) {
+        return false;
+    }
+
+    const bool hitLeft = left_->hitAny(ray, interval);
+
+    if (hitLeft) {
+        return true;
+    }
+
+    const bool hitRight = right_->hitAny(ray, interval);
+
+    return hitRight;
 }
 }

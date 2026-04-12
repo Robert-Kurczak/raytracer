@@ -12,20 +12,19 @@
 namespace RTC {
 class Scene {
 private:
-    std::vector<std::unique_ptr<IHittable>> objects_;
+    std::unique_ptr<IHittable> sceneRoot_;
     std::vector<std::unique_ptr<ILight>> lights_;
 
 public:
-    void addObject(std::unique_ptr<IHittable> object);
-    void addLight(std::unique_ptr<ILight> light);
-
-    [[nodiscard]] const std::vector<std::unique_ptr<IHittable>>&
-    getObjects() const;
+    Scene(
+        std::unique_ptr<IHittable> sceneRoot,
+        std::vector<std::unique_ptr<ILight>> lights
+    );
 
     [[nodiscard]] const std::vector<std::unique_ptr<ILight>>&
     getLights() const;
 
-    bool hitRay(
+    bool hitClosest(
         const Ray& ray,
         const Interval<float>& interval,
         HitData& hitData
@@ -36,4 +35,5 @@ public:
         const Interval<float>& interval
     ) const;
 };
+
 }

@@ -13,6 +13,14 @@ private:
     const float radiusSquared_ = 0.0F;
     const AxisAlignedBoundingBox boundingBox_;
 
+    struct QuadraticResult {
+        bool hasSolution = false;
+        float t1 = 0.0F;
+        float t2 = 0.0F;
+    };
+
+    [[nodiscard]] QuadraticResult solveQuadratic(const Ray& ray) const;
+
     [[nodiscard]] AxisAlignedBoundingBox createBoundingBox(
         const Point3<float>& center,
         float radius
@@ -30,10 +38,15 @@ public:
     [[nodiscard]] const AxisAlignedBoundingBox&
     getBoundingBox() const override;
 
-    bool isHit(
+    bool hitClosest(
         const Ray& ray,
         const Interval<float>& interval,
         HitData& hitData
+    ) const override;
+
+    [[nodiscard]] bool hitAny(
+        const Ray& ray,
+        const Interval<float>& interval
     ) const override;
 };
 }

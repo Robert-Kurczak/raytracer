@@ -9,6 +9,52 @@
 #include <memory>
 
 namespace RTC {
+Triangle::MollerTrumboreResult Triangle::solveMollerTrumbore(
+    const Ray& ray
+) const {
+    const Vector3<float> reversedDirection = ray.getDirection() * -1.0F;
+    const Vector3<float> crossedEdge2 =
+        getCrossProduct(edge2_, reversedDirection);
+    const Vector3<float> solution = ray.getOrigin() - vertexC_;
+
+    const Interval<float> unitInterval {0.0F, 1.0F};
+    const float mainDeterminant = getDotProduct(edge1_, crossedEdge2);
+
+    if (isCloseToZero(mainDeterminant)) {
+        return MollerTrumboreResult {};
+    }
+
+    const float weight1Determinant =
+        getDotProduct(solution, crossedEdge2);
+
+    const float weight1 = weight1Determinant / mainDeterminant;
+
+    if (not unitInterval.contains(weight1)) {
+        return MollerTrumboreResult {};
+    }
+
+    const float weight2Determinant = getDotProduct(
+        edge1_, getCrossProduct(solution, reversedDirection)
+    );
+
+    const float weight2 = weight2Determinant / mainDeterminant;
+
+    if (not unitInterval.contains(weight2)) {
+        return MollerTrumboreResult {};
+    }
+
+    if (weight1 + weight2 > 1) {
+        return MollerTrumboreResult {};
+    }
+
+    const float rayTDeterminant =
+        getDotProduct(edge1_, getCrossProduct(edge2_, solution));
+
+    const float rayT = rayTDeterminant / mainDeterminant;
+
+    return MollerTrumboreResult {.hasSolution = true, .t0 = rayT};
+}
+
 [[nodiscard]] AxisAlignedBoundingBox Triangle::createBoundingBox(
     const Point3<float>& vertexA,
     const Point3<float>& vertexB,
@@ -73,56 +119,31 @@ Triangle::Triangle(
     return boundingBox_;
 }
 
-bool Triangle::isHit(
+bool Triangle::hitClosest(
     const Ray& ray,
     const Interval<float>& interval,
     HitData& hitData
 ) const {
-    const Vector3<float> reversedDirection = ray.getDirection() * -1.0F;
-    const Vector3<float> crossedEdge2 =
-        getCrossProduct(edge2_, reversedDirection);
-    const Vector3<float> solution = ray.getOrigin() - vertexC_;
+    const MollerTrumboreResult result = solveMollerTrumbore(ray);
 
-    const Interval<float> unitInterval {0.0F, 1.0F};
-    const float mainDeterminant = getDotProduct(edge1_, crossedEdge2);
-
-    if (isCloseToZero(mainDeterminant)) {
+    if (not result.hasSolution) {
         return false;
     }
 
-    const float weight1Determinant =
-        getDotProduct(solution, crossedEdge2);
-
-    const float weight1 = weight1Determinant / mainDeterminant;
-
-    if (not unitInterval.contains(weight1)) {
-        return false;
-    }
-
-    const float weight2Determinant = getDotProduct(
-        edge1_, getCrossProduct(solution, reversedDirection)
-    );
-
-    const float weight2 = weight2Determinant / mainDeterminant;
-
-    if (not unitInterval.contains(weight2)) {
-        return false;
-    }
-
-    if (weight1 + weight2 > 1) {
-        return false;
-    }
-
-    const float rayTDeterminant =
-        getDotProduct(edge1_, getCrossProduct(edge2_, solution));
-
-    const float rayT = rayTDeterminant / mainDeterminant;
-
-    if (interval.contains(rayT)) {
-        updateHitData(rayT, ray, hitData);
+    if (interval.contains(result.t0)) {
+        updateHitData(result.t0, ray, hitData);
         return true;
     }
 
     return false;
+}
+
+bool Triangle::hitAny(
+    const Ray& ray,
+    const Interval<float>& interval
+) const {
+    const MollerTrumboreResult result = solveMollerTrumbore(ray);
+
+    return interval.contains(result.t0);
 }
 }

@@ -19,6 +19,15 @@ private:
     const Vector3<float> edge2_;
     const Vector3<float> outwardNormal_;
 
+    struct MollerTrumboreResult {
+        bool hasSolution = false;
+        float t0 = 0.0;
+    };
+
+    [[nodiscard]] MollerTrumboreResult solveMollerTrumbore(
+        const Ray& ray
+    ) const;
+
     [[nodiscard]] AxisAlignedBoundingBox createBoundingBox(
         const Point3<float>& vertexA,
         const Point3<float>& vertexB,
@@ -42,10 +51,15 @@ public:
     [[nodiscard]] const AxisAlignedBoundingBox&
     getBoundingBox() const override;
 
-    bool isHit(
+    bool hitClosest(
         const Ray& ray,
         const Interval<float>& interval,
         HitData& hitData
+    ) const override;
+
+    [[nodiscard]] bool hitAny(
+        const Ray& ray,
+        const Interval<float>& interval
     ) const override;
 };
 }

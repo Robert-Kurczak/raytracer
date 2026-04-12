@@ -4,6 +4,29 @@
 #include "Geometry/BoundingVolume/AxisAlignedBoundingBox/AxisAlignedBoundingBox.hpp"
 
 namespace RTC {
+
+Sphere::QuadraticResult Sphere::solveQuadratic(const Ray& ray) const {
+    const Vector3<float> rayDirection = ray.getDirection();
+    const Vector3<float> rayDisplacement = center_ - ray.getOrigin();
+
+    const float aTerm = rayDirection.getSquaredLength();
+    const float hTerm = getDotProduct(rayDirection, rayDisplacement);
+    const float cTerm =
+        rayDisplacement.getSquaredLength() - radiusSquared_;
+
+    const float quadraticDelta = (hTerm * hTerm) - (aTerm * cTerm);
+
+    if (quadraticDelta < 0) {
+        return QuadraticResult {};
+    }
+
+    const float quadraticDeltaSqrt = std::sqrt(quadraticDelta);
+    const float t1 = (hTerm - quadraticDeltaSqrt) / aTerm;
+    const float t2 = (hTerm + quadraticDeltaSqrt) / aTerm;
+
+    return QuadraticResult {.hasSolution = true, .t1 = t1, .t2 = t2};
+}
+
 AxisAlignedBoundingBox Sphere::createBoundingBox(
     const Point3<float>& center,
     float radius
@@ -45,42 +68,44 @@ const AxisAlignedBoundingBox& Sphere::getBoundingBox() const {
     return boundingBox_;
 }
 
-bool Sphere::isHit(
+bool Sphere::hitClosest(
     const Ray& ray,
     const Interval<float>& interval,
     HitData& hitData
 ) const {
-    const Vector3<float> rayDirection = ray.getDirection();
-    const Vector3<float> rayDisplacement = center_ - ray.getOrigin();
+    const QuadraticResult result = solveQuadratic(ray);
 
-    const float aTerm = rayDirection.getSquaredLength();
-    const float hTerm = getDotProduct(rayDirection, rayDisplacement);
-    const float cTerm =
-        rayDisplacement.getSquaredLength() - radiusSquared_;
-
-    const float quadraticDelta = (hTerm * hTerm) - (aTerm * cTerm);
-
-    if (quadraticDelta < 0) {
+    if (not result.hasSolution) {
         return false;
     }
 
-    const float quadraticDeltaSqrt = std::sqrt(quadraticDelta);
-
-    const float minT = (hTerm - quadraticDeltaSqrt) / aTerm;
-
-    if (interval.contains(minT)) {
-        updateHitData(minT, ray, hitData);
+    if (interval.contains(result.t1)) {
+        updateHitData(result.t1, ray, hitData);
         return true;
     }
 
-    const float maxT = (hTerm + quadraticDeltaSqrt) / aTerm;
-
-    if (interval.contains(maxT)) {
-        updateHitData(maxT, ray, hitData);
+    if (interval.contains(result.t2)) {
+        updateHitData(result.t2, ray, hitData);
         return true;
     }
 
     return false;
+}
+
+bool Sphere::hitAny(
+    const Ray& ray,
+    const Interval<float>& interval
+) const {
+    const QuadraticResult result = solveQuadratic(ray);
+
+    if (not result.hasSolution) {
+        return false;
+    }
+
+    const bool solutionInInterval =
+        interval.contains(result.t1) || interval.contains(result.t2);
+
+    return solutionInInterval;
 }
 
 }

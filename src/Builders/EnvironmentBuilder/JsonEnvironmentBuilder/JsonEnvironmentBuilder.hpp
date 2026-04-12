@@ -6,6 +6,7 @@
 #include "Core/Color/Color.hpp"
 #include "Core/Math/Point.hpp"
 #include "Geometry/Background/IBackground.hpp"
+#include "Geometry/Light/ILight.hpp"
 #include "Rendering/Renderer/IRenderer.hpp"
 #include "Rendering/Writer/IWriter.hpp"
 #include "Utils/Logger/ILogger.hpp"
@@ -59,8 +60,14 @@ private:
         const nlohmann::json& jsonContent
     ) const;
 
-    void parseLights(
-        Scene& scene,
+    [[nodiscard]] std::vector<std::unique_ptr<IHittable>>
+    parseSceneObjects(
+        IMeshBuilder& meshBuilder,
+        IBvhBuilder& bvhBuilder,
+        const nlohmann::json& jsonContent
+    ) const;
+
+    [[nodiscard]] std::vector<std::unique_ptr<ILight>> parseSceneLights(
         const nlohmann::json& jsonContent
     ) const;
 

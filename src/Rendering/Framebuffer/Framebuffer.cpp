@@ -17,8 +17,7 @@ void Framebuffer::setColorAt(
     buffer_.at(index) = color;
 }
 
-[[nodiscard]] const Vector2<uint32_t>& Framebuffer::
-    getResolution() const noexcept {
+const Vector2<uint32_t>& Framebuffer::getResolution() const noexcept {
     return resolution_;
 }
 
@@ -33,6 +32,6 @@ const LinearColor& Framebuffer::getColorAt(
     const size_t index =
         point.getX() + (resolution_.getX() * point.getY());
 
-    return buffer_.at(index);
+    return buffer_[index];
 }
 }
