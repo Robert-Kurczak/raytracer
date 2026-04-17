@@ -25,6 +25,7 @@ DEFAULT_OUTPUT_PATH = paths.RENDERS_DIRECTORY_PATH.joinpath(
 class Args:
     "Command line arguments"
 
+    object_path: str
     camera_position: list[float]
     camera_direction: list[float]
     up_direction: list[float]
@@ -47,6 +48,13 @@ def modify_scene(scene: dict, args: Args):
 
     scene["outputPath"] = DEFAULT_OUTPUT_PATH.as_posix()
     scene["verbose"] = True
+
+    if args.object_path:
+        scene["objects"] = [{
+            "type": "obj",
+            "filePath": args.object_path,
+            "position": [0, 0, 0]
+        }]
 
     if args.camera_position:
         scene["camera"]["position"] = args.camera_position
@@ -102,7 +110,7 @@ def render_scene(scene: dict):
         try:
             subprocess.run(
                 [paths.APPLICATION_BINARY_PATH, temp_file.name],
-                cwd=paths.REPOSITORY_ROOT_PATH,
+                # cwd=paths.REPOSITORY_ROOT_PATH,
                 check=True
             )
         except subprocess.CalledProcessError:
@@ -118,6 +126,13 @@ def parse_arguments() -> Args:
         prog="Raytracer benchmark",
         description="Renders sample scene in verbose mode"
                     "with easily modifiable parameters via command-line"
+    )
+
+    parser.add_argument(
+        "-in",
+        dest="in_",
+        type=str,
+        help="Path to .obj file"
     )
 
     parser.add_argument(
@@ -191,6 +206,7 @@ def parse_arguments() -> Args:
     parsed_args = parser.parse_args()
 
     return Args(
+        object_path = parsed_args.in_,
         camera_position = parsed_args.vp,
         camera_direction = parsed_args.vd,
         up_direction = parsed_args.up,
