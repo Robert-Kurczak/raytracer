@@ -2,6 +2,7 @@
 
 #include "Core/Color/Color.hpp"
 #include "Geometry/Light/ILight.hpp"
+#include "Geometry/Light/LightSample.hpp"
 
 namespace RTC {
 class PointLight : public ILight {
@@ -23,8 +24,9 @@ public:
         float decay
     );
 
-    [[nodiscard]] LightData getSample(
-        const Point3<float>& worldPosition
+    [[nodiscard]] LightSample getSample(
+        const Point3<float>& worldPosition,
+        const Vector3<float>& worldNormal
     ) const override;
 };
 }

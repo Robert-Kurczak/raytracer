@@ -2,7 +2,7 @@
     "outputPath": "resources/renders/cornell-original-scene.exr",
     "verbose": true,
     "renderer": {
-        "samplesPerPixel": 100,
+        "samplesPerPixel": 20,
         "scatterRecursionDepth": 10
     },
     "camera": {
@@ -44,20 +44,5 @@
             ]
         }
     ],
-    "lights": [
-        {
-            "type": "point",
-            "position": [
-                0.0,
-                0.5,
-                -2.0
-            ],
-            "color": [
-                65,
-                65,
-                65
-            ],
-            "decay": 1
-        }
-    ]
+    "lights": []
 }

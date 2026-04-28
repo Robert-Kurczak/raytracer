@@ -16,6 +16,11 @@ struct Color {
         return Color {Type {0}, Type {0}, Type {0}};
     }
 
+    [[nodiscard]] bool isBlack() const noexcept {
+        constexpr float epsilon = 1e-6;
+        return red + green + blue <= epsilon;
+    }
+
     Color& operator*=(const Type& scalar) noexcept {
         red *= scalar;
         green *= scalar;
@@ -98,6 +103,16 @@ requires std::is_arithmetic_v<Type>
         color1.green * color2.green,
         color1.blue * color2.blue
     };
+}
+
+template<typename Type, typename Tag>
+requires std::is_arithmetic_v<Type>
+[[nodiscard]] constexpr bool operator==(
+    const Color<Type, Tag>& color1,
+    const Color<Type, Tag>& color2
+) noexcept {
+    return color1.red == color2.red and color1.green == color2.green and
+           color2.blue == color2.blue;
 }
 
 template<typename Type, typename Tag>

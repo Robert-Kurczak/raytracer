@@ -5,14 +5,14 @@
 #include "Core/Math/Vector.hpp"
 #include "Core/Ray/Ray.hpp"
 #include "Geometry/Hittable/HitData.hpp"
-#include "Geometry/Light/LightData.hpp"
-#include "Geometry/Material/IMaterial.hpp"
+#include "Geometry/Light/LightSample.hpp"
 #include "Rendering/Renderer/RendererStatistics.hpp"
 #include "Utils/Logger/ILogger.hpp"
 #include "World/Scene/Scene.hpp"
 
 #include <format>
 #include <memory>
+#include <numbers>
 #include <thread>
 #include <utility>
 
@@ -21,17 +21,18 @@ static constexpr float epsilon = 0.001F;
 
 bool MaterialRenderer::isInShadow(
     const HitData& hitData,
-    const LightData& lightData,
+    const LightSample& lightSample,
     const Scene& scene
 ) const {
     const Point3<float> origin =
         hitData.hitPoint + hitData.hitNormal * epsilon;
 
-    const Ray shadowRay {origin, lightData.toLight};
+    const Ray shadowRay {origin, lightSample.toLight};
 
     const Interval<float> interval {
-        epsilon, // ray origin is at hit point
-        1.0F // ray end (light) is at the end of unnormalized direction
+        epsilon,       // ray origin is at hit point
+        1.0F - epsilon // ray end (light) is at the end of unnormalized
+                       // direction
     };
 
     return scene.hitAny(shadowRay, interval);
@@ -44,21 +45,18 @@ LinearColor MaterialRenderer::getDirectLight(
     LinearColor illuminationColor = LinearColor::black();
 
     for (const auto& light : scene.getLights()) {
-        const LightData lightData = light->getSample(hitData.hitPoint);
+        const LightSample lightSample =
+            light->getSample(hitData.hitPoint, hitData.hitNormal);
 
-        if (isInShadow(hitData, lightData, scene)) {
+        if (isInShadow(hitData, lightSample, scene)) {
             continue;
         }
 
-        const float cosinus = getDotProduct(
-            hitData.hitNormal, lightData.toLight.getNormalized()
-        );
-
-        const float intensity = std::max(cosinus, 0.0F);
-        illuminationColor += lightData.illumination * intensity;
+        illuminationColor += lightSample.intensity;
     }
 
-    return illuminationColor;
+    const LinearColor& baseColor = hitData.material->getBaseColor();
+    return illuminationColor * baseColor / float(std::numbers::pi);
 }
 
 LinearColor MaterialRenderer::getIndirectLight(
@@ -72,15 +70,12 @@ LinearColor MaterialRenderer::getIndirectLight(
 ) const {
     Ray scatteredRay {};
 
-    const std::shared_ptr<IMaterial> material =
-        hitData.material ? hitData.material
-                         : parameters_.defaultMaterial_;
-
-    const bool wasScattered =
-        material->scatter(ray, hitData, attenuation, scatteredRay);
+    const bool wasScattered = hitData.material->scatter(
+        ray, hitData, attenuation, scatteredRay
+    );
 
     if (!wasScattered) {
-        return LinearColor {.red = 0, .green = 0, .blue = 0};
+        return hitData.material->getEmission();
     }
 
     return traceRay(scatteredRay, scene, interval, statistics, depth - 1);
@@ -103,9 +98,19 @@ LinearColor MaterialRenderer::traceRay(
 
     const bool objectHit = scene.hitClosest(ray, interval, hitData);
 
-    if (!objectHit) {
+    if (not objectHit) {
         return background_->sample(ray);
     }
+
+    if (not hitData.material) {
+        hitData.material = parameters_.defaultMaterial_;
+    }
+
+    const bool isRayPrimary = depth == parameters_.scatterRecursionDepth;
+
+    const LinearColor emittedLight = isRayPrimary
+                                         ? hitData.material->getEmission()
+                                         : LinearColor::black();
 
     const LinearColor directLight = getDirectLight(hitData, scene);
     statistics.shadowRays += scene.getLights().size();
@@ -122,7 +127,8 @@ LinearColor MaterialRenderer::traceRay(
     );
 
     const LinearColor resultColor =
-        directLight + (indirectLight * indirectLightAttenuation);
+        emittedLight + directLight +
+        (indirectLight * indirectLightAttenuation);
 
     return resultColor;
 }
@@ -172,9 +178,15 @@ std::vector<RendererStatistics> MaterialRenderer::renderAll(
     Framebuffer& framebuffer
 ) const {
     const uint32_t threadCount = std::thread::hardware_concurrency();
+
     logger_->log(
         LogLevel::Info,
         std::format("Rendering on {} threads", threadCount)
+    );
+
+    logger_->log(
+        LogLevel::Info,
+        std::format("Total light sources: {}", scene.getLights().size())
     );
 
     const Vector2<uint32_t> resolution = framebuffer.getResolution();

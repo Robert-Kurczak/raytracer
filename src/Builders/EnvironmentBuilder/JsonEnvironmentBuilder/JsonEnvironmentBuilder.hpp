@@ -64,10 +64,12 @@ private:
     parseSceneObjects(
         IMeshBuilder& meshBuilder,
         IBvhBuilder& bvhBuilder,
+        std::vector<std::unique_ptr<ILight>>& sceneLights,
         const nlohmann::json& jsonContent
     ) const;
 
-    [[nodiscard]] std::vector<std::unique_ptr<ILight>> parseSceneLights(
+    void parseSceneLights(
+        std::vector<std::unique_ptr<ILight>>& sceneLights,
         const nlohmann::json& jsonContent
     ) const;
 

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Core/Math/Point.hpp"
-#include "Geometry/Light/LightData.hpp"
+#include "Geometry/Light/LightSample.hpp"
 
 namespace RTC {
 class Scene;
@@ -15,8 +15,9 @@ public:
     ILight operator=(ILight&&) = delete;
     virtual ~ILight() = default;
 
-    [[nodiscard]] virtual LightData getSample(
-        const Point3<float>& worldPosition
+    [[nodiscard]] virtual LightSample getSample(
+        const Point3<float>& worldPosition,
+        const Vector3<float>& worldNormal
     ) const = 0;
 };
 }

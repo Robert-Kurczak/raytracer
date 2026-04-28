@@ -2,7 +2,6 @@
 
 #include "Core/Math/Vector.hpp"
 #include "Geometry/Material/DiffuseMaterial/DiffuseParameters.hpp"
-#include "Geometry/Material/MtlMaterial/MtlParameters.hpp"
 
 namespace RTC {
 static constexpr float epsilon = 0.001F;
@@ -12,6 +11,7 @@ DiffuseParameters DiffuseMaterial::convertFromMtl(
 ) const {
     return DiffuseParameters {
         .baseColor = parameters.diffuse,
+        .emission = parameters.emission,
         .roughness = std::sqrt(2.0F / (parameters.shininess + 2))
     };
 }
@@ -36,9 +36,8 @@ bool DiffuseMaterial::scatter(
     const Vector3<float> specularDirection =
         ray.getDirection().getReflected(hitData.hitNormal);
 
-    const Vector3 reflectedDirection = interpolateLineary(
-        specularDirection, diffusedDirection, parameters_.roughness
-    );
+    const Vector3 reflectedDirection =
+        interpolateLineary(specularDirection, diffusedDirection, 1);
 
     const Point3 reflectedOrigin =
         hitData.hitPoint + epsilon * hitData.hitNormal;
@@ -47,5 +46,13 @@ bool DiffuseMaterial::scatter(
 
     scatteredRay = reflectedRay;
     return true;
+}
+
+const LinearColor& DiffuseMaterial::getBaseColor() const {
+    return parameters_.baseColor;
+}
+
+const LinearColor& DiffuseMaterial::getEmission() const {
+    return parameters_.emission;
 }
 }

@@ -20,5 +20,8 @@ public:
         LinearColor& attenuation,
         Ray& scatteredRay
     ) const = 0;
+
+    [[nodiscard]] virtual const LinearColor& getBaseColor() const = 0;
+    [[nodiscard]] virtual const LinearColor& getEmission() const = 0;
 };
 }

@@ -6,7 +6,6 @@
 #include "Geometry/Background/IBackground.hpp"
 #include "Geometry/Hittable/HitData.hpp"
 #include "Geometry/Light/ILight.hpp"
-#include "Geometry/Light/LightData.hpp"
 #include "Rendering/Framebuffer/Framebuffer.hpp"
 #include "Rendering/Renderer/MaterialRenderer/MaterialRendererParameters.hpp"
 #include "Rendering/Renderer/RendererStatistics.hpp"
@@ -27,7 +26,7 @@ private:
 
     [[nodiscard]] bool isInShadow(
         const HitData& hitData,
-        const LightData& lightData,
+        const LightSample& lightSample,
         const Scene& scene
     ) const;
 

@@ -1,6 +1,9 @@
 #pragma once
 
 #include "../IMeshBuilder.hpp"
+#include "Builders/MeshBuilder/MeshBuilderResult.hpp"
+#include "Geometry/Hittable/IHittable.hpp"
+#include "Geometry/Light/ILight.hpp"
 #include "Geometry/Material/IMaterial.hpp"
 #include "Utils/Logger/ILogger.hpp"
 
@@ -13,6 +16,9 @@
 namespace RTC {
 using MaterialsMap =
     std::unordered_map<std::string, std::shared_ptr<IMaterial>>;
+
+using TriangleBuffer = std::vector<std::unique_ptr<IHittable>>;
+using AreaLightBuffer = std::vector<std::unique_ptr<ILight>>;
 
 class ObjMeshBuilder : public IMeshBuilder {
 private:
@@ -47,12 +53,13 @@ private:
 
     void parseFace(
         TriangleBuffer& triangleBuffer,
+        AreaLightBuffer& areaLightBuffer,
         const std::shared_ptr<IMaterial>& material,
         const std::vector<Point3<float>>& vertexBuffer,
         std::stringstream& lineStream
     ) const;
 
-    [[nodiscard]] TriangleBuffer buildBuffer(
+    [[nodiscard]] MeshBuilderResult parseMesh(
         const std::filesystem::path& path,
         const Vector3<float>& position
     ) const;
@@ -60,7 +67,7 @@ private:
 public:
     ObjMeshBuilder(std::shared_ptr<ILogger> logger);
 
-    [[nodiscard]] TriangleBuffer buildFromFile(
+    [[nodiscard]] MeshBuilderResult buildFromFile(
         const std::filesystem::path& path,
         const Vector3<float>& position
     ) const override;

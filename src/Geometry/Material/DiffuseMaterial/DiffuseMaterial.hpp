@@ -1,8 +1,9 @@
 #pragma once
 
+#include "Core/Color/Color.hpp"
 #include "Geometry/Material/DiffuseMaterial/DiffuseParameters.hpp"
+#include "Geometry/Material/DiffuseMaterial/MtlParameters.hpp"
 #include "Geometry/Material/IMaterial.hpp"
-#include "Geometry/Material/MtlMaterial/MtlParameters.hpp"
 
 namespace RTC {
 class DiffuseMaterial : public IMaterial {
@@ -23,5 +24,8 @@ public:
         LinearColor& attenuation,
         Ray& scatteredRay
     ) const override;
+
+    [[nodiscard]] const LinearColor& getBaseColor() const override;
+    [[nodiscard]] const LinearColor& getEmission() const override;
 };
 }

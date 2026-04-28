@@ -1,7 +1,7 @@
 #include "PointLight.hpp"
 
 #include "Core/Math/Vector.hpp"
-#include "Geometry/Light/LightData.hpp"
+#include "Geometry/Light/LightSample.hpp"
 
 namespace RTC {
 static constexpr float epsilon = 0.001;
@@ -30,13 +30,14 @@ PointLight::PointLight(
         decay
     ) {}
 
-LightData PointLight::getSample(
-    const Point3<float>& worldPosition
+LightSample PointLight::getSample(
+    const Point3<float>& worldPosition,
+    const Vector3<float>& worldNormal
 ) const {
     const Vector3<float> toLight = position_ - worldPosition;
     const float distanceSquared = toLight.getSquaredLength();
-    LinearColor illumination = color_ / (distanceSquared * decay_);
+    const LinearColor intensity = color_ / (distanceSquared * decay_);
 
-    return LightData {.toLight = toLight, .illumination = illumination};
+    return LightSample {.intensity = intensity, .toLight = toLight};
 }
 }

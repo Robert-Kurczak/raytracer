@@ -4,6 +4,7 @@
 #include "Builders/BvhBuilder/BvhBuilder.hpp"
 #include "Builders/BvhBuilder/IBvhBuilder.hpp"
 #include "Builders/MeshBuilder/IMeshBuilder.hpp"
+#include "Builders/MeshBuilder/MeshBuilderResult.hpp"
 #include "Builders/MeshBuilder/ObjMeshBuilder/ObjMeshBuilder.hpp"
 #include "Core/Color/Color.hpp"
 #include "Geometry/Background/IBackground.hpp"
@@ -26,6 +27,7 @@
 #include "World/Camera/CameraParameters.hpp"
 #include "nlohmann/json_fwd.hpp"
 
+#include <algorithm>
 #include <filesystem>
 #include <format>
 #include <fstream>
@@ -168,6 +170,7 @@ std::vector<std::unique_ptr<IHittable>> JsonEnvironmentBuilder::
     parseSceneObjects(
         IMeshBuilder& meshBuilder,
         IBvhBuilder& bvhBuilder,
+        std::vector<std::unique_ptr<ILight>>& sceneLights,
         const nlohmann::json& jsonContent
     ) const {
     const auto& jsonSceneObjects = jsonContent["objects"];
@@ -184,13 +187,19 @@ std::vector<std::unique_ptr<IHittable>> JsonEnvironmentBuilder::
             const std::string filePath =
                 jsonObject["filePath"].get<std::string>();
 
-            IMeshBuilder::TriangleBuffer mesh =
+            MeshBuilderResult meshParsingResult =
                 meshBuilder.buildFromFile(filePath, objectPosition);
 
             std::unique_ptr<IHittable> bvhMesh =
-                bvhBuilder.build(std::move(mesh));
+                bvhBuilder.build(std::move(meshParsingResult.triangles));
 
             sceneObjects.emplace_back(std::move(bvhMesh));
+
+            std::ranges::move(
+                meshParsingResult.areaLights,
+                std::back_inserter(sceneLights)
+            );
+
         } else if (objectType == "sphere") {
             const float radius = jsonObject["radius"].get<float>();
 
@@ -204,10 +213,11 @@ std::vector<std::unique_ptr<IHittable>> JsonEnvironmentBuilder::
     return sceneObjects;
 }
 
-std::vector<std::unique_ptr<ILight>> JsonEnvironmentBuilder::
-    parseSceneLights(const nlohmann::json& jsonContent) const {
+void JsonEnvironmentBuilder::parseSceneLights(
+    std::vector<std::unique_ptr<ILight>>& sceneLights,
+    const nlohmann::json& jsonContent
+) const {
     const auto& jsonSceneLights = jsonContent["lights"];
-    std::vector<std::unique_ptr<ILight>> sceneLights;
 
     for (const auto& jsonLight : jsonSceneLights) {
         const std::string objectType =
@@ -227,8 +237,6 @@ std::vector<std::unique_ptr<ILight>> JsonEnvironmentBuilder::
             sceneLights.emplace_back(std::move(pointLight));
         }
     }
-
-    return sceneLights;
 }
 
 std::unique_ptr<Scene> JsonEnvironmentBuilder::parseScene(
@@ -236,16 +244,18 @@ std::unique_ptr<Scene> JsonEnvironmentBuilder::parseScene(
     IBvhBuilder& bvhBuilder,
     const nlohmann::json& jsonContent
 ) const {
-    auto objects =
-        parseSceneObjects(meshBuilder, bvhBuilder, jsonContent);
+    std::vector<std::unique_ptr<ILight>> sceneLights {};
+    auto objects = parseSceneObjects(
+        meshBuilder, bvhBuilder, sceneLights, jsonContent
+    );
 
-    auto lights = parseSceneLights(jsonContent);
+    parseSceneLights(sceneLights, jsonContent);
 
     std::unique_ptr<IHittable> sceneRoot =
         bvhBuilder.build(std::move(objects));
 
     return std::make_unique<Scene>(
-        std::move(sceneRoot), std::move(lights)
+        std::move(sceneRoot), std::move(sceneLights)
     );
 }
 

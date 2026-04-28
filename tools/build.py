@@ -56,7 +56,7 @@ def build_application(clean):
     clean_command = f"rm -rf {paths.BUILD_DIRECTORY_MOUNT_PATH}"
     cmake_command = str(
         "cmake"
-        " -DCMAKE_BUILD_TYPE=Release"
+        " -DCMAKE_BUILD_TYPE=RelWithDebInfo"
         f" -S {paths.SOURCE_DIRECTORY_MOUNT_PATH}"
         f" -B {paths.BUILD_DIRECTORY_MOUNT_PATH}"
     )

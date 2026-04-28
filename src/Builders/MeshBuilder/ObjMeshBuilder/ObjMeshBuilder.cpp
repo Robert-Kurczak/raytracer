@@ -1,9 +1,12 @@
 #include "ObjMeshBuilder.hpp"
 
+#include "Builders/MeshBuilder/MeshBuilderResult.hpp"
+#include "Core/Color/Color.hpp"
 #include "Geometry/Hittable/Triangle/Triangle.hpp"
+#include "Geometry/Light/TriangleAreaLight/TriangleAreaLight.hpp"
 #include "Geometry/Material/DiffuseMaterial/DiffuseMaterial.hpp"
+#include "Geometry/Material/DiffuseMaterial/MtlParameters.hpp"
 #include "Geometry/Material/IMaterial.hpp"
-#include "Geometry/Material/MtlMaterial/MtlParameters.hpp"
 #include "Utils/Logger/ILogger.hpp"
 
 #include <chrono>
@@ -64,6 +67,11 @@ MaterialsMap ObjMeshBuilder::extractMaterials(
             lineStream >> mtlParameters.specular.red;
             lineStream >> mtlParameters.specular.green;
             lineStream >> mtlParameters.specular.blue;
+        } else if (dataType == "Ke") {
+            lineStream >> mtlParameters.emission.red;
+            lineStream >> mtlParameters.emission.green;
+            lineStream >> mtlParameters.emission.blue;
+
         } else if (dataType == "Tr") {
             lineStream >> mtlParameters.transparency;
         } else if (dataType == "Ns") {
@@ -144,6 +152,7 @@ uint32_t ObjMeshBuilder::parseVertexIndex(
 
 void ObjMeshBuilder::parseFace(
     TriangleBuffer& triangleBuffer,
+    AreaLightBuffer& areaLightBuffer,
     const std::shared_ptr<IMaterial>& material,
     const std::vector<Point3<float>>& vertexBuffer,
     std::stringstream& lineStream
@@ -171,13 +180,24 @@ void ObjMeshBuilder::parseFace(
         );
 
         triangleBuffer.push_back(std::move(triangle));
+
+        if (not material->getEmission().isBlack()) {
+            auto light = std::make_unique<TriangleAreaLight>(
+                vertexBuffer[fanBaseIndex],
+                vertexBuffer[fanIndexA],
+                vertexBuffer[fanIndexB],
+                material->getEmission()
+            );
+
+            areaLightBuffer.push_back(std::move(light));
+        }
     }
 }
 
 ObjMeshBuilder::ObjMeshBuilder(std::shared_ptr<ILogger> logger) :
     logger_(std::move(logger)) {}
 
-IMeshBuilder::TriangleBuffer ObjMeshBuilder::buildBuffer(
+MeshBuilderResult ObjMeshBuilder::parseMesh(
     const std::filesystem::path& path,
     const Vector3<float>& position
 ) const {
@@ -192,6 +212,7 @@ IMeshBuilder::TriangleBuffer ObjMeshBuilder::buildBuffer(
     std::string line;
 
     TriangleBuffer triangleBuffer {};
+    AreaLightBuffer areaLightBuffer {};
     std::vector<Point3<float>> vertexBuffer {};
 
     std::unordered_map<std::string, std::shared_ptr<IMaterial>> materials;
@@ -207,7 +228,11 @@ IMeshBuilder::TriangleBuffer ObjMeshBuilder::buildBuffer(
             parseVertex(vertexBuffer, position, lineStream);
         } else if (dataType == "f") {
             parseFace(
-                triangleBuffer, currentMaterial, vertexBuffer, lineStream
+                triangleBuffer,
+                areaLightBuffer,
+                currentMaterial,
+                vertexBuffer,
+                lineStream
             );
         } else if (dataType == "mtllib") {
             parseMtlLib(materials, path, lineStream);
@@ -216,17 +241,20 @@ IMeshBuilder::TriangleBuffer ObjMeshBuilder::buildBuffer(
         }
     }
 
-    return triangleBuffer;
+    return MeshBuilderResult {
+        .triangles = std::move(triangleBuffer),
+        .areaLights = std::move(areaLightBuffer)
+    };
 }
 
-IMeshBuilder::TriangleBuffer ObjMeshBuilder::buildFromFile(
+MeshBuilderResult ObjMeshBuilder::buildFromFile(
     const std::filesystem::path& path,
     const Vector3<float>& position
 ) const {
     logger_->log(LogLevel::Info, "Building mesh from .obj file");
 
     const auto startTime = std::chrono::high_resolution_clock::now();
-    auto result = buildBuffer(path, position);
+    MeshBuilderResult result = parseMesh(path, position);
     const auto endTime = std::chrono::high_resolution_clock::now();
 
     const auto executionTime =
@@ -236,7 +264,11 @@ IMeshBuilder::TriangleBuffer ObjMeshBuilder::buildFromFile(
 
     logger_->log(
         LogLevel::Info,
-        std::format("Triangles in mesh: {}", result.size())
+        std::format("Triangles in mesh: {}", result.triangles.size())
+    );
+    logger_->log(
+        LogLevel::Info,
+        std::format("Area lights in mesh: {}", result.areaLights.size())
     );
     logger_->log(
         LogLevel::Info, std::format("Mesh built in {}", executionTime)
