@@ -293,7 +293,15 @@ template<typename Type>
 requires std::is_arithmetic_v<Type>
 using Vector3 = Vector<Type, 3>;
 
+using Vector3f = Vector<float, 3>;
+using Vector3i = Vector<int, 3>;
+using Vector3u = Vector<uint32_t, 3>;
+
 template<typename Type>
 requires std::is_arithmetic_v<Type>
 using Vector2 = Vector<Type, 2>;
+
+using Vector2f = Vector<float, 2>;
+using Vector2i = Vector<int, 2>;
+using Vector2u = Vector<uint32_t, 2>;
 }

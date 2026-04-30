@@ -15,9 +15,13 @@ public:
     ILight operator=(ILight&&) = delete;
     virtual ~ILight() = default;
 
-    [[nodiscard]] virtual LightSample getSample(
+    [[deprecated]] [[nodiscard]] virtual LightSample getSample(
         const Point3<float>& worldPosition,
         const Vector3<float>& worldNormal
+    ) const = 0;
+
+    [[nodiscard]] virtual LightSample getSample(
+        const Point3f& origin
     ) const = 0;
 };
 }

@@ -38,6 +38,18 @@ LightSample PointLight::getSample(
     const float distanceSquared = toLight.getSquaredLength();
     const LinearColor intensity = color_ / (distanceSquared * decay_);
 
-    return LightSample {.intensity = intensity, .toLight = toLight};
+    return LightSample {
+        .outLight = intensity, .inDirection = toLight, .pdf = 1
+    };
+}
+
+LightSample PointLight::getSample(const Point3f& origin) const {
+    const Vector3f inDirection = position_ - origin;
+    const float distandeSquared = inDirection.getSquaredLength();
+    const LinearColor outLight = color_ / (distandeSquared * decay_);
+
+    return LightSample {
+        .outLight = outLight, .inDirection = inDirection, .pdf = 1
+    };
 }
 }

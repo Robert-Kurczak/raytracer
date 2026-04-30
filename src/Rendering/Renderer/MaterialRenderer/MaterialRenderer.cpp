@@ -27,7 +27,7 @@ bool MaterialRenderer::isInShadow(
     const Point3<float> origin =
         hitData.hitPoint + hitData.hitNormal * epsilon;
 
-    const Ray shadowRay {origin, lightSample.toLight};
+    const Ray shadowRay {origin, lightSample.inDirection};
 
     const Interval<float> interval {
         epsilon,       // ray origin is at hit point
@@ -52,7 +52,7 @@ LinearColor MaterialRenderer::getDirectLight(
             continue;
         }
 
-        illuminationColor += lightSample.intensity;
+        illuminationColor += lightSample.outLight;
     }
 
     const LinearColor& baseColor = hitData.material->getBaseColor();

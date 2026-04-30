@@ -28,5 +28,9 @@ public:
         const Point3<float>& worldPosition,
         const Vector3<float>& worldNormal
     ) const override;
+
+    [[nodiscard]] LightSample getSample(
+        const Point3f& origin
+    ) const override;
 };
 }

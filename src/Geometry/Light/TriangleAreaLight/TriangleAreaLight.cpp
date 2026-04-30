@@ -67,6 +67,25 @@ LightSample TriangleAreaLight::getSample(
         (emission_ * lightCosinus * surfaceCosinus) /
         (distanceSquared * pdf_);
 
-    return LightSample {.intensity = intensity, .toLight = toLight};
+    return LightSample {
+        .outLight = intensity, .inDirection = toLight, .pdf = pdf_
+    };
+}
+
+LightSample TriangleAreaLight::getSample(const Point3f& origin) const {
+    const Vector3f sample = getRandomSample();
+    const Vector3f inDirection = sample - origin;
+    const float distanceSquared = inDirection.getSquaredLength();
+    const float cosinus =
+        getDotProduct(normal_, inDirection.getNormalized());
+
+    const LinearColor outLight = emission_ * cosinus / distanceSquared;
+    const float pdfSolidArea = distanceSquared / cosinus * pdf_;
+
+    return LightSample {
+        .outLight = outLight,
+        .inDirection = inDirection,
+        .pdf = pdfSolidArea
+    };
 }
 }
