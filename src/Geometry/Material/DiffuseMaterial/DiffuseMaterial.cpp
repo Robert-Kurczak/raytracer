@@ -23,7 +23,7 @@ DiffuseParameters DiffuseMaterial::convertFromMtl(
 
 Vector3f DiffuseMaterial::createCosWeightVersor() const {
     const auto uTheta = getRandomNumber<float>();
-    const auto uPhi = getRandomNumber<float>();
+    const auto uPhi = getRandomNumber<float>(0, 2 * std::numbers::pi);
 
     const float sinTheta = std::sqrt(uTheta);
 
@@ -38,20 +38,20 @@ Vector3f DiffuseMaterial::transformToWorldSpace(
     const Vector3f& localVersor,
     const Vector3f& worldNormal
 ) const {
-    const Vector3f helperAxis = std::abs(localVersor.getX()) > 0.9
+    const Vector3f helperAxis = std::abs(worldNormal.getX()) > 0.9
                                     ? Vector3f {0.0F, 1.0F, 0.0F}
                                     : Vector3f {1.0F, 0.0F, 0.0F};
 
     const Vector3f tangent =
         getCrossProduct(worldNormal, helperAxis).getNormalized();
 
-    const Vector3f bitangent = getCrossProduct(worldNormal, tangent);
+    const Vector3f bitangent = getCrossProduct(tangent, worldNormal);
 
     const Vector3f globalVersor = tangent * localVersor.getX() +
                                   bitangent * localVersor.getY() +
                                   worldNormal * localVersor.getZ();
 
-    return globalVersor;
+    return globalVersor.getNormalized();
 }
 
 DiffuseMaterial::DiffuseMaterial(DiffuseParameters parameters) :
@@ -91,6 +91,16 @@ const LinearColor& DiffuseMaterial::getBaseColor() const {
 }
 
 const LinearColor& DiffuseMaterial::getEmission() const {
+    return parameters_.emission;
+}
+
+LinearColor DiffuseMaterial::getEmission(
+    const Point3f& origin,
+    const Vector3f& direction
+) const {
+    (void) origin;
+    (void) direction;
+
     return parameters_.emission;
 }
 

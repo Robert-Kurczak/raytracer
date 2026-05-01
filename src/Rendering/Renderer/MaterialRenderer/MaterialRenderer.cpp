@@ -5,7 +5,9 @@
 #include "Core/Math/Vector.hpp"
 #include "Core/Ray/Ray.hpp"
 #include "Geometry/Hittable/HitData.hpp"
+#include "Geometry/Light/ILight.hpp"
 #include "Geometry/Light/LightSample.hpp"
+#include "Geometry/Material/MaterialSample.hpp"
 #include "Rendering/Renderer/RendererStatistics.hpp"
 #include "Utils/Logger/ILogger.hpp"
 #include "World/Scene/Scene.hpp"
@@ -133,6 +135,90 @@ LinearColor MaterialRenderer::traceRay(
     return resultColor;
 }
 
+LinearColor MaterialRenderer::traceRay(
+    const Ray& ray,
+    const Scene& scene,
+    uint32_t recursionDepth
+) const {
+    constexpr Interval<float> renderInterval {
+        epsilon, Interval<float>::infinity()
+    };
+
+    if (recursionDepth > parameters_.scatterRecursionDepth) {
+        return LinearColor::black();
+    }
+
+    HitData hitData;
+
+    const bool hitAnything =
+        scene.hitClosest(ray, renderInterval, hitData);
+
+    if (not hitAnything) {
+        return background_->sample(ray);
+    }
+
+    // TODO should be already set
+    if (not hitData.material) {
+        hitData.material = parameters_.defaultMaterial_;
+    }
+
+    const bool isRayPrimary = recursionDepth == 0;
+    const LinearColor materialEmission = hitData.material->getEmission(
+        hitData.hitPoint, -ray.getDirection()
+    );
+
+    const LinearColor emittedLight =
+        isRayPrimary ? materialEmission : LinearColor::black();
+
+    const MaterialSample materialSample = hitData.material->getSample(
+        hitData.hitPoint, hitData.hitNormal, -ray.getDirection()
+    );
+
+    const Ray scatterRay {
+        hitData.hitPoint + epsilon * hitData.hitNormal,
+        materialSample.inDirection
+    };
+
+    const LinearColor scatteredLighting =
+        traceRay(scatterRay, scene, recursionDepth + 1);
+
+    const float indirectCosinus = std::max(
+        0.0F,
+        getDotProduct(
+            hitData.hitNormal, materialSample.inDirection.getNormalized()
+        )
+    );
+
+    const LinearColor indirectLighting =
+        materialSample.brdf * scatteredLighting * indirectCosinus /
+        materialSample.pdf;
+
+    LinearColor directLighting = LinearColor::black();
+
+    for (const std::unique_ptr<ILight>& light : scene.getLights()) {
+        const LightSample lightSample =
+            light->getSample(hitData.hitPoint);
+
+        if (isInShadow(hitData, lightSample, scene)) {
+            continue;
+        }
+
+        const LinearColor directBrdf = hitData.material->calculateBrdf(
+            hitData.hitPoint, -ray.getDirection(), lightSample.inDirection
+        );
+
+        const float directCosinus = std::max(
+            0.0F,
+            getDotProduct(hitData.hitNormal, lightSample.inDirection)
+        );
+
+        directLighting += directBrdf * lightSample.outLight *
+                          directCosinus / lightSample.pdf;
+    }
+
+    return emittedLight + indirectLighting + directLighting;
+}
+
 RendererStatistics MaterialRenderer::renderSection(
     const Camera& camera,
     const Scene& scene,
@@ -158,6 +244,7 @@ RendererStatistics MaterialRenderer::renderSection(
                     renderInterval,
                     statistics,
                     parameters_.scatterRecursionDepth
+                    // 0
                 );
 
                 resultColor += color;

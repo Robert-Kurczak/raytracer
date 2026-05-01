@@ -17,7 +17,7 @@ Vector3<float> TriangleAreaLight::getPerpendicular(
     return getCrossProduct(edge1, edge2);
 }
 
-Vector3<float> TriangleAreaLight::getRandomSample() const {
+Point3f TriangleAreaLight::getRandomSample() const {
     auto barycentricA = getRandomNumber<float>();
     auto barycentricB = getRandomNumber<float>();
 
@@ -73,14 +73,22 @@ LightSample TriangleAreaLight::getSample(
 }
 
 LightSample TriangleAreaLight::getSample(const Point3f& origin) const {
-    const Vector3f sample = getRandomSample();
+    const Point3f sample = getRandomSample();
     const Vector3f inDirection = sample - origin;
     const float distanceSquared = inDirection.getSquaredLength();
     const float cosinus =
-        getDotProduct(normal_, inDirection.getNormalized());
+        getDotProduct(normal_, -inDirection.getNormalized());
 
-    const LinearColor outLight = emission_ * cosinus / distanceSquared;
-    const float pdfSolidArea = distanceSquared / cosinus * pdf_;
+    if (cosinus <= 0) {
+        return LightSample {
+            .outLight = LinearColor::black(),
+            .inDirection = inDirection,
+            .pdf = 1
+        };
+    }
+
+    const LinearColor outLight = emission_;
+    float pdfSolidArea = (distanceSquared / cosinus) * pdf_;
 
     return LightSample {
         .outLight = outLight,

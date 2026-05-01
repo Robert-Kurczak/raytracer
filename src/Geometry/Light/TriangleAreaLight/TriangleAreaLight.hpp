@@ -21,7 +21,7 @@ private:
         const Point3<float>& vertexC
     ) const;
 
-    [[nodiscard]] Vector3<float> getRandomSample() const;
+    [[nodiscard]] Point3f getRandomSample() const;
 
 public:
     TriangleAreaLight(

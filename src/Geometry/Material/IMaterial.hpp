@@ -31,6 +31,11 @@ public:
     getEmission() const = 0;
     // ========
 
+    [[nodiscard]] virtual LinearColor getEmission(
+        const Point3f& origin,
+        const Vector3f& direction
+    ) const = 0;
+
     [[nodiscard]] virtual LinearColor calculateBrdf(
         const Point3f& origin,
         const Vector3f& outDirection,

@@ -34,6 +34,11 @@ public:
     [[nodiscard]] const LinearColor& getBaseColor() const override;
     [[nodiscard]] const LinearColor& getEmission() const override;
 
+    [[nodiscard]] LinearColor getEmission(
+        const Point3f& origin,
+        const Vector3f& direction
+    ) const override;
+
     [[nodiscard]] LinearColor calculateBrdf(
         const Point3f& origin,
         const Vector3f& outDirection,
