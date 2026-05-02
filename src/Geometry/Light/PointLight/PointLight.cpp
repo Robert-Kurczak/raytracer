@@ -31,12 +31,16 @@ PointLight::PointLight(
     ) {}
 
 LightSample PointLight::getSample(const Point3f& origin) const {
-    const Vector3f inDirection = position_ - origin;
-    const float distandeSquared = inDirection.getSquaredLength();
+    const Vector3f toLight = position_ - origin;
+    const Vector3f inDirection = toLight.getNormalized();
+    const float distandeSquared = toLight.getSquaredLength();
     const LinearColor outLight = emission_ / (distandeSquared * decay_);
 
     return LightSample {
-        .outLight = outLight, .inDirection = inDirection, .pdf = 1
+        .outLight = outLight,
+        .toLight = toLight,
+        .inDirection = inDirection,
+        .pdf = 1
     };
 }
 }

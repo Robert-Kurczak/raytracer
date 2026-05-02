@@ -20,39 +20,40 @@ private:
     std::unique_ptr<IBackground> background_;
     MaterialRendererParameters parameters_;
 
-    [[deprecated]] [[nodiscard]] bool isInShadow(
+    [[nodiscard]] LinearColor getEmission(
         const HitData& hitData,
-        const LightSample& lightSample,
-        const Scene& scene
+        const Vector3f& outDirection,
+        uint32_t recursionDepth
     ) const;
 
-    // [[deprecated]] [[nodiscard]] LinearColor getDirectLight(
-    //     const HitData& hitData,
-    //     const Scene& scene
-    // ) const;
+    [[nodiscard]] LinearColor getIndirectLight(
+        const HitData& hitData,
+        const Point3f& offsetHitPoint,
+        const Vector3f& outDirection,
+        const Scene& scene,
+        RendererStatistics& statistics,
+        uint32_t recursionDepth
+    ) const;
 
-    // [[deprecated]] [[nodiscard]] LinearColor getIndirectLight(
-    //     LinearColor& attenuation,
-    //     const Ray& ray,
-    //     const Interval<float>& interval,
-    //     const HitData& hitData,
-    //     const Scene& scene,
-    //     RendererStatistics& statistics,
-    //     uint32_t depth
-    // ) const;
+    [[nodiscard]] LinearColor getDirectLight(
+        const HitData& hitData,
+        const Point3f& offsetHitPoint,
+        const Vector3f& outDirection,
+        const Scene& scene,
+        RendererStatistics& statistics
+    ) const;
 
-    // [[deprecated]] [[nodiscard]] LinearColor traceRay(
-    //     const Ray& ray,
-    //     const Scene& scene,
-    //     const Interval<float>& interval,
-    //     RendererStatistics& statistics,
-    //     uint32_t depth
-    // ) const;
+    [[nodiscard]] bool isInShadow(
+        const Point3f& origin,
+        const Vector3f& toLight,
+        const Scene& scene
+    ) const;
 
     [[nodiscard]] LinearColor traceRay(
         const Ray& ray,
         const Scene& scene,
-        uint32_t recursionDepth
+        RendererStatistics& statistics,
+        uint32_t recursionDepth = 0
     ) const;
 
     RendererStatistics renderSection(

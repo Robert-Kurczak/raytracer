@@ -5,6 +5,8 @@
 #include "Core/Math/Vector.hpp"
 #include "Geometry/Light/LightSample.hpp"
 
+#include <unistd.h>
+
 namespace RTC {
 Vector3f TriangleAreaLight::getPerpendicular(
     const Point3f& vertexA,
@@ -49,10 +51,10 @@ TriangleAreaLight::TriangleAreaLight(
 
 LightSample TriangleAreaLight::getSample(const Point3f& origin) const {
     const Point3f sample = getRandomSample();
-    const Vector3f inDirection = sample - origin;
-    const float distanceSquared = inDirection.getSquaredLength();
-    const float cosinus =
-        getDotProduct(normal_, -inDirection.getNormalized());
+    const Vector3f toLight = sample - origin;
+    const Vector3f inDirection = toLight.getNormalized();
+    const float distanceSquared = toLight.getSquaredLength();
+    const float cosinus = getDotProduct(normal_, -inDirection);
 
     if (cosinus <= 0) {
         return LightSample {
@@ -66,6 +68,7 @@ LightSample TriangleAreaLight::getSample(const Point3f& origin) const {
 
     return LightSample {
         .outLight = emission_,
+        .toLight = toLight,
         .inDirection = inDirection,
         .pdf = solidAreaPdf
     };

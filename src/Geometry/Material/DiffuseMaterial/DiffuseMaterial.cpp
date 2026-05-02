@@ -15,9 +15,7 @@ DiffuseParameters DiffuseMaterial::convertFromMtl(
     const MtlParameters& parameters
 ) const {
     return DiffuseParameters {
-        .baseColor = parameters.diffuse,
-        .emission = parameters.emission,
-        .roughness = std::sqrt(2.0F / (parameters.shininess + 2))
+        .baseColor = parameters.diffuse, .emission = parameters.emission
     };
 }
 
@@ -97,7 +95,7 @@ MaterialSample DiffuseMaterial::getSample(
 ) const {
     const Vector3f localVersor = createCosWeightVersor();
     const Vector3f inDirection =
-        transformToWorldSpace(localVersor, normal);
+        transformToWorldSpace(localVersor, normal).getNormalized();
 
     const LinearColor brdf =
         calculateBrdf(origin, outDirection, inDirection);
