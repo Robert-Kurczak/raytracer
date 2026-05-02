@@ -130,8 +130,10 @@ std::unique_ptr<IRenderer> JsonEnvironmentBuilder::parseRenderer(
     const nlohmann::json& jsonContent
 ) const {
     const MaterialRendererParameters parameters {
-        .samplesPerPixel =
-            jsonContent["renderer"]["samplesPerPixel"].get<uint32_t>(),
+        .pathsPerPixel =
+            jsonContent["renderer"]["pathsPerPixel"].get<uint32_t>(),
+        .lightSamplesPerHit =
+            jsonContent["renderer"]["lightSamplesPerHit"].get<uint32_t>(),
         .scatterRecursionDepth =
             jsonContent["renderer"]["scatterRecursionDepth"]
                 .get<uint32_t>(),

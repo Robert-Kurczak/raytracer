@@ -18,7 +18,7 @@
 #include <utility>
 
 namespace RTC {
-static constexpr float epsilon = 0.001F;
+static constexpr float epsilon = 1e-4F;
 
 LinearColor MaterialRenderer::getEmission(
     const HitData& hitData,
@@ -69,24 +69,32 @@ LinearColor MaterialRenderer::getDirectLight(
     LinearColor directLight = LinearColor::black();
 
     for (const std::unique_ptr<ILight>& light : scene.getLights()) {
-        const LightSample lightSample =
-            light->getSample(hitData.hitPoint);
+        for (uint32_t i = 0; i < parameters_.lightSamplesPerHit; i++) {
+            const LightSample lightSample =
+                light->getSample(hitData.hitPoint);
 
-        if (isInShadow(offsetHitPoint, lightSample.toLight, scene)) {
-            continue;
+            if (isInShadow(offsetHitPoint, lightSample.toLight, scene)) {
+                continue;
+            }
+
+            const LinearColor brdf = hitData.material->calculateBrdf(
+                hitData.hitPoint, outDirection, lightSample.inDirection
+            );
+
+            const float cosinus = std::max(
+                0.0F,
+                getDotProduct(hitData.hitNormal, lightSample.inDirection)
+            );
+
+            const LinearColor sample =
+                brdf * lightSample.outLight * cosinus / lightSample.pdf;
+
+            directLight += LinearColor {
+                sample.red / float(parameters_.lightSamplesPerHit),
+                sample.green / float(parameters_.lightSamplesPerHit),
+                sample.blue / float(parameters_.lightSamplesPerHit)
+            };
         }
-
-        const LinearColor brdf = hitData.material->calculateBrdf(
-            hitData.hitPoint, outDirection, lightSample.inDirection
-        );
-
-        const float cosinus = std::max(
-            0.0F,
-            getDotProduct(hitData.hitNormal, lightSample.inDirection)
-        );
-
-        directLight +=
-            brdf * lightSample.outLight * cosinus / lightSample.pdf;
     }
 
     return directLight;
@@ -177,7 +185,7 @@ RendererStatistics MaterialRenderer::renderSection(
 
             LinearColor resultColor = LinearColor::black();
 
-            for (uint32_t i = 0; i < parameters_.samplesPerPixel; i++) {
+            for (uint32_t i = 0; i < parameters_.pathsPerPixel; i++) {
                 Ray ray = camera.getRandomizedRay(pixel);
 
                 const LinearColor color =
@@ -186,7 +194,7 @@ RendererStatistics MaterialRenderer::renderSection(
                 resultColor += color;
             }
 
-            resultColor /= float(parameters_.samplesPerPixel);
+            resultColor /= float(parameters_.pathsPerPixel);
 
             framebuffer.setColorAt(pixel, resultColor);
         }

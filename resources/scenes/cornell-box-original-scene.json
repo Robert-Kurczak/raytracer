@@ -2,7 +2,8 @@
     "outputPath": "resources/renders/cornell-original-scene.exr",
     "verbose": true,
     "renderer": {
-        "samplesPerPixel": 20,
+        "pathsPerPixel": 20,
+        "lightSamplesPerHit": 10,
         "scatterRecursionDepth": 10
     },
     "camera": {
