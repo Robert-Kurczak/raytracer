@@ -24,14 +24,8 @@ public:
     DiffuseMaterial(DiffuseParameters parameters);
     DiffuseMaterial(MtlParameters parameters);
 
-    bool scatter(
-        const Ray& ray,
-        const HitData& hitData,
-        LinearColor& attenuation,
-        Ray& scatteredRay
-    ) const override;
-
     [[nodiscard]] const LinearColor& getBaseColor() const override;
+
     [[nodiscard]] const LinearColor& getEmission() const override;
 
     [[nodiscard]] LinearColor getEmission(

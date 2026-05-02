@@ -2,7 +2,6 @@
 
 #include "Core/Color/Color.hpp"
 #include "Core/Math/Vector.hpp"
-#include "Core/Ray/Ray.hpp"
 #include "Geometry/Hittable/HitData.hpp"
 #include "Geometry/Material/MaterialSample.hpp"
 
@@ -16,20 +15,9 @@ public:
     IMaterial operator=(IMaterial&&) = delete;
     virtual ~IMaterial() = default;
 
-    // ========
-    [[deprecated]] virtual bool scatter(
-        const Ray& ray,
-        const HitData& hitData,
-        LinearColor& attenuation,
-        Ray& scatteredRay
-    ) const = 0;
+    [[nodiscard]] virtual const LinearColor& getBaseColor() const = 0;
 
-    [[deprecated]] [[nodiscard]] virtual const LinearColor&
-    getBaseColor() const = 0;
-
-    [[deprecated]] [[nodiscard]] virtual const LinearColor&
-    getEmission() const = 0;
-    // ========
+    [[nodiscard]] virtual const LinearColor& getEmission() const = 0;
 
     [[nodiscard]] virtual LinearColor getEmission(
         const Point3f& origin,

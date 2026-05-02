@@ -20,38 +20,34 @@ private:
     std::unique_ptr<IBackground> background_;
     MaterialRendererParameters parameters_;
 
-    [[deprecated]] [[nodiscard]] LinearColor getSkyAttenuation(
-        const Vector3<float>& rayDirectionVersor
-    ) const;
-
     [[deprecated]] [[nodiscard]] bool isInShadow(
         const HitData& hitData,
         const LightSample& lightSample,
         const Scene& scene
     ) const;
 
-    [[deprecated]] [[nodiscard]] LinearColor getDirectLight(
-        const HitData& hitData,
-        const Scene& scene
-    ) const;
+    // [[deprecated]] [[nodiscard]] LinearColor getDirectLight(
+    //     const HitData& hitData,
+    //     const Scene& scene
+    // ) const;
 
-    [[deprecated]] [[nodiscard]] LinearColor getIndirectLight(
-        LinearColor& attenuation,
-        const Ray& ray,
-        const Interval<float>& interval,
-        const HitData& hitData,
-        const Scene& scene,
-        RendererStatistics& statistics,
-        uint32_t depth
-    ) const;
+    // [[deprecated]] [[nodiscard]] LinearColor getIndirectLight(
+    //     LinearColor& attenuation,
+    //     const Ray& ray,
+    //     const Interval<float>& interval,
+    //     const HitData& hitData,
+    //     const Scene& scene,
+    //     RendererStatistics& statistics,
+    //     uint32_t depth
+    // ) const;
 
-    [[deprecated]] [[nodiscard]] LinearColor traceRay(
-        const Ray& ray,
-        const Scene& scene,
-        const Interval<float>& interval,
-        RendererStatistics& statistics,
-        uint32_t depth
-    ) const;
+    // [[deprecated]] [[nodiscard]] LinearColor traceRay(
+    //     const Ray& ray,
+    //     const Scene& scene,
+    //     const Interval<float>& interval,
+    //     RendererStatistics& statistics,
+    //     uint32_t depth
+    // ) const;
 
     [[nodiscard]] LinearColor traceRay(
         const Ray& ray,

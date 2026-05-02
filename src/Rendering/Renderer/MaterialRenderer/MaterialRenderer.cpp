@@ -40,100 +40,100 @@ bool MaterialRenderer::isInShadow(
     return scene.hitAny(shadowRay, interval);
 }
 
-LinearColor MaterialRenderer::getDirectLight(
-    const HitData& hitData,
-    const Scene& scene
-) const {
-    LinearColor illuminationColor = LinearColor::black();
+// LinearColor MaterialRenderer::getDirectLight(
+//     const HitData& hitData,
+//     const Scene& scene
+// ) const {
+//     LinearColor illuminationColor = LinearColor::black();
 
-    for (const auto& light : scene.getLights()) {
-        const LightSample lightSample =
-            light->getSample(hitData.hitPoint, hitData.hitNormal);
+// // for (const auto& light : scene.getLights()) {
+// //     const LightSample lightSample =
+// //         light->getSample(hitData.hitPoint, hitData.hitNormal);
 
-        if (isInShadow(hitData, lightSample, scene)) {
-            continue;
-        }
+// //     if (isInShadow(hitData, lightSample, scene)) {
+// //         continue;
+// //     }
 
-        illuminationColor += lightSample.outLight;
-    }
+// //     illuminationColor += lightSample.outLight;
+// // }
 
-    const LinearColor& baseColor = hitData.material->getBaseColor();
-    return illuminationColor * baseColor / float(std::numbers::pi);
-}
+// const LinearColor& baseColor = hitData.material->getBaseColor();
+// return illuminationColor * baseColor / float(std::numbers::pi);
+// }
 
-LinearColor MaterialRenderer::getIndirectLight(
-    LinearColor& attenuation,
-    const Ray& ray,
-    const Interval<float>& interval,
-    const HitData& hitData,
-    const Scene& scene,
-    RendererStatistics& statistics,
-    uint32_t depth
-) const {
-    Ray scatteredRay {};
+// LinearColor MaterialRenderer::getIndirectLight(
+//     LinearColor& attenuation,
+//     const Ray& ray,
+//     const Interval<float>& interval,
+//     const HitData& hitData,
+//     const Scene& scene,
+//     RendererStatistics& statistics,
+//     uint32_t depth
+// ) const {
+//     Ray scatteredRay {};
 
-    const bool wasScattered = hitData.material->scatter(
-        ray, hitData, attenuation, scatteredRay
-    );
+// const bool wasScattered = hitData.material->scatter(
+//     ray, hitData, attenuation, scatteredRay
+// );
 
-    if (!wasScattered) {
-        return hitData.material->getEmission();
-    }
+// if (!wasScattered) {
+//     return hitData.material->getEmission();
+// }
 
-    return traceRay(scatteredRay, scene, interval, statistics, depth - 1);
-}
+// return traceRay(scatteredRay, scene, interval, statistics, depth - 1);
+// }
 
-LinearColor MaterialRenderer::traceRay(
-    const Ray& ray,
-    const Scene& scene,
-    const Interval<float>& interval,
-    RendererStatistics& statistics,
-    uint32_t depth
-) const {
-    if (depth == 0) {
-        return LinearColor::black();
-    }
+// LinearColor MaterialRenderer::traceRay(
+//     const Ray& ray,
+//     const Scene& scene,
+//     const Interval<float>& interval,
+//     RendererStatistics& statistics,
+//     uint32_t depth
+// ) const {
+//     if (depth == 0) {
+//         return LinearColor::black();
+//     }
 
-    statistics.rays++;
+// statistics.rays++;
 
-    HitData hitData {};
+// HitData hitData {};
 
-    const bool objectHit = scene.hitClosest(ray, interval, hitData);
+// const bool objectHit = scene.hitClosest(ray, interval, hitData);
 
-    if (not objectHit) {
-        return background_->sample(ray);
-    }
+// if (not objectHit) {
+//     return background_->sample(ray);
+// }
 
-    if (not hitData.material) {
-        hitData.material = parameters_.defaultMaterial_;
-    }
+// if (not hitData.material) {
+//     hitData.material = parameters_.defaultMaterial_;
+// }
 
-    const bool isRayPrimary = depth == parameters_.scatterRecursionDepth;
+// const bool isRayPrimary = depth == parameters_.scatterRecursionDepth;
 
-    const LinearColor emittedLight = isRayPrimary
-                                         ? hitData.material->getEmission()
-                                         : LinearColor::black();
+// const LinearColor emittedLight = isRayPrimary
+//                                      ? hitData.material->getEmission()
+//                                      : LinearColor::black();
 
-    const LinearColor directLight = getDirectLight(hitData, scene);
-    statistics.shadowRays += scene.getLights().size();
+// const LinearColor directLight = getDirectLight(hitData, scene);
+// statistics.shadowRays += scene.getLights().size();
 
-    LinearColor indirectLightAttenuation = LinearColor::black();
-    const LinearColor indirectLight = getIndirectLight(
-        indirectLightAttenuation,
-        ray,
-        interval,
-        hitData,
-        scene,
-        statistics,
-        depth
-    );
+// LinearColor indirectLightAttenuation = LinearColor::black();
+// const LinearColor indirectLight = getIndirectLight(
+//     indirectLightAttenuation,
+//     ray,
+//     interval,
+//     hitData,
+//     scene,
+//     statistics,
+//     depth
+// );
 
-    const LinearColor resultColor =
-        emittedLight + directLight +
-        (indirectLight * indirectLightAttenuation);
+// const LinearColor resultColor =
+//     emittedLight + directLight +
+//     (indirectLight * indirectLightAttenuation);
 
-    return resultColor;
-}
+// return resultColor;
+// }
 
 LinearColor MaterialRenderer::traceRay(
     const Ray& ray,
@@ -209,7 +209,9 @@ LinearColor MaterialRenderer::traceRay(
 
         const float directCosinus = std::max(
             0.0F,
-            getDotProduct(hitData.hitNormal, lightSample.inDirection)
+            getDotProduct(
+                hitData.hitNormal, lightSample.inDirection.getNormalized()
+            )
         );
 
         directLighting += directBrdf * lightSample.outLight *
@@ -238,14 +240,7 @@ RendererStatistics MaterialRenderer::renderSection(
             for (uint32_t i = 0; i < parameters_.samplesPerPixel; i++) {
                 Ray ray = camera.getRandomizedRay(pixel);
 
-                const LinearColor color = traceRay(
-                    ray,
-                    scene,
-                    renderInterval,
-                    statistics,
-                    parameters_.scatterRecursionDepth
-                    // 0
-                );
+                const LinearColor color = traceRay(ray, scene, 0);
 
                 resultColor += color;
             }

@@ -60,32 +60,6 @@ DiffuseMaterial::DiffuseMaterial(DiffuseParameters parameters) :
 DiffuseMaterial::DiffuseMaterial(MtlParameters parameters) :
     parameters_(convertFromMtl(parameters)) {}
 
-bool DiffuseMaterial::scatter(
-    const Ray& ray,
-    const HitData& hitData,
-    LinearColor& attenuation,
-    Ray& scatteredRay
-) const {
-    attenuation = parameters_.baseColor;
-
-    const Vector3<float> diffusedDirection =
-        Vector3<float>::randomVersorOnHemisphere(hitData.hitNormal);
-
-    const Vector3<float> specularDirection =
-        ray.getDirection().getReflected(hitData.hitNormal);
-
-    const Vector3 reflectedDirection =
-        interpolateLineary(specularDirection, diffusedDirection, 1);
-
-    const Point3 reflectedOrigin =
-        hitData.hitPoint + epsilon * hitData.hitNormal;
-
-    const Ray reflectedRay {reflectedOrigin, reflectedDirection};
-
-    scatteredRay = reflectedRay;
-    return true;
-}
-
 const LinearColor& DiffuseMaterial::getBaseColor() const {
     return parameters_.baseColor;
 }

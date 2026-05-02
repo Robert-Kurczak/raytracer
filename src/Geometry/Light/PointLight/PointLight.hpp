@@ -7,27 +7,22 @@
 namespace RTC {
 class PointLight : public ILight {
 private:
-    Point3<float> position_;
-    LinearColor color_;
+    Point3f position_;
+    LinearColor emission_;
     float decay_;
 
 public:
     PointLight(
-        const Point3<float>& position,
-        const LinearColor& color,
+        const Point3f& position,
+        const LinearColor& emission,
         float decay
     );
 
     PointLight(
-        const Point3<float>& position,
-        const Color8Bit& color,
+        const Point3f& position,
+        const Color8Bit& emission,
         float decay
     );
-
-    [[nodiscard]] LightSample getSample(
-        const Point3<float>& worldPosition,
-        const Vector3<float>& worldNormal
-    ) const override;
 
     [[nodiscard]] LightSample getSample(
         const Point3f& origin
