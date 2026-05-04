@@ -15,7 +15,8 @@ DiffuseParameters DiffuseMaterial::convertFromMtl(
     const MtlParameters& parameters
 ) const {
     return DiffuseParameters {
-        .baseColor = parameters.diffuse, .emission = parameters.emission
+        .baseColor = parameters.diffuse,
+        .emission = parameters.emission / float(std::numbers::pi)
     };
 }
 

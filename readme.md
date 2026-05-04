@@ -39,5 +39,12 @@ or manually:
 ./build/raytracer config/suzanne-scene.json
 ```
 
+## Assumptions
+### Units
+All vertex defined in .obj file are assumed to use meters $[m]$ as space unit
+
+Light emission parameter `Ke` defined in the `.mtl` files are assumed to be in Watts per squared meter $[\frac{W}{m^2}]$
+
 ## Sources
 1. https://raytracing.github.io/books/RayTracingInOneWeekend.html
+2. https://pbr-book.org/4ed/Monte_Carlo_Integration
