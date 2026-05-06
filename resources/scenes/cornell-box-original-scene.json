@@ -3,7 +3,7 @@
     "verbose": true,
     "renderer": {
         "pathsPerPixel": 20,
-        "lightSamplesPerHit": 10,
+        "lightSamplesPerHit": 1,
         "scatterRecursionDepth": 10
     },
     "camera": {

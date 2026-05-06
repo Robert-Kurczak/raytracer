@@ -50,7 +50,7 @@ Vector3f DiffuseMaterial::transformToWorldSpace(
                                   bitangent * localVersor.getY() +
                                   worldNormal * localVersor.getZ();
 
-    return globalVersor.getNormalized();
+    return globalVersor;
 }
 
 DiffuseMaterial::DiffuseMaterial(DiffuseParameters parameters) :

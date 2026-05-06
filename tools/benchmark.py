@@ -30,7 +30,7 @@ class Args:
     camera_direction: list[float]
     up_direction: list[float]
     vertical_fov: float
-    light_colors: list[list[int]]
+    light_colors: list[list[float]]
     light_positions: list[list[float]]
     resolution: list[float]
     recursion_depth: int
@@ -96,7 +96,7 @@ def modify_scene(scene: dict, args: Args):
             light_json = {
                 "type": "point",
                 "position": position,
-                "color": color,
+                "color": [int(c * 255) for c in color],
                 "decay": 1
             }
 
@@ -132,7 +132,7 @@ def parse_arguments() -> Args:
     )
 
     parser.add_argument(
-        "-in",
+        "-i",
         dest="in_",
         type=str,
         help="Path to .obj file"
@@ -168,9 +168,9 @@ def parse_arguments() -> Args:
     parser.add_argument(
         "-ltcol",
         nargs=3,
-        type=int,
+        type=float,
         action="append",
-        help="Lights color [r g b]",
+        help="Lights color [r g b]. Values in range <0.0, 1.0>",
     )
 
     parser.add_argument(
