@@ -1,0 +1,44 @@
+{
+    "outputPath": "resources/renders/breakfast-room-scene.exr",
+    "verbose": true,
+    "renderer": {
+        "pathsPerPixel": 500,
+        "lightSamplesPerHit": 1,
+        "scatterRecursionDepth": 200
+    },
+    "camera": {
+        "screenWidth": 1920,
+        "screenHeight": 1080,
+        "position": [
+            -2.3,
+            2.2,
+            3.5
+        ],
+        "direction": [
+            0.15,
+            -0.07,
+            -0.7
+        ],
+        "upDirection": [
+            0.0,
+            1.0,
+            0.0
+        ],
+        "fieldOfViewDegrees": 90
+    },
+    "background": {
+        "type": "sky"
+    },
+    "objects": [
+        {
+            "type": "obj",
+            "filePath": "resources/objects/breakfast-room/breakfast_room.obj",
+            "position": [
+                0.0,
+                0.0,
+                0.0
+            ]
+        }
+    ],
+    "lights": []
+}
