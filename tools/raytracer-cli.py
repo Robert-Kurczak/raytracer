@@ -18,7 +18,7 @@ SCENE_JSON_PATH = paths.SCENES_DIRECTORY_PATH.joinpath(
 )
 
 DEFAULT_OUTPUT_PATH = paths.RENDERS_DIRECTORY_PATH.joinpath(
-    "benchmark-scene.ppm"
+    "raytracer-cli-scene.ppm"
 )
 
 @dataclass
@@ -103,7 +103,7 @@ def modify_scene(scene: dict, args: Args):
             scene["lights"].append(light_json)
 
 def render_scene(scene: dict):
-    "Executes raytracer to render benchmarked scene"
+    "Executes raytracer to render scene"
 
     with tempfile.NamedTemporaryFile(mode="w+") as temp_file:
         json.dump(scene, temp_file)
@@ -126,7 +126,7 @@ def parse_arguments() -> Args:
     "Creates command line argument parser"
 
     parser = argparse.ArgumentParser(
-        prog="Raytracer benchmark",
+        prog="Raytracer CLI",
         description="Renders sample scene in verbose mode"
                     "with easily modifiable parameters via command-line"
     )

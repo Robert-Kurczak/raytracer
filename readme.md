@@ -1,5 +1,57 @@
 # Raytracer
 
+## Examples
+Breakfast room
+![Breakfast room](resources/examples/breakfast-room.png)
+```
+Resolution: 1920x1080
+Triangles in mesh: 269764
+Area lights in mesh: 0
+Mesh built in 197ms
+BVH built in 472ms
+Rendered on 16 threads
+Direct light sources: 0
+Traced rays: 2'576'729'948
+Traced shadow rays: 0
+Tracing time: 18'110'619ms
+Total execution time: 18'111'566ms = 5.03h
+Rays per second: 142'277.28 [rays/s]
+```
+
+Sponza
+![Sponza](resources/examples/sponza.png)
+```
+Resolution: 1920x1080
+Triangles in mesh: 66450
+Area lights in mesh: 0
+Mesh built in 63ms
+BVH built in 85ms
+Rendered on 16 threads
+Direct light sources: 0
+Traced rays: 2'101'590'636
+Traced shadow rays: 0
+Tracing time: 1'397'030ms
+Total execution time: 1'397'479ms = 23.3min
+Rays per second: 1'504'327.5 [rays/s]
+```
+
+Cornell box
+![Cornell box](resources/examples/cornell-original.png)
+```
+Resolution: 1000x1000
+Triangles in mesh: 36
+Area lights in mesh: 2
+Mesh built in 0ms
+BVH built in 0ms
+Rendered on 16 threads
+Direct light sources: 0
+Traced rays: 110'020'216
+Traced shadow rays: 187'305'892
+Tracing time: 13'745ms
+Total execution time: 8'004'381 [rays/s]
+Rays per second: 7'927'671 [rays/s]
+```
+
 ## Build & Run
 The project is implemented in C++20, using:
 * CMake > 3.15 - build system
@@ -37,6 +89,25 @@ After a successful build, the application can be launched with:
 or manually:
 ```bash
 ./build/raytracer config/suzanne-scene.json
+```
+
+## CLI
+In addition to `.json` configuration files, it's also possible to render scene via `tools/raytracer-cli.py` tool
+
+```
+  -i        Path to .obj file
+  -vp       Camera position [x y z]
+  -vd       Camera direction [x y z]
+  -up       Up direction [x y z]
+  -fovy     Vertical field of view [degrees]
+  -ltcol    Lights color [r g b]. Values in range <0.0, 1.0>
+  -ltpos    Light position [x y z]
+  -r        Recursion depth
+  -res      Image resolution [x y]
+  -o        Output file path
+  -np       Paths per pixel
+  -nl       Light samples per intersection
+
 ```
 
 ## Assumptions

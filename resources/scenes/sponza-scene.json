@@ -1,0 +1,44 @@
+{
+    "outputPath": "resources/renders/sponza-scene.exr",
+    "verbose": true,
+    "renderer": {
+        "pathsPerPixel": 100,
+        "lightSamplesPerHit": 1,
+        "scatterRecursionDepth": 10
+    },
+    "camera": {
+        "screenWidth": 1920,
+        "screenHeight": 1080,
+        "position": [
+            -12.0,
+            1.5,
+            2.0
+        ],
+        "direction": [
+            0.8,
+            -0.2,
+            -0.5
+        ],
+        "upDirection": [
+            0.0,
+            1.0,
+            0.0
+        ],
+        "fieldOfViewDegrees": 90
+    },
+    "background": {
+        "type": "sky"
+    },
+    "objects": [
+        {
+            "type": "obj",
+            "filePath": "resources/objects/sponza/sponza.obj",
+            "position": [
+                0.0,
+                0.0,
+                0.0
+            ]
+        }
+    ],
+    "lights": []
+}
