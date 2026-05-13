@@ -10,6 +10,7 @@
 #include <cstddef>
 #include <filesystem>
 #include <half.h>
+#include <stdexcept>
 #include <utility>
 #include <vector>
 
@@ -18,7 +19,16 @@ using PixelType = float;
 static constexpr Imf::PixelType EXR_PIXEL_TYPE = Imf::FLOAT;
 
 ExrWriter::ExrWriter(std::filesystem::path imagePath) :
-    imagePath_(std::move(imagePath)) {}
+    imagePath_(std::move(imagePath)) {
+    const std::filesystem::path parentDirectory =
+        imagePath_.parent_path();
+
+    if (not std::filesystem::exists(parentDirectory)) {
+        throw std::runtime_error(
+            parentDirectory.string() + "directory does not exist."
+        );
+    }
+}
 
 void ExrWriter::write(const Framebuffer& framebuffer) noexcept {
     const Vector2<uint32_t> resolution = framebuffer.getResolution();
