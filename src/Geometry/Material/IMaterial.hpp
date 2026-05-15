@@ -26,6 +26,7 @@ public:
 
     [[nodiscard]] virtual LinearColor calculateBrdf(
         const Point3f& origin,
+        const Vector3f& normal,
         const Vector3f& outDirection,
         const Vector3f& inDirection
     ) const = 0;

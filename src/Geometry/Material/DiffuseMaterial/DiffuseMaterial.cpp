@@ -79,10 +79,12 @@ LinearColor DiffuseMaterial::getEmission(
 
 LinearColor DiffuseMaterial::calculateBrdf(
     const Point3f& origin,
+    const Vector3f& normal,
     const Vector3f& outDirection,
     const Vector3f& inDirection
 ) const {
     (void) origin;
+    (void) normal;
     (void) outDirection;
     (void) inDirection;
 
@@ -99,7 +101,7 @@ MaterialSample DiffuseMaterial::getSample(
         transformToWorldSpace(localVersor, normal).getNormalized();
 
     const LinearColor brdf =
-        calculateBrdf(origin, outDirection, inDirection);
+        calculateBrdf(origin, normal, outDirection, inDirection);
     const float pdf = localVersor.getZ() / float(std::numbers::pi);
 
     return MaterialSample {

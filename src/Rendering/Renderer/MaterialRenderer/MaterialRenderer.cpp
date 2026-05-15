@@ -78,7 +78,10 @@ LinearColor MaterialRenderer::getDirectLight(
             }
 
             const LinearColor brdf = hitData.material->calculateBrdf(
-                hitData.hitPoint, outDirection, lightSample.inDirection
+                hitData.hitPoint,
+                hitData.hitNormal,
+                outDirection,
+                lightSample.inDirection
             );
 
             const float cosinus = std::max(

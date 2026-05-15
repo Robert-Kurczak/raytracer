@@ -46,7 +46,7 @@ PpmWriter::PpmWriter(std::filesystem::path imagePath) :
 
     if (not std::filesystem::exists(parentDirectory)) {
         throw std::runtime_error(
-            parentDirectory.string() + "directory does not exist."
+            parentDirectory.string() + " directory does not exist."
         );
     }
 }

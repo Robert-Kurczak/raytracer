@@ -64,9 +64,13 @@ float GlossyMaterial::getDistributionTerm(
         return 0.0F;
     }
 
-    const float denominator = (((alphaSquared_ - 1) * cosinus) + 1);
+    const float denominator_term =
+        (((alphaSquared_ - 1) * cosinus * cosinus) + 1);
 
-    return alphaSquared_ / (denominator * denominator);
+    return alphaSquared_ /
+           float(
+               std::numbers::pi * (denominator_term * denominator_term)
+           );
 }
 
 float GlossyMaterial::getGeometricTerm(
@@ -74,7 +78,7 @@ float GlossyMaterial::getGeometricTerm(
     const Vector3f& inDirection,
     const Vector3f& macrosurfaceNormal
 ) const {
-    static const auto lambda = [&](const Vector3f& direction) {
+    const auto lambda = [&](const Vector3f& direction) {
         const float cosinus =
             getDotProduct(direction, macrosurfaceNormal);
 
@@ -107,7 +111,8 @@ LinearColor GlossyMaterial::getFresnelTerm(
         .red = 1.0F, .green = 1.0F, .blue = 1.0F
     };
 
-    const float cosinus = getDotProduct(outDirection, microfacetNormal);
+    const float cosinus =
+        std::max(0.0F, getDotProduct(outDirection, microfacetNormal));
 
     return baseTerm +
            (unitColor - baseTerm) * float(std::pow(1.0F - cosinus, 5));
@@ -137,13 +142,36 @@ LinearColor GlossyMaterial::getEmission(
 
 LinearColor GlossyMaterial::calculateBrdf(
     const Point3f& origin,
+    const Vector3f& normal,
     const Vector3f& outDirection,
     const Vector3f& inDirection
 ) const {
     const Vector3f microfacetNormal =
         (inDirection + outDirection).getNormalized();
 
-    //
+    // TODO move it to cookTorranceBrdf taking cos values
+    const float distribution =
+        getDistributionTerm(microfacetNormal, normal);
+
+    const float geometry =
+        getGeometricTerm(outDirection, inDirection, normal);
+
+    const LinearColor fresnel =
+        getFresnelTerm(outDirection, microfacetNormal);
+
+    const float outCosinus =
+        std::max(0.0F, getDotProduct(outDirection, normal));
+    const float inCosinus =
+        std::max(0.0F, getDotProduct(inDirection, normal));
+    const float microfacetOutCosinus =
+        getDotProduct(microfacetNormal, outDirection);
+    const float microfacetMacrosurfaceCosinus =
+        getDotProduct(microfacetNormal, normal);
+
+    const LinearColor nominator = distribution * geometry * fresnel;
+    const float denominator = 4.0F * outCosinus * inCosinus;
+
+    return nominator / denominator;
 };
 
 MaterialSample GlossyMaterial::getSample(
@@ -151,11 +179,10 @@ MaterialSample GlossyMaterial::getSample(
     const Vector3f& normal,
     const Vector3f& outDirection
 ) const {
-    // TODO TBN to global
     const Vector3f microfacetNormal =
         transformToWorldSpace(createMicrofacetNormal(), normal);
     const Vector3f inDirection =
-        outDirection.getReflected(microfacetNormal);
+        (-outDirection).getReflected(microfacetNormal);
 
     // TODO compute cosinuses wi * n and wo * n here and pass them
 
@@ -180,7 +207,7 @@ MaterialSample GlossyMaterial::getSample(
 
     const LinearColor brdf = nominator / denominator;
     const float pdf = (distribution * microfacetMacrosurfaceCosinus) /
-                      (4.0F * microfacetOutCosinus);
+                      (4.0F * std::abs(microfacetOutCosinus));
 
     return MaterialSample {
         .inDirection = inDirection, .brdf = brdf, .pdf = pdf

@@ -5,8 +5,9 @@
 #include "Geometry/Hittable/Triangle/Triangle.hpp"
 #include "Geometry/Light/TriangleAreaLight/TriangleAreaLight.hpp"
 #include "Geometry/Material/DiffuseMaterial/DiffuseMaterial.hpp"
-#include "Geometry/Material/DiffuseMaterial/MtlParameters.hpp"
+#include "Geometry/Material/GlossyMaterial/GlossyMaterial.hpp"
 #include "Geometry/Material/IMaterial.hpp"
+#include "Geometry/Material/MtlParameters.hpp"
 #include "Utils/Logger/ILogger.hpp"
 
 #include <chrono>
@@ -50,7 +51,7 @@ MaterialsMap ObjMeshBuilder::extractMaterials(
         if (dataType == "newmtl") {
             if (!mtlName.empty()) {
                 materials_[mtlName] =
-                    std::make_shared<DiffuseMaterial>(mtlParameters);
+                    std::make_shared<GlossyMaterial>(mtlParameters);
             }
 
             lineStream >> mtlName;
