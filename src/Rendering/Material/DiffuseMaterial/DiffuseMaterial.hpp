@@ -1,9 +1,9 @@
 #pragma once
 
 #include "Core/Color/Color.hpp"
-#include "Geometry/Material/DiffuseMaterial/DiffuseParameters.hpp"
-#include "Geometry/Material/IMaterial.hpp"
-#include "Geometry/Material/MtlParameters.hpp"
+#include "Rendering/Material/DiffuseMaterial/DiffuseParameters.hpp"
+#include "Rendering/Material/IMaterial.hpp"
+#include "Rendering/Material/MtlParameters.hpp"
 
 namespace RTC {
 class DiffuseMaterial : public IMaterial {
@@ -15,10 +15,6 @@ private:
     ) const;
 
     [[nodiscard]] Vector3f createCosWeightVersor() const;
-    [[nodiscard]] Vector3f transformToWorldSpace(
-        const Vector3f& localVersor,
-        const Vector3f& worldNormal
-    ) const;
 
 public:
     DiffuseMaterial(const DiffuseParameters& parameters);

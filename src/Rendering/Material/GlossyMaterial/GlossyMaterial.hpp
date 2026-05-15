@@ -1,15 +1,14 @@
 #pragma once
 
 #include "Core/Color/Color.hpp"
-#include "Geometry/Material/IMaterial.hpp"
-#include "Geometry/Material/MtlParameters.hpp"
 #include "GlossyParameters.hpp"
+#include "Rendering/Material/IMaterial.hpp"
+#include "Rendering/Material/MtlParameters.hpp"
 
 namespace RTC {
 class GlossyMaterial : public IMaterial {
 private:
-    GlossyParameters parameters_;
-
+    const LinearColor fresnelBaseTerm_;
     const float alphaSquared_;
 
     [[nodiscard]] GlossyParameters convertFromMtl(
@@ -17,28 +16,34 @@ private:
     ) const;
 
     [[nodiscard]] Vector3f createMicrofacetNormal() const;
-    [[nodiscard]] Vector3f transformToWorldSpace(
-        const Vector3f& localVersor,
-        const Vector3f& worldNormal
-    ) const;
 
-    [[nodiscard]] float getDistributionTerm(
-        const Vector3f& microfacetNormal,
-        const Vector3f& macrosurfaceNormal
-    ) const;
+    [[nodiscard]] float getMaskingShadowingLambda(float cosinus) const;
+
+    [[nodiscard]] float getDistributionTerm(float normalsCosinus) const;
 
     [[nodiscard]] float getGeometricTerm(
-        const Vector3f& outDirection,
-        const Vector3f& inDirection,
-        const Vector3f& macrosurfaceNormal
+        float outCosinus,
+        float inCosinus
     ) const;
 
-    [[nodiscard]] LinearColor getFresnelTerm(
+    [[nodiscard]] LinearColor getFresnelTerm(float outCosinus) const;
+
+    struct MicrofacetData {
+        LinearColor brdf;
+        float distribution {};
+        float normalsCosinus {};
+        float microfacetOutCosinus {};
+    };
+
+    [[nodiscard]] MicrofacetData getCookTorranceTerms(
         const Vector3f& outDirection,
+        const Vector3f& inDirection,
+        const Vector3f& normal,
         const Vector3f& microfacetNormal
     ) const;
 
 public:
+    GlossyMaterial(const GlossyParameters& parameters);
     GlossyMaterial(const MtlParameters& parameters);
 
     [[nodiscard]] const LinearColor& getBaseColor() const override;

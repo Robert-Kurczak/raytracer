@@ -3,7 +3,7 @@
 #include "Core/Color/Color.hpp"
 #include "Core/Math/Vector.hpp"
 #include "Geometry/Hittable/HitData.hpp"
-#include "Geometry/Material/MaterialSample.hpp"
+#include "MaterialSample.hpp"
 
 namespace RTC {
 class IMaterial {

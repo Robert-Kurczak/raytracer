@@ -4,10 +4,9 @@
 #include "Core/Color/Color.hpp"
 #include "Geometry/Hittable/Triangle/Triangle.hpp"
 #include "Geometry/Light/TriangleAreaLight/TriangleAreaLight.hpp"
-#include "Geometry/Material/DiffuseMaterial/DiffuseMaterial.hpp"
-#include "Geometry/Material/GlossyMaterial/GlossyMaterial.hpp"
-#include "Geometry/Material/IMaterial.hpp"
-#include "Geometry/Material/MtlParameters.hpp"
+#include "Rendering/Material/DiffuseMaterial/DiffuseMaterial.hpp"
+#include "Rendering/Material/GlossyMaterial/GlossyMaterial.hpp"
+#include "Rendering/Material/MtlParameters.hpp"
 #include "Utils/Logger/ILogger.hpp"
 
 #include <chrono>

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Geometry/Material/IMaterial.hpp"
+#include "Rendering/Material/IMaterial.hpp"
 
 #include <cstdint>
 #include <memory>

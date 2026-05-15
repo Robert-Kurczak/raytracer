@@ -2,9 +2,10 @@
 
 #include "Core/Color/Color.hpp"
 #include "Core/Math/Random.hpp"
+#include "Core/Math/Transformations.hpp"
 #include "Core/Math/Vector.hpp"
-#include "Geometry/Material/DiffuseMaterial/DiffuseParameters.hpp"
-#include "Geometry/Material/MaterialSample.hpp"
+#include "Rendering/Material/DiffuseMaterial/DiffuseParameters.hpp"
+#include "Rendering/Material/MaterialSample.hpp"
 
 #include <numbers>
 
@@ -31,26 +32,6 @@ Vector3f DiffuseMaterial::createCosWeightVersor() const {
     const float z = std::sqrt(1 - uTheta);
 
     return Vector3f {x, y, z};
-}
-
-Vector3f DiffuseMaterial::transformToWorldSpace(
-    const Vector3f& localVersor,
-    const Vector3f& worldNormal
-) const {
-    const Vector3f helperAxis = std::abs(worldNormal.getX()) > 0.9
-                                    ? Vector3f {0.0F, 1.0F, 0.0F}
-                                    : Vector3f {1.0F, 0.0F, 0.0F};
-
-    const Vector3f tangent =
-        getCrossProduct(worldNormal, helperAxis).getNormalized();
-
-    const Vector3f bitangent = getCrossProduct(tangent, worldNormal);
-
-    const Vector3f globalVersor = tangent * localVersor.getX() +
-                                  bitangent * localVersor.getY() +
-                                  worldNormal * localVersor.getZ();
-
-    return globalVersor;
 }
 
 DiffuseMaterial::DiffuseMaterial(const DiffuseParameters& parameters) :

@@ -4,7 +4,7 @@
 #include "Builders/MeshBuilder/MeshBuilderResult.hpp"
 #include "Geometry/Hittable/IHittable.hpp"
 #include "Geometry/Light/ILight.hpp"
-#include "Geometry/Material/IMaterial.hpp"
+#include "Rendering/Material/IMaterial.hpp"
 #include "Utils/Logger/ILogger.hpp"
 
 #include <filesystem>
