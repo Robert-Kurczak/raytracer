@@ -1,6 +1,7 @@
 #include "GlossyMaterial.hpp"
 
 #include "Core/Color/Color.hpp"
+#include "Core/Math/Numeric.hpp"
 #include "Core/Math/Random.hpp"
 #include "Core/Math/Transformations.hpp"
 #include "Core/Math/Vector.hpp"
@@ -63,12 +64,15 @@ float GlossyMaterial::getGeometricTerm(
     const float outShadowing = getMaskingShadowingLambda(outCosinus);
     const float inShadowing = getMaskingShadowingLambda(inCosinus);
 
-    return 1.0F / (1.0F + outCosinus + inShadowing);
+    return 1.0F / (1.0F + outShadowing + inShadowing);
 }
 
-LinearColor GlossyMaterial::getFresnelTerm(float outCosinus) const {
-    return fresnelBaseTerm_ + (UNIT_LINEAR_COLOR - fresnelBaseTerm_) *
-                                  float(std::pow(1.0F - outCosinus, 5));
+LinearColor GlossyMaterial::getFresnelTerm(
+    float microfacetOutCosinus
+) const {
+    return fresnelBaseTerm_ +
+           (UNIT_LINEAR_COLOR - fresnelBaseTerm_) *
+               float(std::pow(1.0F - microfacetOutCosinus, 5));
 }
 
 GlossyMaterial::MicrofacetData GlossyMaterial::getCookTorranceTerms(
@@ -78,20 +82,20 @@ GlossyMaterial::MicrofacetData GlossyMaterial::getCookTorranceTerms(
     const Vector3f& microfacetNormal
 ) const {
     const float normalsCosinus = // m * n
-        std::max(0.0F, getDotProduct(microfacetNormal, normal));
+        std::max(EPSILON, getDotProduct(microfacetNormal, normal));
 
     const float outCosinus = // wo * n
-        getDotProduct(outDirection, normal);
+        std::max(EPSILON, getDotProduct(outDirection, normal));
 
     const float inCosinus = // wi * n
-        getDotProduct(inDirection, normal);
+        std::max(EPSILON, getDotProduct(inDirection, normal));
 
     const float microfacetOutCosinus = // wo * m
-        getDotProduct(microfacetNormal, outDirection);
+        std::max(EPSILON, getDotProduct(microfacetNormal, outDirection));
 
     const float distribution = getDistributionTerm(normalsCosinus);
     const float geometry = getGeometricTerm(outCosinus, inCosinus);
-    const LinearColor fresnel = getFresnelTerm(outCosinus);
+    const LinearColor fresnel = getFresnelTerm(microfacetOutCosinus);
 
     const LinearColor nominator = distribution * geometry * fresnel;
     const float denominator = 4.0F * outCosinus * inCosinus;

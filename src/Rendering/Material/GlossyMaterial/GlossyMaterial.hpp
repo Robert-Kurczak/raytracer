@@ -26,7 +26,9 @@ private:
         float inCosinus
     ) const;
 
-    [[nodiscard]] LinearColor getFresnelTerm(float outCosinus) const;
+    [[nodiscard]] LinearColor getFresnelTerm(
+        float microfacetOutCosinus
+    ) const;
 
     struct MicrofacetData {
         LinearColor brdf;
