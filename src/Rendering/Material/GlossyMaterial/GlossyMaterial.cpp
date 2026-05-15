@@ -148,6 +148,26 @@ LinearColor GlossyMaterial::calculateBrdf(
     return data.brdf;
 };
 
+float GlossyMaterial::calculatePdf(
+    const Vector3f& normal,
+    const Vector3f& inDirection,
+    const Vector3f& outDirection
+) const {
+    const Vector3f microfacetNormal =
+        (outDirection + inDirection).getNormalized();
+
+    const float normalsCosinus =
+        std::max(EPSILON, getDotProduct(microfacetNormal, normal));
+
+    const float microfacetOutCosinus =
+        std::max(EPSILON, getDotProduct(outDirection, microfacetNormal));
+
+    const float distribution = getDistributionTerm(normalsCosinus);
+
+    return (distribution * normalsCosinus) /
+           (4.0F * std::abs(microfacetOutCosinus));
+}
+
 MaterialSample GlossyMaterial::getSample(
     const Point3f& origin,
     const Vector3f& normal,
@@ -163,8 +183,8 @@ MaterialSample GlossyMaterial::getSample(
         outDirection, inDirection, normal, microfacetNormal
     );
 
-    float pdf = (data.distribution * data.normalsCosinus) /
-                (4.0F * std::abs(data.microfacetOutCosinus));
+    const float pdf = (data.distribution * data.normalsCosinus) /
+                      (4.0F * std::abs(data.microfacetOutCosinus));
 
     return MaterialSample {
         .inDirection = inDirection, .brdf = data.brdf, .pdf = pdf

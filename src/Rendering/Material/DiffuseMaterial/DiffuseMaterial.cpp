@@ -1,6 +1,7 @@
 #include "DiffuseMaterial.hpp"
 
 #include "Core/Color/Color.hpp"
+#include "Core/Math/Numeric.hpp"
 #include "Core/Math/Random.hpp"
 #include "Core/Math/Transformations.hpp"
 #include "Core/Math/Vector.hpp"
@@ -10,7 +11,6 @@
 #include <numbers>
 
 namespace RTC {
-static constexpr float epsilon = 0.001F;
 
 DiffuseParameters DiffuseMaterial::convertFromMtl(
     const MtlParameters& parameters
@@ -56,6 +56,17 @@ LinearColor DiffuseMaterial::getEmission(
     (void) direction;
 
     return parameters_.emission;
+}
+
+float DiffuseMaterial::calculatePdf(
+    const Vector3f& normal,
+    const Vector3f& inDirection,
+    const Vector3f& outDirection
+) const {
+    const float cosinus = // wi * n
+        std::max(EPSILON, getDotProduct(inDirection, normal));
+
+    return cosinus / float(std::numbers::pi);
 }
 
 LinearColor DiffuseMaterial::calculateBrdf(

@@ -64,6 +64,12 @@ public:
         const Vector3f& inDirection
     ) const override;
 
+    [[nodiscard]] float calculatePdf(
+        const Vector3f& normal,
+        const Vector3f& inDirection,
+        const Vector3f& outDirection
+    ) const override;
+
     [[nodiscard]] MaterialSample getSample(
         const Point3f& origin,
         const Vector3f& normal,

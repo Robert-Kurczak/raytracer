@@ -1,0 +1,111 @@
+#include "StandardMaterial.hpp"
+
+#include "Core/Math/Random.hpp"
+
+namespace RTC {
+MaterialSample StandardMaterial::getGlossySample(
+    const Point3f& origin,
+    const Vector3f& normal,
+    const Vector3f& outDirection
+) const {
+    MaterialSample glossySample =
+        glossyMaterial_->getSample(origin, normal, outDirection);
+
+    const float diffusePdf = diffuseMaterial_->calculatePdf(
+        normal, glossySample.inDirection, outDirection
+    );
+
+    const float combinedPdf = (diffuseBlendFactor_ * diffusePdf) +
+                              (glossyBlendFactor_ * glossySample.pdf);
+
+    glossySample.pdf = combinedPdf;
+
+    return glossySample;
+}
+
+MaterialSample StandardMaterial::getDiffuseSample(
+    const Point3f& origin,
+    const Vector3f& normal,
+    const Vector3f& outDirection
+) const {
+    MaterialSample diffuseSample =
+        diffuseMaterial_->getSample(origin, normal, outDirection);
+
+    const float glossyPdf = glossyMaterial_->calculatePdf(
+        normal, diffuseSample.inDirection, outDirection
+    );
+
+    const float combinedPdf = (diffuseBlendFactor_ * diffuseSample.pdf) +
+                              (glossyBlendFactor_ * glossyPdf);
+
+    diffuseSample.pdf = combinedPdf;
+
+    return diffuseSample;
+}
+
+StandardMaterial::StandardMaterial(
+    std::shared_ptr<IMaterial> diffuseMaterial,
+    std::shared_ptr<IMaterial> glossyMaterial,
+    float glossyBlendFactor
+) :
+    diffuseMaterial_(std::move(diffuseMaterial)),
+    glossyMaterial_(std::move(glossyMaterial)),
+    glossyBlendFactor_(glossyBlendFactor),
+    diffuseBlendFactor_(1.0F - glossyBlendFactor_) {}
+
+const LinearColor& StandardMaterial::getBaseColor() const {
+    return diffuseMaterial_->getBaseColor();
+}
+
+const LinearColor& StandardMaterial::getEmission() const {
+    return diffuseMaterial_->getEmission();
+}
+
+LinearColor StandardMaterial::getEmission(
+    const Point3f& origin,
+    const Vector3f& direction
+) const {
+    return diffuseMaterial_->getEmission(origin, direction);
+}
+
+LinearColor StandardMaterial::calculateBrdf(
+    const Point3f& origin,
+    const Vector3f& normal,
+    const Vector3f& outDirection,
+    const Vector3f& inDirection
+) const {
+    const auto randomFactor = getRandomNumber<float>();
+
+    if (randomFactor >= glossyBlendFactor_) {
+        return glossyMaterial_->calculateBrdf(
+            origin, normal, outDirection, inDirection
+        );
+    }
+
+    return diffuseMaterial_->calculateBrdf(
+        origin, normal, outDirection, inDirection
+    );
+}
+
+float StandardMaterial::calculatePdf(
+    const Vector3f& normal,
+    const Vector3f& inDirection,
+    const Vector3f& outDirection
+) const {
+    return 1.0F; // TODO
+}
+
+MaterialSample StandardMaterial::getSample(
+    const Point3f& origin,
+    const Vector3f& normal,
+    const Vector3f& outDirection
+) const {
+    const auto randomFactor = getRandomNumber<float>();
+
+    if (randomFactor >= glossyBlendFactor_) {
+        return getGlossySample(origin, normal, outDirection);
+    }
+
+    return getDiffuseSample(origin, normal, outDirection);
+}
+}

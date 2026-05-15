@@ -7,6 +7,7 @@
 #include "Rendering/Material/DiffuseMaterial/DiffuseMaterial.hpp"
 #include "Rendering/Material/GlossyMaterial/GlossyMaterial.hpp"
 #include "Rendering/Material/MtlParameters.hpp"
+#include "Rendering/Material/StandardMaterial/StandardMaterial.hpp"
 #include "Utils/Logger/ILogger.hpp"
 
 #include <chrono>
@@ -49,8 +50,14 @@ MaterialsMap ObjMeshBuilder::extractMaterials(
 
         if (dataType == "newmtl") {
             if (!mtlName.empty()) {
-                materials_[mtlName] =
+                const auto diffuseMaterial =
+                    std::make_shared<DiffuseMaterial>(mtlParameters);
+                const auto glossyMaterial =
                     std::make_shared<GlossyMaterial>(mtlParameters);
+
+                materials_[mtlName] = std::make_shared<StandardMaterial>(
+                    diffuseMaterial, glossyMaterial, 0.5F
+                );
             }
 
             lineStream >> mtlName;
