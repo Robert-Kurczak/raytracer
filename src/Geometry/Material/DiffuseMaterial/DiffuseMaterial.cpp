@@ -53,10 +53,10 @@ Vector3f DiffuseMaterial::transformToWorldSpace(
     return globalVersor;
 }
 
-DiffuseMaterial::DiffuseMaterial(DiffuseParameters parameters) :
+DiffuseMaterial::DiffuseMaterial(const DiffuseParameters& parameters) :
     parameters_(parameters) {}
 
-DiffuseMaterial::DiffuseMaterial(MtlParameters parameters) :
+DiffuseMaterial::DiffuseMaterial(const MtlParameters& parameters) :
     parameters_(convertFromMtl(parameters)) {}
 
 const LinearColor& DiffuseMaterial::getBaseColor() const {
