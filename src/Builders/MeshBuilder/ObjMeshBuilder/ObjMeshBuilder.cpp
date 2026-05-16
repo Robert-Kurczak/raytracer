@@ -188,7 +188,7 @@ void ObjMeshBuilder::parseFace(
 
         triangleBuffer.push_back(std::move(triangle));
 
-        if (not material->getEmission().isBlack()) {
+        if (material && not material->getEmission().isBlack()) {
             auto light = std::make_unique<TriangleAreaLight>(
                 vertexBuffer[fanBaseIndex],
                 vertexBuffer[fanIndexA],
