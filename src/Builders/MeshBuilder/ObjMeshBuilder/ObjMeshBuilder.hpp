@@ -5,6 +5,7 @@
 #include "Geometry/Hittable/IHittable.hpp"
 #include "Geometry/Light/ILight.hpp"
 #include "Rendering/Material/IMaterial.hpp"
+#include "Rendering/Material/MtlParameters.hpp"
 #include "Utils/Logger/ILogger.hpp"
 
 #include <filesystem>
@@ -23,6 +24,10 @@ using AreaLightBuffer = std::vector<std::unique_ptr<ILight>>;
 class ObjMeshBuilder : public IMeshBuilder {
 private:
     std::shared_ptr<ILogger> logger_;
+
+    [[nodiscard]] std::shared_ptr<IMaterial> createMaterial(
+        const MtlParameters& parameters
+    ) const;
 
     [[nodiscard]] MaterialsMap extractMaterials(
         const std::filesystem::path& path

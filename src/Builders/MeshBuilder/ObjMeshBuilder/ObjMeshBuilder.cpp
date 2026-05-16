@@ -24,6 +24,23 @@
 
 namespace RTC {
 
+std::shared_ptr<IMaterial> ObjMeshBuilder::createMaterial(
+    const MtlParameters& parameters
+) const {
+    const auto diffuseMaterial =
+        std::make_shared<DiffuseMaterial>(parameters);
+
+    const auto glossyMaterial =
+        std::make_shared<GlossyMaterial>(parameters);
+
+    const float glossyBlendFactor =
+        parameters.specular.getLargestComponent();
+
+    return std::make_unique<StandardMaterial>(
+        diffuseMaterial, glossyMaterial, glossyBlendFactor
+    );
+}
+
 MaterialsMap ObjMeshBuilder::extractMaterials(
     const std::filesystem::path& path
 ) const {
@@ -50,14 +67,7 @@ MaterialsMap ObjMeshBuilder::extractMaterials(
 
         if (dataType == "newmtl") {
             if (!mtlName.empty()) {
-                const auto diffuseMaterial =
-                    std::make_shared<DiffuseMaterial>(mtlParameters);
-                const auto glossyMaterial =
-                    std::make_shared<GlossyMaterial>(mtlParameters);
-
-                materials_[mtlName] = std::make_shared<StandardMaterial>(
-                    diffuseMaterial, glossyMaterial, 0.5F
-                );
+                materials_[mtlName] = createMaterial(mtlParameters);
             }
 
             lineStream >> mtlName;
@@ -87,8 +97,7 @@ MaterialsMap ObjMeshBuilder::extractMaterials(
     }
 
     if (!mtlName.empty()) {
-        materials_[mtlName] =
-            std::make_shared<DiffuseMaterial>(mtlParameters);
+        materials_[mtlName] = createMaterial(mtlParameters);
     }
 
     return materials_;

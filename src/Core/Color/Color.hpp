@@ -1,5 +1,6 @@
 #pragma once
 
+#include <algorithm>
 #include <cstdint>
 #include <ostream>
 #include <type_traits>
@@ -19,6 +20,10 @@ struct Color {
     [[nodiscard]] bool isBlack() const noexcept {
         constexpr float epsilon = 1e-6;
         return red + green + blue <= epsilon;
+    }
+
+    [[nodiscard]] Type getLargestComponent() const noexcept {
+        return std::max({red, green, blue});
     }
 
     Color& operator*=(const Type& scalar) noexcept {
