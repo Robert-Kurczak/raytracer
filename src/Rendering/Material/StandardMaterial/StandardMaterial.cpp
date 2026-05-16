@@ -11,15 +11,6 @@ MaterialSample StandardMaterial::getGlossySample(
     MaterialSample glossySample =
         glossyMaterial_->getSample(origin, normal, outDirection);
 
-    const float diffusePdf = diffuseMaterial_->calculatePdf(
-        normal, glossySample.inDirection, outDirection
-    );
-
-    const float combinedPdf = (diffuseBlendFactor_ * diffusePdf) +
-                              (glossyBlendFactor_ * glossySample.pdf);
-
-    glossySample.pdf = combinedPdf;
-
     return glossySample;
 }
 
@@ -30,15 +21,6 @@ MaterialSample StandardMaterial::getDiffuseSample(
 ) const {
     MaterialSample diffuseSample =
         diffuseMaterial_->getSample(origin, normal, outDirection);
-
-    const float glossyPdf = glossyMaterial_->calculatePdf(
-        normal, diffuseSample.inDirection, outDirection
-    );
-
-    const float combinedPdf = (diffuseBlendFactor_ * diffuseSample.pdf) +
-                              (glossyBlendFactor_ * glossyPdf);
-
-    diffuseSample.pdf = combinedPdf;
 
     return diffuseSample;
 }
@@ -74,17 +56,16 @@ LinearColor StandardMaterial::calculateBrdf(
     const Vector3f& outDirection,
     const Vector3f& inDirection
 ) const {
-    const auto randomFactor = getRandomNumber<float>();
-
-    if (randomFactor >= glossyBlendFactor_) {
-        return glossyMaterial_->calculateBrdf(
-            origin, normal, outDirection, inDirection
-        );
-    }
-
-    return diffuseMaterial_->calculateBrdf(
+    const LinearColor diffuseBrdf = diffuseMaterial_->calculateBrdf(
         origin, normal, outDirection, inDirection
     );
+
+    const LinearColor glossyBrdf = glossyMaterial_->calculateBrdf(
+        origin, normal, outDirection, inDirection
+    );
+
+    return diffuseBlendFactor_ * diffuseBrdf +
+           glossyBlendFactor_ * glossyBrdf;
 }
 
 float StandardMaterial::calculatePdf(
@@ -102,7 +83,7 @@ MaterialSample StandardMaterial::getSample(
 ) const {
     const auto randomFactor = getRandomNumber<float>();
 
-    if (randomFactor >= glossyBlendFactor_) {
+    if (randomFactor <= glossyBlendFactor_) {
         return getGlossySample(origin, normal, outDirection);
     }
 
