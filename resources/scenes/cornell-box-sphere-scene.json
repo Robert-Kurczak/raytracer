@@ -4,7 +4,8 @@
     "renderer": {
         "pathsPerPixel": 100,
         "lightSamplesPerHit": 1,
-        "scatterRecursionDepth": 10
+        "scatterRecursionDepth": 10,
+        "photonsPerLight": 100000
     },
     "camera": {
         "screenWidth": 1000,
@@ -29,9 +30,9 @@
     "background": {
         "type": "solid",
         "color": [
-            10,
-            10,
-            10
+            0,
+            0,
+            0
         ]
     },
     "objects": [
@@ -45,20 +46,5 @@
             ]
         }
     ],
-    "lights": [
-        {
-            "type": "point",
-            "position": [
-                0.0,
-                0.35,
-                -2.0
-            ],
-            "color": [
-                65,
-                65,
-                65
-            ],
-            "decay": 1
-        }
-    ]
+    "lights": []
 }

@@ -40,7 +40,16 @@ Color8Bit PpmWriter::castTo8Bit(LinearColor color) const {
 }
 
 PpmWriter::PpmWriter(std::filesystem::path imagePath) :
-    imagePath_(std::move(imagePath)) {}
+    imagePath_(std::move(imagePath)) {
+    const std::filesystem::path parentDirectory =
+        imagePath_.parent_path();
+
+    if (not std::filesystem::exists(parentDirectory)) {
+        throw std::runtime_error(
+            parentDirectory.string() + " directory does not exist."
+        );
+    }
+}
 
 void PpmWriter::write(const Framebuffer& framebuffer) noexcept {
     const Vector2<uint32_t> resolution = framebuffer.getResolution();

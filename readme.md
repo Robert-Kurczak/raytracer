@@ -7,15 +7,15 @@ Breakfast room
 Resolution: 1920x1080
 Triangles in mesh: 269764
 Area lights in mesh: 0
-Mesh built in 197ms
-BVH built in 472ms
+Mesh built in 218ms
+BVH built in 490ms
 Rendered on 16 threads
 Direct light sources: 0
-Traced rays: 2'576'729'948
+Traced rays: 2'810'738'937
 Traced shadow rays: 0
-Tracing time: 18'110'619ms
-Total execution time: 18'111'566ms = 5.03h
-Rays per second: 142'277.28 [rays/s]
+Tracing time: 17'604'123ms
+Total execution time: 17'605'125ms = 4.89h
+Rays per second: 159'654.61 [rays/s]
 ```
 
 Sponza

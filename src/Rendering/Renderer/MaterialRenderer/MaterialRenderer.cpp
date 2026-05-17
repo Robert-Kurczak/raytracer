@@ -7,7 +7,8 @@
 #include "Geometry/Hittable/HitData.hpp"
 #include "Geometry/Light/ILight.hpp"
 #include "Geometry/Light/LightSample.hpp"
-#include "Geometry/Material/MaterialSample.hpp"
+#include "Rendering/Material/IMaterial.hpp"
+#include "Rendering/Material/MaterialSample.hpp"
 #include "Rendering/Renderer/RendererStatistics.hpp"
 #include "Utils/Logger/ILogger.hpp"
 #include "World/Scene/Scene.hpp"
@@ -78,7 +79,10 @@ LinearColor MaterialRenderer::getDirectLight(
             }
 
             const LinearColor brdf = hitData.material->calculateBrdf(
-                hitData.hitPoint, outDirection, lightSample.inDirection
+                hitData.hitPoint,
+                hitData.hitNormal,
+                outDirection,
+                lightSample.inDirection
             );
 
             const float cosinus = std::max(
@@ -90,9 +94,11 @@ LinearColor MaterialRenderer::getDirectLight(
                 brdf * lightSample.outLight * cosinus / lightSample.pdf;
 
             directLight += LinearColor {
-                sample.red / float(parameters_.lightSamplesPerHit),
-                sample.green / float(parameters_.lightSamplesPerHit),
-                sample.blue / float(parameters_.lightSamplesPerHit)
+                .red = sample.red / float(parameters_.lightSamplesPerHit),
+                .green =
+                    sample.green / float(parameters_.lightSamplesPerHit),
+                .blue =
+                    sample.blue / float(parameters_.lightSamplesPerHit)
             };
         }
     }
@@ -139,11 +145,6 @@ LinearColor MaterialRenderer::traceRay(
 
     if (not hitAnything) {
         return background_->sample(ray);
-    }
-
-    // TODO should be already set
-    if (not hitData.material) {
-        hitData.material = parameters_.defaultMaterial_;
     }
 
     const Vector3f outDirection = -ray.getDirection().getNormalized();
@@ -277,7 +278,7 @@ MaterialRenderer::MaterialRenderer(
 ) :
     logger_(std::move(logger)),
     background_(std::move(background)),
-    parameters_(std::move(parameters)) {}
+    parameters_(parameters) {}
 
 RendererStatistics MaterialRenderer::render(
     const Camera& camera,

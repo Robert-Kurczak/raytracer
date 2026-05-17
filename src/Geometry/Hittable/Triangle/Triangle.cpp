@@ -4,7 +4,7 @@
 #include "Core/Math/Numeric.hpp"
 #include "Core/Math/Vector.hpp"
 #include "Geometry/BoundingVolume/AxisAlignedBoundingBox/AxisAlignedBoundingBox.hpp"
-#include "Geometry/Material/IMaterial.hpp"
+#include "Rendering/Material/IMaterial.hpp"
 
 #include <memory>
 

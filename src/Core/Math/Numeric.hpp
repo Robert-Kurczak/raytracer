@@ -19,4 +19,6 @@ requires std::is_floating_point_v<Type>
 constexpr double degreesToRadians(Type value) noexcept {
     return value * (std::numbers::pi / 180.0);
 }
+
+inline constexpr float EPSILON = 0.00001F;
 }

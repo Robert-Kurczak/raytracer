@@ -6,6 +6,8 @@
 #include "Builders/MeshBuilder/IMeshBuilder.hpp"
 #include "Builders/MeshBuilder/MeshBuilderResult.hpp"
 #include "Builders/MeshBuilder/ObjMeshBuilder/ObjMeshBuilder.hpp"
+#include "Builders/PhotonMapBuilder/IPhotonMapBuilder.hpp"
+#include "Builders/PhotonMapBuilder/PhotonMapBuilder.hpp"
 #include "Core/Color/Color.hpp"
 #include "Geometry/Background/IBackground.hpp"
 #include "Geometry/Background/SkyBackground/SkyBackground.hpp"
@@ -14,11 +16,11 @@
 #include "Geometry/Hittable/Sphere/Sphere.hpp"
 #include "Geometry/Light/ILight.hpp"
 #include "Geometry/Light/PointLight/PointLight.hpp"
-#include "Geometry/Material/DiffuseMaterial/DiffuseMaterial.hpp"
-#include "Geometry/Material/DiffuseMaterial/DiffuseParameters.hpp"
 #include "Rendering/Renderer/IRenderer.hpp"
 #include "Rendering/Renderer/MaterialRenderer/MaterialRenderer.hpp"
 #include "Rendering/Renderer/MaterialRenderer/MaterialRendererParameters.hpp"
+#include "Rendering/Renderer/PhotonMapRenderer/PhotonMapRenderer.hpp"
+#include "Rendering/Renderer/PhotonMapRenderer/PhotonMapRendererParameters.hpp"
 #include "Rendering/Writer/ExrWriter/ExrWriter.hpp"
 #include "Rendering/Writer/PpmWriter/PpmWriter.hpp"
 #include "Utils/Logger/CoutLogger/CoutLogger.hpp"
@@ -37,11 +39,6 @@
 using json = nlohmann::json;
 
 namespace RTC {
-static constexpr DiffuseParameters DEFAULT_MATERIAL_PARAMETERS {
-    .baseColor {.red = 0.50F, .green = 0.10F, .blue = 0.40F},
-    .emission = LinearColor::black()
-};
-
 static constexpr LinearColor DEFAULT_BACKGROUND_COLOR {
     .red = 0.3F,
     .green = 0.3F,
@@ -129,6 +126,39 @@ std::unique_ptr<IRenderer> JsonEnvironmentBuilder::parseRenderer(
     const std::shared_ptr<ILogger>& logger,
     const nlohmann::json& jsonContent
 ) const {
+    std::unique_ptr<IBackground> background =
+        parseBackground(jsonContent);
+
+    const bool photonMappingEnabled =
+        jsonContent["renderer"]["photonMappingEnabled"].get<bool>();
+
+    if (photonMappingEnabled) {
+        const PhotonMapRendererParameters parameters {
+            .pathsPerPixel =
+                jsonContent["renderer"]["pathsPerPixel"].get<uint32_t>(),
+            .lightSamplesPerHit =
+                jsonContent["renderer"]["lightSamplesPerHit"]
+                    .get<uint32_t>(),
+            .scatterRecursionDepth =
+                jsonContent["renderer"]["scatterRecursionDepth"]
+                    .get<uint32_t>(),
+            .emittedPhotons =
+                jsonContent["renderer"]["emittedPhotons"].get<uint32_t>(),
+            .nearestPhotons =
+                jsonContent["renderer"]["nearestPhotons"].get<uint32_t>(),
+        };
+
+        std::unique_ptr<IPhotonMapBuilder> photonMapBuilder =
+            std::make_unique<PhotonMapBuilder>(logger);
+
+        return std::make_unique<PhotonMapRenderer>(
+            logger,
+            std::move(photonMapBuilder),
+            std::move(background),
+            parameters
+        );
+    }
+
     const MaterialRendererParameters parameters {
         .pathsPerPixel =
             jsonContent["renderer"]["pathsPerPixel"].get<uint32_t>(),
@@ -137,12 +167,7 @@ std::unique_ptr<IRenderer> JsonEnvironmentBuilder::parseRenderer(
         .scatterRecursionDepth =
             jsonContent["renderer"]["scatterRecursionDepth"]
                 .get<uint32_t>(),
-        .defaultMaterial_ =
-            std::make_shared<DiffuseMaterial>(DEFAULT_MATERIAL_PARAMETERS)
     };
-
-    std::unique_ptr<IBackground> background =
-        parseBackground(jsonContent);
 
     return std::make_unique<MaterialRenderer>(
         logger, std::move(background), parameters
