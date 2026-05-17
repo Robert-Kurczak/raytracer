@@ -1,10 +1,11 @@
 #include "AxisAlignedBoundingBox.hpp"
 
+#include "Core/Math/Numeric.hpp"
+
+#include <cassert>
 #include <cstdint>
 
 namespace RTC {
-static constexpr float EPSILON = 0.0001F;
-
 static constexpr uint8_t X_AXIS_INDEX = 0;
 static constexpr uint8_t Y_AXIS_INDEX = 1;
 static constexpr uint8_t Z_AXIS_INDEX = 2;

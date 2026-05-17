@@ -29,9 +29,9 @@
     "background": {
         "type": "solid",
         "color": [
-            10,
-            10,
-            10
+            0,
+            0,
+            0
         ]
     },
     "objects": [
@@ -45,20 +45,5 @@
             ]
         }
     ],
-    "lights": [
-        {
-            "type": "point",
-            "position": [
-                0.0,
-                0.35,
-                -2.0
-            ],
-            "color": [
-                65,
-                65,
-                65
-            ],
-            "decay": 1
-        }
-    ]
+    "lights": []
 }

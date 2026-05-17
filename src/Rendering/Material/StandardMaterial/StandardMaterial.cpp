@@ -73,7 +73,13 @@ float StandardMaterial::calculatePdf(
     const Vector3f& inDirection,
     const Vector3f& outDirection
 ) const {
-    return 1.0F; // TODO
+    const float diffusePdf =
+        diffuseMaterial_->calculatePdf(normal, inDirection, outDirection);
+    const float glossyPdf =
+        glossyMaterial_->calculatePdf(normal, inDirection, outDirection);
+
+    return (diffuseBlendFactor_ * diffusePdf) +
+           (glossyBlendFactor_ * glossyPdf);
 }
 
 MaterialSample StandardMaterial::getSample(

@@ -15,6 +15,8 @@ private:
         const MtlParameters& parameters
     ) const;
 
+    [[nodiscard]] float getAlphaSquared(float roughness) const;
+
     [[nodiscard]] Vector3f createMicrofacetNormal() const;
 
     [[nodiscard]] float getMaskingShadowingLambda(float cosinus) const;
