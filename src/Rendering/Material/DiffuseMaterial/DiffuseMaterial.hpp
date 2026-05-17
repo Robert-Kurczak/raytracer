@@ -1,9 +1,9 @@
 #pragma once
 
 #include "Core/Color/Color.hpp"
-#include "Geometry/Material/DiffuseMaterial/DiffuseParameters.hpp"
-#include "Geometry/Material/DiffuseMaterial/MtlParameters.hpp"
-#include "Geometry/Material/IMaterial.hpp"
+#include "Rendering/Material/DiffuseMaterial/DiffuseParameters.hpp"
+#include "Rendering/Material/IMaterial.hpp"
+#include "Rendering/Material/MtlParameters.hpp"
 
 namespace RTC {
 class DiffuseMaterial : public IMaterial {
@@ -15,14 +15,10 @@ private:
     ) const;
 
     [[nodiscard]] Vector3f createCosWeightVersor() const;
-    [[nodiscard]] Vector3f transformToWorldSpace(
-        const Vector3f& localVersor,
-        const Vector3f& worldNormal
-    ) const;
 
 public:
-    DiffuseMaterial(DiffuseParameters parameters);
-    DiffuseMaterial(MtlParameters parameters);
+    DiffuseMaterial(const DiffuseParameters& parameters);
+    DiffuseMaterial(const MtlParameters& parameters);
 
     [[nodiscard]] const LinearColor& getBaseColor() const override;
 
@@ -33,8 +29,15 @@ public:
         const Vector3f& direction
     ) const override;
 
+    [[nodiscard]] float calculatePdf(
+        const Vector3f& normal,
+        const Vector3f& inDirection,
+        const Vector3f& outDirection
+    ) const override;
+
     [[nodiscard]] LinearColor calculateBrdf(
         const Point3f& origin,
+        const Vector3f& normal,
         const Vector3f& outDirection,
         const Vector3f& inDirection
     ) const override;

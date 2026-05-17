@@ -2,7 +2,7 @@
 
 #include "Geometry/BoundingVolume/AxisAlignedBoundingBox/AxisAlignedBoundingBox.hpp"
 #include "Geometry/Hittable/IHittable.hpp"
-#include "Geometry/Material/IMaterial.hpp"
+#include "Rendering/Material/IMaterial.hpp"
 
 #include <memory>
 

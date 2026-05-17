@@ -1,15 +1,16 @@
 #include "DiffuseMaterial.hpp"
 
 #include "Core/Color/Color.hpp"
+#include "Core/Math/Numeric.hpp"
 #include "Core/Math/Random.hpp"
+#include "Core/Math/Transformations.hpp"
 #include "Core/Math/Vector.hpp"
-#include "Geometry/Material/DiffuseMaterial/DiffuseParameters.hpp"
-#include "Geometry/Material/MaterialSample.hpp"
+#include "Rendering/Material/DiffuseMaterial/DiffuseParameters.hpp"
+#include "Rendering/Material/MaterialSample.hpp"
 
 #include <numbers>
 
 namespace RTC {
-static constexpr float epsilon = 0.001F;
 
 DiffuseParameters DiffuseMaterial::convertFromMtl(
     const MtlParameters& parameters
@@ -33,30 +34,10 @@ Vector3f DiffuseMaterial::createCosWeightVersor() const {
     return Vector3f {x, y, z};
 }
 
-Vector3f DiffuseMaterial::transformToWorldSpace(
-    const Vector3f& localVersor,
-    const Vector3f& worldNormal
-) const {
-    const Vector3f helperAxis = std::abs(worldNormal.getX()) > 0.9
-                                    ? Vector3f {0.0F, 1.0F, 0.0F}
-                                    : Vector3f {1.0F, 0.0F, 0.0F};
-
-    const Vector3f tangent =
-        getCrossProduct(worldNormal, helperAxis).getNormalized();
-
-    const Vector3f bitangent = getCrossProduct(tangent, worldNormal);
-
-    const Vector3f globalVersor = tangent * localVersor.getX() +
-                                  bitangent * localVersor.getY() +
-                                  worldNormal * localVersor.getZ();
-
-    return globalVersor;
-}
-
-DiffuseMaterial::DiffuseMaterial(DiffuseParameters parameters) :
+DiffuseMaterial::DiffuseMaterial(const DiffuseParameters& parameters) :
     parameters_(parameters) {}
 
-DiffuseMaterial::DiffuseMaterial(MtlParameters parameters) :
+DiffuseMaterial::DiffuseMaterial(const MtlParameters& parameters) :
     parameters_(convertFromMtl(parameters)) {}
 
 const LinearColor& DiffuseMaterial::getBaseColor() const {
@@ -77,12 +58,25 @@ LinearColor DiffuseMaterial::getEmission(
     return parameters_.emission;
 }
 
+float DiffuseMaterial::calculatePdf(
+    const Vector3f& normal,
+    const Vector3f& inDirection,
+    const Vector3f& outDirection
+) const {
+    const float cosinus = // wi * n
+        std::max(EPSILON, getDotProduct(inDirection, normal));
+
+    return cosinus / float(std::numbers::pi);
+}
+
 LinearColor DiffuseMaterial::calculateBrdf(
     const Point3f& origin,
+    const Vector3f& normal,
     const Vector3f& outDirection,
     const Vector3f& inDirection
 ) const {
     (void) origin;
+    (void) normal;
     (void) outDirection;
     (void) inDirection;
 
@@ -99,7 +93,7 @@ MaterialSample DiffuseMaterial::getSample(
         transformToWorldSpace(localVersor, normal).getNormalized();
 
     const LinearColor brdf =
-        calculateBrdf(origin, outDirection, inDirection);
+        calculateBrdf(origin, normal, outDirection, inDirection);
     const float pdf = localVersor.getZ() / float(std::numbers::pi);
 
     return MaterialSample {

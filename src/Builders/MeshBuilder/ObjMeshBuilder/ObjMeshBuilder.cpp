@@ -4,9 +4,10 @@
 #include "Core/Color/Color.hpp"
 #include "Geometry/Hittable/Triangle/Triangle.hpp"
 #include "Geometry/Light/TriangleAreaLight/TriangleAreaLight.hpp"
-#include "Geometry/Material/DiffuseMaterial/DiffuseMaterial.hpp"
-#include "Geometry/Material/DiffuseMaterial/MtlParameters.hpp"
-#include "Geometry/Material/IMaterial.hpp"
+#include "Rendering/Material/DiffuseMaterial/DiffuseMaterial.hpp"
+#include "Rendering/Material/GlossyMaterial/GlossyMaterial.hpp"
+#include "Rendering/Material/MtlParameters.hpp"
+#include "Rendering/Material/StandardMaterial/StandardMaterial.hpp"
 #include "Utils/Logger/ILogger.hpp"
 
 #include <chrono>
@@ -22,6 +23,23 @@
 #include <vector>
 
 namespace RTC {
+
+std::shared_ptr<IMaterial> ObjMeshBuilder::createMaterial(
+    const MtlParameters& parameters
+) const {
+    const auto diffuseMaterial =
+        std::make_shared<DiffuseMaterial>(parameters);
+
+    const auto glossyMaterial =
+        std::make_shared<GlossyMaterial>(parameters);
+
+    const float glossyBlendFactor =
+        parameters.specular.getLargestComponent();
+
+    return std::make_unique<StandardMaterial>(
+        diffuseMaterial, glossyMaterial, glossyBlendFactor
+    );
+}
 
 MaterialsMap ObjMeshBuilder::extractMaterials(
     const std::filesystem::path& path
@@ -49,8 +67,7 @@ MaterialsMap ObjMeshBuilder::extractMaterials(
 
         if (dataType == "newmtl") {
             if (!mtlName.empty()) {
-                materials_[mtlName] =
-                    std::make_shared<DiffuseMaterial>(mtlParameters);
+                materials_[mtlName] = createMaterial(mtlParameters);
             }
 
             lineStream >> mtlName;
@@ -80,8 +97,7 @@ MaterialsMap ObjMeshBuilder::extractMaterials(
     }
 
     if (!mtlName.empty()) {
-        materials_[mtlName] =
-            std::make_shared<DiffuseMaterial>(mtlParameters);
+        materials_[mtlName] = createMaterial(mtlParameters);
     }
 
     return materials_;
@@ -181,7 +197,7 @@ void ObjMeshBuilder::parseFace(
 
         triangleBuffer.push_back(std::move(triangle));
 
-        if (not material->getEmission().isBlack()) {
+        if (material && not material->getEmission().isBlack()) {
             auto light = std::make_unique<TriangleAreaLight>(
                 vertexBuffer[fanBaseIndex],
                 vertexBuffer[fanIndexA],

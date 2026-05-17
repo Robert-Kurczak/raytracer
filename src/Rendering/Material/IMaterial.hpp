@@ -3,7 +3,7 @@
 #include "Core/Color/Color.hpp"
 #include "Core/Math/Vector.hpp"
 #include "Geometry/Hittable/HitData.hpp"
-#include "Geometry/Material/MaterialSample.hpp"
+#include "MaterialSample.hpp"
 
 namespace RTC {
 class IMaterial {
@@ -24,8 +24,15 @@ public:
         const Vector3f& direction
     ) const = 0;
 
+    [[nodiscard]] virtual float calculatePdf(
+        const Vector3f& normal,
+        const Vector3f& inDirection,
+        const Vector3f& outDirection
+    ) const = 0;
+
     [[nodiscard]] virtual LinearColor calculateBrdf(
         const Point3f& origin,
+        const Vector3f& normal,
         const Vector3f& outDirection,
         const Vector3f& inDirection
     ) const = 0;
