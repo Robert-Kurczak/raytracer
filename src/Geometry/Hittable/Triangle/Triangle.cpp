@@ -9,6 +9,25 @@
 #include <memory>
 
 namespace RTC {
+std::optional<Vector3f> Triangle::createFlatNormalIfNeccessary() const {
+    if (vertexA_.normal && vertexB_.normal && vertexC_.normal) {
+        return std::nullopt;
+    }
+
+    return getCrossProduct(edge1_, edge2_).getNormalized();
+}
+
+Vector3f Triangle::createSmoothNormal(
+    const MollerTrumboreResult& result
+) const {
+    const Vector3f interpolatedNormal =
+        result.barycentricWeightA * vertexA_.normal.value() +
+        result.barycentricWeightB * vertexB_.normal.value() +
+        result.barycentricWeightC * vertexC_.normal.value();
+
+    return interpolatedNormal.getNormalized();
+}
+
 Triangle::MollerTrumboreResult Triangle::solveMollerTrumbore(
     const Ray& ray
 ) const {
@@ -52,7 +71,13 @@ Triangle::MollerTrumboreResult Triangle::solveMollerTrumbore(
 
     const float rayT = rayTDeterminant / mainDeterminant;
 
-    return MollerTrumboreResult {.hasSolution = true, .t0 = rayT};
+    return MollerTrumboreResult {
+        .hasSolution = true,
+        .t0 = rayT,
+        .barycentricWeightA = weight1,
+        .barycentricWeightB = weight2,
+        .barycentricWeightC = 1.0F - weight1 - weight2
+    };
 }
 
 [[nodiscard]] AxisAlignedBoundingBox Triangle::createBoundingBox(
@@ -74,25 +99,30 @@ Triangle::MollerTrumboreResult Triangle::solveMollerTrumbore(
     const float maxZ =
         std::max({vertexA.getZ(), vertexB.getZ(), vertexC.getZ()});
 
-    const Point3<float> minPoint {minX, minY, minZ};
-    const Point3<float> maxPoint {maxX, maxY, maxZ};
+    const Point3f minPoint {minX, minY, minZ};
+    const Point3f maxPoint {maxX, maxY, maxZ};
 
     return AxisAlignedBoundingBox {minPoint, maxPoint};
 }
 
 void Triangle::updateHitData(
-    float rayT,
+    const MollerTrumboreResult& result,
     const Ray& ray,
     HitData& hitData
 ) const {
-    const Point3<float> tPoint = ray.at(rayT);
+    const Point3f tPoint = ray.at(result.t0);
+
+    Vector3f normal =
+        flatNormal_ ? flatNormal_.value() : createSmoothNormal(result);
+
     const bool isFrontFace =
-        getDotProduct(ray.getDirection(), outwardNormal_) < 0;
+        getDotProduct(ray.getDirection(), normal) < 0;
 
-    const Vector3<float> normal =
-        isFrontFace ? outwardNormal_ : -outwardNormal_;
+    if (not isFrontFace) {
+        normal = -normal;
+    }
 
-    hitData.rayT = rayT;
+    hitData.rayT = result.t0;
     hitData.hitPoint = tPoint;
     hitData.hitNormal = normal;
     hitData.isFrontFace = isFrontFace;
@@ -116,7 +146,7 @@ Triangle::Triangle(
     material_(std::move(material)),
     edge1_(vertexA_.position - vertexC_.position),
     edge2_(vertexB_.position - vertexC_.position),
-    outwardNormal_(getCrossProduct(edge1_, edge2_).getNormalized()) {}
+    flatNormal_(createFlatNormalIfNeccessary()) {}
 
 [[nodiscard]] const AxisAlignedBoundingBox& Triangle::
     getBoundingBox() const {
@@ -135,7 +165,7 @@ bool Triangle::hitClosest(
     }
 
     if (interval.contains(result.t0)) {
-        updateHitData(result.t0, ray, hitData);
+        updateHitData(result, ray, hitData);
         return true;
     }
 
