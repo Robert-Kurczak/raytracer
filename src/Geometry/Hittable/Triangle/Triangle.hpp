@@ -2,6 +2,7 @@
 
 #include "Geometry/BoundingVolume/AxisAlignedBoundingBox/AxisAlignedBoundingBox.hpp"
 #include "Geometry/Hittable/IHittable.hpp"
+#include "Geometry/Vertex.hpp"
 #include "Rendering/Material/IMaterial.hpp"
 
 #include <memory>
@@ -9,9 +10,10 @@
 namespace RTC {
 class Triangle : public IHittable {
 private:
-    const Point3<float> vertexA_;
-    const Point3<float> vertexB_;
-    const Point3<float> vertexC_;
+    const Vertex vertexA_;
+    const Vertex vertexB_;
+    const Vertex vertexC_;
+
     const AxisAlignedBoundingBox boundingBox_;
     std::shared_ptr<IMaterial> material_;
 
@@ -42,9 +44,9 @@ private:
 
 public:
     Triangle(
-        const Point3<float>& vertexA,
-        const Point3<float>& vertexB,
-        const Point3<float>& vertexC,
+        Vertex vertexA,
+        Vertex vertexB,
+        Vertex vertexC,
         std::shared_ptr<IMaterial> material
     );
 

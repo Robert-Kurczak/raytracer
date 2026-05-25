@@ -4,12 +4,14 @@
 #include "Builders/MeshBuilder/MeshBuilderResult.hpp"
 #include "Geometry/Hittable/IHittable.hpp"
 #include "Geometry/Light/ILight.hpp"
+#include "Geometry/Vertex.hpp"
 #include "Rendering/Material/IMaterial.hpp"
 #include "Rendering/Material/MtlParameters.hpp"
 #include "Utils/Logger/ILogger.hpp"
 
 #include <filesystem>
 #include <memory>
+#include <optional>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -23,6 +25,12 @@ using AreaLightBuffer = std::vector<std::unique_ptr<ILight>>;
 
 class ObjMeshBuilder : public IMeshBuilder {
 private:
+    struct FaceIndices {
+        uint32_t vertexIndex = 0;
+        std::optional<uint32_t> textureCoordIndex;
+        std::optional<uint32_t> normalIndex;
+    };
+
     std::shared_ptr<ILogger> logger_;
 
     [[nodiscard]] std::shared_ptr<IMaterial> createMaterial(
@@ -46,27 +54,53 @@ private:
     ) const;
 
     void parseVertex(
-        std::vector<Point3<float>>& vertexBuffer,
-        const Vector3<float>& offset,
+        std::vector<Point3f>& vertexBuffer,
+        const Vector3f& offset,
         std::stringstream& lineStream
     ) const;
 
-    [[nodiscard]] uint32_t parseVertexIndex(
+    void parseTextureCoord(
+        std::vector<Point2f>& textureCoordsBuffer,
+        std::stringstream& lineStream
+    ) const;
+
+    void parseVertexNormal(
+        std::vector<Vector3f>& normalBuffer,
+        std::stringstream& lineStream
+    ) const;
+
+    [[nodiscard]] uint32_t convertObjIndexToBufferIndex(
+        int objIndex,
+        uint32_t bufferSize
+    ) const;
+
+    [[nodiscard]] FaceIndices parseFaceIndices(
         const std::string& entry,
-        uint32_t verticesAmount
+        uint32_t verticesAmount,
+        uint32_t textureCoordsAmount,
+        uint32_t normalsAmount
+    ) const;
+
+    [[nodiscard]] Vertex convertFaceIndicesToVertex(
+        const FaceIndices& faceIndices,
+        const std::vector<Point3f>& vertexBuffer,
+        const std::vector<Point2f>& textureCoordsBuffer,
+        const std::vector<Vector3f>& normalsBuffer
     ) const;
 
     void parseFace(
         TriangleBuffer& triangleBuffer,
         AreaLightBuffer& areaLightBuffer,
+        const std::vector<Point3f>& vertexBuffer,
+        const std::vector<Point2f>& textureCoordsBuffer,
+        const std::vector<Vector3f>& normalsBuffer,
         const std::shared_ptr<IMaterial>& material,
-        const std::vector<Point3<float>>& vertexBuffer,
         std::stringstream& lineStream
     ) const;
 
     [[nodiscard]] MeshBuilderResult parseMesh(
         const std::filesystem::path& path,
-        const Vector3<float>& position
+        const Vector3f& position
     ) const;
 
 public:
@@ -74,7 +108,7 @@ public:
 
     [[nodiscard]] MeshBuilderResult buildFromFile(
         const std::filesystem::path& path,
-        const Vector3<float>& position
+        const Vector3f& position
     ) const override;
 };
 }

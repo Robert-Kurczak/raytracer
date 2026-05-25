@@ -12,10 +12,10 @@ namespace RTC {
 Triangle::MollerTrumboreResult Triangle::solveMollerTrumbore(
     const Ray& ray
 ) const {
-    const Vector3<float> reversedDirection = ray.getDirection() * -1.0F;
-    const Vector3<float> crossedEdge2 =
+    const Vector3f reversedDirection = -ray.getDirection();
+    const Vector3f crossedEdge2 =
         getCrossProduct(edge2_, reversedDirection);
-    const Vector3<float> solution = ray.getOrigin() - vertexC_;
+    const Vector3f solution = ray.getOrigin() - vertexC_.position;
 
     const Interval<float> unitInterval {0.0F, 1.0F};
     const float mainDeterminant = getDotProduct(edge1_, crossedEdge2);
@@ -56,9 +56,9 @@ Triangle::MollerTrumboreResult Triangle::solveMollerTrumbore(
 }
 
 [[nodiscard]] AxisAlignedBoundingBox Triangle::createBoundingBox(
-    const Point3<float>& vertexA,
-    const Point3<float>& vertexB,
-    const Point3<float>& vertexC
+    const Point3f& vertexA,
+    const Point3f& vertexB,
+    const Point3f& vertexC
 ) const {
     const float minX =
         std::min({vertexA.getX(), vertexB.getX(), vertexC.getX()});
@@ -100,18 +100,22 @@ void Triangle::updateHitData(
 }
 
 Triangle::Triangle(
-    const Point3<float>& vertexA,
-    const Point3<float>& vertexB,
-    const Point3<float>& vertexC,
+    Vertex vertexA,
+    Vertex vertexB,
+    Vertex vertexC,
     std::shared_ptr<IMaterial> material
 ) :
     vertexA_(vertexA),
     vertexB_(vertexB),
     vertexC_(vertexC),
-    boundingBox_(createBoundingBox(vertexA, vertexB, vertexC)),
+    boundingBox_(createBoundingBox(
+        vertexA_.position,
+        vertexB_.position,
+        vertexC_.position
+    )),
     material_(std::move(material)),
-    edge1_(vertexA_ - vertexC_),
-    edge2_(vertexB_ - vertexC_),
+    edge1_(vertexA_.position - vertexC_.position),
+    edge2_(vertexB_.position - vertexC_.position),
     outwardNormal_(getCrossProduct(edge1_, edge2_).getNormalized()) {}
 
 [[nodiscard]] const AxisAlignedBoundingBox& Triangle::
