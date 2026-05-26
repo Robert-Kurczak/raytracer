@@ -1,5 +1,6 @@
 #include "PhotonMapBuilder.hpp"
 
+#include <chrono>
 #include <memory>
 #include <utility>
 
@@ -58,8 +59,28 @@ PhotonMapBuilder::PhotonMapBuilder(std::shared_ptr<ILogger> logger) :
     logger_(std::move(logger)) {}
 
 PhotonMap PhotonMapBuilder::build(std::vector<Photon>&& photons) const {
+    logger_->log(LogLevel::Info, "Building photon map");
+
+    logger_->log(
+        LogLevel::Info, std::format("Photons amount: {}", photons.size())
+    );
+
+    const auto timeStart = std::chrono::high_resolution_clock::now();
+
     std::unique_ptr<PhotonNode> treeRoot =
         buildRecursively(photons, 0, photons.size());
+
+    const auto timeEnd = std::chrono::high_resolution_clock::now();
+
+    const auto executionTime =
+        std::chrono::duration_cast<std::chrono::milliseconds>(
+            timeEnd - timeStart
+        );
+
+    logger_->log(
+        LogLevel::Info,
+        std::format("Photon map built in {}", executionTime)
+    );
 
     return PhotonMap {std::move(treeRoot)};
 }

@@ -33,17 +33,14 @@ MaterialSample TransparentMaterial::createReflection(
     };
 }
 
-float TransparentMaterial::getFresnelFactor(
-    float refractionCosine
-) const {
+float TransparentMaterial::getFresnelFactor(float incidenceCosine) const {
     const float baseTerm = (1.0F - parameters_.refractionIndex) /
                            (1.0F + parameters_.refractionIndex);
 
     const float squaredBaseTerm = baseTerm * baseTerm;
 
-    return squaredBaseTerm +
-           ((1.0F - squaredBaseTerm) *
-            float(std::pow(1.0F - refractionCosine, 5)));
+    return squaredBaseTerm + ((1.0F - squaredBaseTerm) *
+                              float(std::pow(1.0F - incidenceCosine, 5)));
 }
 
 TransparentMaterial::TransparentMaterial(
@@ -127,7 +124,7 @@ MaterialSample TransparentMaterial::getSample(
         ((incidenceCosine / relativeRefractionIndex) - refractionCosine) *
             refractionNormal;
 
-    if (getRandomNumber<float>() <= getFresnelFactor(refractionCosine)) {
+    if (getRandomNumber<float>() <= getFresnelFactor(incidenceCosine)) {
         return createReflection(outDirection, refractionNormal);
     }
 

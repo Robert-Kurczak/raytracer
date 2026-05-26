@@ -20,7 +20,7 @@ private:
         const Vector3f& refractionNormal
     ) const;
 
-    [[nodiscard]] float getFresnelFactor(float refractionCosine) const;
+    [[nodiscard]] float getFresnelFactor(float incidenceCosine) const;
 
 public:
     TransparentMaterial(TransparentParameters parameters);
