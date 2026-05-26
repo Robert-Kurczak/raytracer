@@ -45,6 +45,20 @@ LinearColor MaterialRenderer::getIndirectLight(
         hitData.hitPoint, hitData.hitNormal, outDirection
     );
 
+    if (materialSample.scatterType == ScatterType::Specular) {
+        const Point3f specularOffsetPoint =
+            hitData.hitPoint + epsilon * materialSample.inDirection;
+
+        const Ray scatterRay {
+            specularOffsetPoint, materialSample.inDirection
+        };
+
+        const LinearColor scatterLight =
+            traceRay(scatterRay, scene, statistics, recursionDepth + 1);
+
+        return (materialSample.brdf * scatterLight) / materialSample.pdf;
+    }
+
     const Ray scatterRay {offsetHitPoint, materialSample.inDirection};
 
     const LinearColor scatterLight =
@@ -54,7 +68,7 @@ LinearColor MaterialRenderer::getIndirectLight(
         0.0F, getDotProduct(hitData.hitNormal, materialSample.inDirection)
     );
 
-    return materialSample.brdf * scatterLight * cosinus /
+    return (materialSample.brdf * scatterLight * cosinus) /
            materialSample.pdf;
 }
 

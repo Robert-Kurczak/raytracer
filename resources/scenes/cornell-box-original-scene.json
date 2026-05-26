@@ -5,7 +5,7 @@
         "pathsPerPixel": 20,
         "lightSamplesPerHit": 1,
         "scatterRecursionDepth": 10,
-        "photonMappingEnabled": true,
+        "photonMappingEnabled": false,
         "emittedPhotons": 100000,
         "nearestPhotons": 40
     },

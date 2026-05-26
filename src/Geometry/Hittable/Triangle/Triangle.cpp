@@ -112,20 +112,12 @@ void Triangle::updateHitData(
 ) const {
     const Point3f tPoint = ray.at(result.t0);
 
-    Vector3f normal =
+    const Vector3f normal =
         flatNormal_ ? flatNormal_.value() : createSmoothNormal(result);
-
-    const bool isFrontFace =
-        getDotProduct(ray.getDirection(), normal) < 0;
-
-    if (not isFrontFace) {
-        normal = -normal;
-    }
 
     hitData.rayT = result.t0;
     hitData.hitPoint = tPoint;
     hitData.hitNormal = normal;
-    hitData.isFrontFace = isFrontFace;
     hitData.material = material_;
 }
 

@@ -9,6 +9,7 @@
 #include "Rendering/Material/GlossyMaterial/GlossyMaterial.hpp"
 #include "Rendering/Material/MtlParameters.hpp"
 #include "Rendering/Material/StandardMaterial/StandardMaterial.hpp"
+#include "Rendering/Material/TransparentMaterial/TransparentMaterial.hpp"
 #include "Utils/Logger/ILogger.hpp"
 #include "Utils/StringUtils.hpp"
 
@@ -34,6 +35,13 @@ static constexpr DiffuseParameters DEFAULT_MATERIAL_PARAMETERS {
 std::shared_ptr<IMaterial> ObjMeshBuilder::createMaterial(
     const MtlParameters& parameters
 ) const {
+    const bool isTransparent =
+        not parameters.transmisionFilter.isBlack() and
+        parameters.refractionIndex > 1.0F;
+    if (isTransparent) {
+        return std::make_shared<TransparentMaterial>(parameters);
+    }
+
     const auto diffuseMaterial =
         std::make_shared<DiffuseMaterial>(parameters);
 
@@ -95,11 +103,16 @@ MaterialsMap ObjMeshBuilder::extractMaterials(
             lineStream >> mtlParameters.emission.red;
             lineStream >> mtlParameters.emission.green;
             lineStream >> mtlParameters.emission.blue;
-
+        } else if (dataType == "Tf") {
+            lineStream >> mtlParameters.transmisionFilter.red;
+            lineStream >> mtlParameters.transmisionFilter.green;
+            lineStream >> mtlParameters.transmisionFilter.blue;
         } else if (dataType == "Tr") {
             lineStream >> mtlParameters.transparency;
         } else if (dataType == "Ns") {
             lineStream >> mtlParameters.shininess;
+        } else if (dataType == "Ni") {
+            lineStream >> mtlParameters.refractionIndex;
         }
     }
 
