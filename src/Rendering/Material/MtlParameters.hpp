@@ -2,6 +2,8 @@
 
 #include "Core/Color/Color.hpp"
 
+#include <cstdint>
+
 namespace RTC {
 struct MtlParameters {
     LinearColor ambient = LinearColor::black();
@@ -12,5 +14,6 @@ struct MtlParameters {
     float transparency = 0.0F;
     float refractionIndex = 0.0F;
     LinearColor transmisionFilter = BLACK_LINEAR_COLOR;
+    uint8_t illuminationModel = UINT8_MAX;
 };
 }

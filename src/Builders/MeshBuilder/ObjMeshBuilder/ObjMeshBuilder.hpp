@@ -33,6 +33,10 @@ private:
 
     std::shared_ptr<ILogger> logger_;
 
+    [[nodiscard]] bool isMaterialTransparent(
+        const MtlParameters& parameters
+    ) const;
+
     [[nodiscard]] std::shared_ptr<IMaterial> createMaterial(
         const MtlParameters& parameters
     ) const;

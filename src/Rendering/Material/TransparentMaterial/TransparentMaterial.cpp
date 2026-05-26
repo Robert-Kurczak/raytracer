@@ -1,6 +1,7 @@
 #include "TransparentMaterial.hpp"
 
 #include "Core/Color/Color.hpp"
+#include "Core/Math/Random.hpp"
 #include "Core/Math/Vector.hpp"
 #include "Rendering/Material/MaterialSample.hpp"
 #include "Rendering/Material/TransparentMaterial/TransparentParameters.hpp"
@@ -8,7 +9,6 @@
 #include <numbers>
 
 namespace RTC {
-constexpr float AIR_REFRACTION_INDEX = 1.0F;
 
 TransparentParameters TransparentMaterial::convertFromMtl(
     const MtlParameters& parameters
@@ -16,18 +16,44 @@ TransparentParameters TransparentMaterial::convertFromMtl(
     return TransparentParameters {
         .refractionIndex = parameters.refractionIndex,
         .emission = parameters.emission / float(std::numbers::pi),
-        .transmissionFilter =
+        .transmissionColor =
             UNIT_LINEAR_COLOR - parameters.transmisionFilter
     };
+}
+
+MaterialSample TransparentMaterial::createReflection(
+    const Vector3f& outDirection,
+    const Vector3f& refractionNormal
+) const {
+    return MaterialSample {
+        .inDirection = (-outDirection).getReflected(refractionNormal),
+        .brdf = parameters_.transmissionColor,
+        .pdf = 1.0F,
+        .scatterType = ScatterType::Specular
+    };
+}
+
+float TransparentMaterial::getFresnelFactor(
+    float refractionCosine
+) const {
+    const float baseTerm = (1.0F - parameters_.refractionIndex) /
+                           (1.0F + parameters_.refractionIndex);
+
+    const float squaredBaseTerm = baseTerm * baseTerm;
+
+    return squaredBaseTerm +
+           ((1.0F - squaredBaseTerm) *
+            float(std::pow(1.0F - refractionCosine, 5)));
 }
 
 TransparentMaterial::TransparentMaterial(
     TransparentParameters parameters
 ) :
-    parameters_(parameters) {}
+    parameters_(parameters),
+    inverseRefractionIndex_(1.0F / parameters_.refractionIndex) {}
 
 TransparentMaterial::TransparentMaterial(MtlParameters parameters) :
-    parameters_(convertFromMtl(parameters)) {}
+    TransparentMaterial(convertFromMtl(parameters)) {}
 
 const LinearColor& TransparentMaterial::getBaseColor() const {
     return BLACK_LINEAR_COLOR;
@@ -75,27 +101,25 @@ MaterialSample TransparentMaterial::getSample(
     if (fromGlasstoAir) {
         incidenceCosine = -incidenceCosine;
         refractionNormal = -normal;
-        relativeRefractionIndex =
-            AIR_REFRACTION_INDEX / parameters_.refractionIndex;
+        relativeRefractionIndex = inverseRefractionIndex_;
     }
+
+    const float squaredRelatveRefractionIndex =
+        relativeRefractionIndex * relativeRefractionIndex;
 
     const float incidenceSineSquared =
         std::max(0.0F, 1.0F - (incidenceCosine * incidenceCosine));
 
     const float refractionSineSquared =
-        incidenceSineSquared /
-        (relativeRefractionIndex * relativeRefractionIndex);
+        incidenceSineSquared / squaredRelatveRefractionIndex;
 
     const float refractionCosine =
         std::sqrt(1.0F - refractionSineSquared);
 
-    if (refractionSineSquared >= 1.0F) {
-        return MaterialSample {
-            .inDirection = (-outDirection).getReflected(refractionNormal),
-            .brdf = parameters_.transmissionFilter,
-            .pdf = 1.0F,
-            .scatterType = ScatterType::Specular
-        };
+    const bool totalInternalReflection = refractionSineSquared >= 1.0;
+
+    if (totalInternalReflection) {
+        return createReflection(outDirection, refractionNormal);
     }
 
     const Vector3f refractedDirection =
@@ -103,10 +127,14 @@ MaterialSample TransparentMaterial::getSample(
         ((incidenceCosine / relativeRefractionIndex) - refractionCosine) *
             refractionNormal;
 
+    if (getRandomNumber<float>() <= getFresnelFactor(refractionCosine)) {
+        return createReflection(outDirection, refractionNormal);
+    }
+
     return MaterialSample {
         .inDirection = refractedDirection,
-        .brdf = parameters_.transmissionFilter * relativeRefractionIndex *
-                relativeRefractionIndex,
+        .brdf =
+            parameters_.transmissionColor * squaredRelatveRefractionIndex,
         .pdf = 1.0F,
         .scatterType = ScatterType::Specular
     };

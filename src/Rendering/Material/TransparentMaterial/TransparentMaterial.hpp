@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Rendering/Material/IMaterial.hpp"
+#include "Rendering/Material/MaterialSample.hpp"
 #include "Rendering/Material/MtlParameters.hpp"
 #include "Rendering/Material/TransparentMaterial/TransparentParameters.hpp"
 
@@ -8,10 +9,18 @@ namespace RTC {
 class TransparentMaterial : public IMaterial {
 private:
     TransparentParameters parameters_;
+    const float inverseRefractionIndex_;
 
     [[nodiscard]] TransparentParameters convertFromMtl(
         const MtlParameters& parameters
     ) const;
+
+    [[nodiscard]] MaterialSample createReflection(
+        const Vector3f& outDirection,
+        const Vector3f& refractionNormal
+    ) const;
+
+    [[nodiscard]] float getFresnelFactor(float refractionCosine) const;
 
 public:
     TransparentMaterial(TransparentParameters parameters);

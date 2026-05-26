@@ -32,13 +32,28 @@ static constexpr DiffuseParameters DEFAULT_MATERIAL_PARAMETERS {
     .emission = LinearColor::black()
 };
 
+bool ObjMeshBuilder::isMaterialTransparent(
+    const MtlParameters& parameters
+) const {
+    const bool isTransparentMode = parameters.illuminationModel == 7 or
+                                   parameters.illuminationModel == 8 or
+                                   parameters.illuminationModel == 9;
+
+    if (isTransparentMode) {
+        return true;
+    }
+
+    const bool containsTransparentPrams =
+        not parameters.transmisionFilter.isBlack() and
+        parameters.refractionIndex > 1.0F;
+
+    return containsTransparentPrams;
+}
+
 std::shared_ptr<IMaterial> ObjMeshBuilder::createMaterial(
     const MtlParameters& parameters
 ) const {
-    const bool isTransparent =
-        not parameters.transmisionFilter.isBlack() and
-        parameters.refractionIndex > 1.0F;
-    if (isTransparent) {
+    if (isMaterialTransparent(parameters)) {
         return std::make_shared<TransparentMaterial>(parameters);
     }
 
@@ -113,6 +128,10 @@ MaterialsMap ObjMeshBuilder::extractMaterials(
             lineStream >> mtlParameters.shininess;
         } else if (dataType == "Ni") {
             lineStream >> mtlParameters.refractionIndex;
+        } else if (dataType == "illum") {
+            int illum = 0;
+            lineStream >> illum;
+            mtlParameters.illuminationModel = uint8_t(illum);
         }
     }
 

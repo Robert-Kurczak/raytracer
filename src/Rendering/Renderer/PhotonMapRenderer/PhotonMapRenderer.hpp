@@ -31,7 +31,6 @@ private:
 
     [[nodiscard]] LinearColor getIndirectLight(
         const HitData& hitData,
-        const Point3f& offsetHitPoint,
         const Vector3f& outDirection,
         const Scene& scene,
         const PhotonMap& photonMap,

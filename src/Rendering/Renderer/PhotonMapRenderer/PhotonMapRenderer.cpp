@@ -38,7 +38,6 @@ LinearColor PhotonMapRenderer::getEmission(
 
 LinearColor PhotonMapRenderer::getIndirectLight(
     const HitData& hitData,
-    const Point3f& offsetHitPoint,
     const Vector3f& outDirection,
     const Scene& scene,
     const PhotonMap& photonMap,
@@ -49,16 +48,24 @@ LinearColor PhotonMapRenderer::getIndirectLight(
         hitData.hitPoint, hitData.hitNormal, outDirection
     );
 
-    const Ray scatterRay {offsetHitPoint, materialSample.inDirection};
+    if (materialSample.scatterType == ScatterType::Specular) {
+        const Point3f specularOffsetPoint =
+            hitData.hitPoint + EPSILON * materialSample.inDirection;
 
-    // const LinearColor scatterLight =
-    //     photonMap.getRadiance(hitData, outDirection, 1000000000);
+        const Ray scatterRay {
+            specularOffsetPoint, materialSample.inDirection
+        };
 
-    const float cosinus = std::max(
-        0.0F, getDotProduct(hitData.hitNormal, materialSample.inDirection)
+        const LinearColor scatterLight = traceRay(
+            scatterRay, scene, photonMap, statistics, recursionDepth + 1
+        );
+
+        return (materialSample.brdf * scatterLight) / materialSample.pdf;
+    }
+
+    return photonMap.getRadiance(
+        hitData, outDirection, parameters_.nearestPhotons
     );
-
-    return LinearColor::black();
 }
 
 LinearColor PhotonMapRenderer::getDirectLight(
@@ -232,18 +239,13 @@ LinearColor PhotonMapRenderer::traceRay(
     const LinearColor emittedLight =
         getEmission(hitData, outDirection, recursionDepth);
 
-    // const LinearColor indirectLight = getIndirectLight(
-    //     hitData,
-    //     offsetHitPoint,
-    //     outDirection,
-    //     scene,
-    //     photonMap,
-    //     statistics,
-    //     recursionDepth
-    // );
-
-    const LinearColor indirectLight = photonMap.getRadiance(
-        hitData, outDirection, parameters_.nearestPhotons
+    const LinearColor indirectLight = getIndirectLight(
+        hitData,
+        outDirection,
+        scene,
+        photonMap,
+        statistics,
+        recursionDepth
     );
 
     const LinearColor directLight = getDirectLight(

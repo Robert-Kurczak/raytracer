@@ -5,9 +5,9 @@
         "pathsPerPixel": 10,
         "lightSamplesPerHit": 1,
         "scatterRecursionDepth": 10,
-        "photonMappingEnabled": false,
-        "emittedPhotons": 100000,
-        "nearestPhotons": 40
+        "photonMappingEnabled": true,
+        "emittedPhotons": 1000000,
+        "nearestPhotons": 100
     },
     "camera": {
         "screenWidth": 1000,
