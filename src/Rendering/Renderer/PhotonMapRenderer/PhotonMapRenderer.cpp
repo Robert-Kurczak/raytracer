@@ -170,12 +170,38 @@ void PhotonMapRenderer::tracePhoton(
     const Vector3f outDirection =
         -photonRay.getDirection().getNormalized();
 
+    const MaterialSample materialSample = hitData.material->getSample(
+        hitData.hitPoint, hitData.hitNormal, outDirection
+    );
+
+    if (materialSample.scatterType == ScatterType::Specular) {
+        specularBounce = true;
+        photon.position =
+            hitData.hitPoint + EPSILON * materialSample.inDirection;
+        photon.direction = materialSample.inDirection;
+
+        const LinearColor materialColor =
+            materialSample.brdf / materialSample.pdf;
+
+        photon.power.red *= materialColor.red;
+        photon.power.green *= materialColor.green;
+        photon.power.blue *= materialColor.blue;
+
+        tracePhoton(
+            photon,
+            specularBounce,
+            globalPhotons,
+            causticPhotons,
+            scene,
+            statistics,
+            recursionDepth + 1
+        );
+
+        return;
+    }
+
     const Point3f offsetHitPoint =
         hitData.hitPoint + EPSILON * hitData.hitNormal;
-
-    const MaterialSample materialSample = hitData.material->getSample(
-        offsetHitPoint, hitData.hitNormal, outDirection
-    );
 
     const float incidenceCosine = std::max(
         0.0F, getDotProduct(hitData.hitNormal, materialSample.inDirection)
@@ -204,8 +230,6 @@ void PhotonMapRenderer::tracePhoton(
         causticPhotons.push_back(photon);
     } else if (hitDiffuse) {
         globalPhotons.push_back(photon);
-    } else if (materialSample.scatterType == ScatterType::Specular) {
-        specularBounce = true;
     }
 
     photon.direction = materialSample.inDirection;

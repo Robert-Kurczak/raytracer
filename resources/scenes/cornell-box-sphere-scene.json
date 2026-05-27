@@ -6,8 +6,8 @@
         "lightSamplesPerHit": 1,
         "scatterRecursionDepth": 10,
         "photonMappingEnabled": true,
-        "emittedPhotons": 100000,
-        "nearestPhotons": 200
+        "emittedPhotons": 1000000,
+        "nearestPhotons": 100
     },
     "camera": {
         "screenWidth": 1000,
