@@ -148,19 +148,14 @@ void PhotonMapRenderer::tracePhoton(
     }
 
     HitData hitData;
-
     Ray photonRay {photon.position, photon.direction};
+
+    statistics.rays++;
 
     const bool hitAnything =
         scene.hitClosest(photonRay, renderInterval, hitData);
 
     if (not hitAnything) {
-        return;
-    }
-
-    constexpr float adsorptionProbability = 0.2F;
-
-    if (getRandomNumber<float>() <= adsorptionProbability) {
         return;
     }
 
@@ -170,17 +165,35 @@ void PhotonMapRenderer::tracePhoton(
     const Point3f offsetHitPoint =
         hitData.hitPoint + EPSILON * hitData.hitNormal;
 
-    const MaterialSample sample = hitData.material->getSample(
+    const MaterialSample materialSample = hitData.material->getSample(
         offsetHitPoint, hitData.hitNormal, outDirection
     );
 
-    photon.position = offsetHitPoint;
+    const float incidenceCosine = std::max(
+        0.0F, getDotProduct(hitData.hitNormal, materialSample.inDirection)
+    );
 
-    if (sample.scatterType == ScatterType::Diffuse) {
+    const LinearColor materialColor =
+        (materialSample.brdf * incidenceCosine) / materialSample.pdf;
+
+    const float survivalProbability =
+        std::clamp(materialColor.getLargestComponent(), 0.05F, 1.0F);
+
+    if (getRandomNumber<float>() > survivalProbability) {
+        return;
+    }
+
+    photon.position = offsetHitPoint;
+    photon.power.red *= materialColor.red;
+    photon.power.green *= materialColor.green;
+    photon.power.blue *= materialColor.blue;
+    photon.power /= survivalProbability;
+
+    if (materialSample.scatterType == ScatterType::Diffuse) {
         photonMap.push_back(photon);
     }
 
-    photon.direction = sample.inDirection;
+    photon.direction = materialSample.inDirection;
 
     tracePhoton(photon, photonMap, scene, statistics, recursionDepth + 1);
 }
