@@ -1,0 +1,107 @@
+#pragma once
+
+#include "../IRenderer.hpp"
+#include "Builders/PhotonMapBuilder/IPhotonMapBuilder.hpp"
+#include "Core/Color/Color.hpp"
+#include "Core/Math/Interval.hpp"
+#include "Geometry/Background/IBackground.hpp"
+#include "Geometry/Hittable/HitData.hpp"
+#include "Geometry/Light/ILight.hpp"
+#include "Rendering/Framebuffer/Framebuffer.hpp"
+#include "Rendering/PhotonMap/PhotonMap.hpp"
+#include "Rendering/Renderer/PhotonMapRenderer/PhotonMapRendererParameters.hpp"
+#include "Rendering/Renderer/RendererStatistics.hpp"
+#include "Utils/Logger/ILogger.hpp"
+
+#include <memory>
+
+namespace RTC {
+class PhotonMapRenderer : public IRenderer {
+private:
+    std::shared_ptr<ILogger> logger_;
+    std::unique_ptr<IPhotonMapBuilder> photonMapBuilder_;
+    std::unique_ptr<IBackground> background_;
+    PhotonMapRendererParameters parameters_;
+
+    [[nodiscard]] LinearColor getEmission(
+        const HitData& hitData,
+        const Vector3f& outDirection,
+        uint32_t recursionDepth
+    ) const;
+
+    [[nodiscard]] LinearColor getIndirectLight(
+        const HitData& hitData,
+        const Vector3f& outDirection,
+        const Scene& scene,
+        const PhotonMap& photonMap,
+        RendererStatistics& statistics,
+        uint32_t recursionDepth
+    ) const;
+
+    [[nodiscard]] LinearColor getDirectLight(
+        const HitData& hitData,
+        const Point3f& offsetHitPoint,
+        const Vector3f& outDirection,
+        const Scene& scene,
+        RendererStatistics& statistics
+    ) const;
+
+    [[nodiscard]] bool isInShadow(
+        const Point3f& origin,
+        const Vector3f& toLight,
+        const Scene& scene
+    ) const;
+
+    void tracePhoton(
+        Photon& photon,
+        std::vector<Photon>& photonMap,
+        const Scene& scene,
+        RendererStatistics& statistics,
+        uint32_t recursionDepth = 0
+    );
+
+    [[nodiscard]] LinearColor traceRay(
+        const Ray& ray,
+        const Scene& scene,
+        const PhotonMap& photonMap,
+        RendererStatistics& statistics,
+        uint32_t recursionDepth = 0
+    ) const;
+
+    std::vector<Photon> scatterPhotons(
+        const Scene& scene,
+        RendererStatistics& statistics
+    );
+
+    RendererStatistics renderSection(
+        const Camera& camera,
+        const Scene& scene,
+        const PhotonMap& photonMap,
+        const Interval<float>& renderInterval,
+        const Interval<uint32_t>& xIndices,
+        const Interval<uint32_t>& yIndices,
+        Framebuffer& framebuffer
+    ) const;
+
+    std::vector<RendererStatistics> renderAll(
+        const Camera& camera,
+        const Scene& scene,
+        const PhotonMap& photonMap,
+        Framebuffer& framebuffer
+    ) const;
+
+public:
+    PhotonMapRenderer(
+        std::shared_ptr<ILogger> logger,
+        std::unique_ptr<IPhotonMapBuilder> photonMapBuilder,
+        std::unique_ptr<IBackground> background,
+        PhotonMapRendererParameters parameters
+    );
+
+    RendererStatistics render(
+        const Camera& camera,
+        const Scene& scene,
+        Framebuffer& framebuffer
+    ) noexcept override;
+};
+}

@@ -4,6 +4,7 @@
 #include "Geometry/Light/ILight.hpp"
 
 #include <memory>
+#include <vector>
 
 namespace RTC {
 struct MeshBuilderResult {

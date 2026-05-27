@@ -1,15 +1,11 @@
 #pragma once
 
-#include "Rendering/Material/IMaterial.hpp"
-
 #include <cstdint>
-#include <memory>
 
 namespace RTC {
 struct MaterialRendererParameters {
-    uint32_t pathsPerPixel;
-    uint32_t lightSamplesPerHit;
-    uint32_t scatterRecursionDepth;
-    std::shared_ptr<IMaterial> defaultMaterial_;
+    uint32_t pathsPerPixel = 0;
+    uint32_t lightSamplesPerHit = 0;
+    uint32_t scatterRecursionDepth = 0;
 };
 }

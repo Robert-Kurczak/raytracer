@@ -14,6 +14,7 @@ private:
     const Vector3f perpendicular_;
     const Vector3f normal_;
     const float area_;
+    const LinearColor power_;
 
     [[nodiscard]] Vector3f getPerpendicular(
         const Point3f& vertexA,
@@ -34,5 +35,9 @@ public:
     [[nodiscard]] LightSample getSample(
         const Point3f& origin
     ) const override;
+
+    [[nodiscard]] LinearColor getPower() const override;
+
+    [[nodiscard]] Photon emitPhoton() const override;
 };
 }

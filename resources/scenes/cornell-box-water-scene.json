@@ -1,0 +1,52 @@
+{
+    "outputPath": "resources/renders/cornell-water-scene.exr",
+    "verbose": true,
+    "renderer": {
+        "pathsPerPixel": 20,
+        "lightSamplesPerHit": 1,
+        "scatterRecursionDepth": 10,
+        "photonMappingEnabled": false,
+        "emittedPhotons": 100000,
+        "nearestPhotons": 40
+    },
+    "camera": {
+        "screenWidth": 1000,
+        "screenHeight": 1000,
+        "position": [
+            0.0,
+            0.0,
+            -0.2
+        ],
+        "direction": [
+            0.0,
+            0.0,
+            -1.0
+        ],
+        "upDirection": [
+            0.0,
+            1.0,
+            0.0
+        ],
+        "fieldOfViewDegrees": 90
+    },
+    "background": {
+        "type": "solid",
+        "color": [
+            10,
+            10,
+            10
+        ]
+    },
+    "objects": [
+        {
+            "type": "obj",
+            "filePath": "resources/objects/cornell-box/CornellBox-Water.obj",
+            "position": [
+                0.0,
+                -0.80,
+                -2.0
+            ]
+        }
+    ],
+    "lights": []
+}

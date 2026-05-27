@@ -27,5 +27,9 @@ public:
     [[nodiscard]] LightSample getSample(
         const Point3f& origin
     ) const override;
+
+    [[nodiscard]] LinearColor getPower() const override;
+
+    [[nodiscard]] Photon emitPhoton() const override;
 };
 }

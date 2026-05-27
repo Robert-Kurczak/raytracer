@@ -212,7 +212,10 @@ MaterialSample GlossyMaterial::getSample(
                       (4.0F * std::abs(data.microfacetOutCosinus));
 
     return MaterialSample {
-        .inDirection = inDirection, .brdf = data.brdf, .pdf = pdf
+        .inDirection = inDirection,
+        .brdf = data.brdf,
+        .pdf = pdf,
+        .scatterType = ScatterType::Glossy
     };
 };
 }

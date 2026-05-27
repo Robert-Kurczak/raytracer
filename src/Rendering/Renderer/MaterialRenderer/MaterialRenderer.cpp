@@ -7,6 +7,7 @@
 #include "Geometry/Hittable/HitData.hpp"
 #include "Geometry/Light/ILight.hpp"
 #include "Geometry/Light/LightSample.hpp"
+#include "Rendering/Material/IMaterial.hpp"
 #include "Rendering/Material/MaterialSample.hpp"
 #include "Rendering/Renderer/RendererStatistics.hpp"
 #include "Utils/Logger/ILogger.hpp"
@@ -44,6 +45,20 @@ LinearColor MaterialRenderer::getIndirectLight(
         hitData.hitPoint, hitData.hitNormal, outDirection
     );
 
+    if (materialSample.scatterType == ScatterType::Specular) {
+        const Point3f specularOffsetPoint =
+            hitData.hitPoint + epsilon * materialSample.inDirection;
+
+        const Ray scatterRay {
+            specularOffsetPoint, materialSample.inDirection
+        };
+
+        const LinearColor scatterLight =
+            traceRay(scatterRay, scene, statistics, recursionDepth + 1);
+
+        return (materialSample.brdf * scatterLight) / materialSample.pdf;
+    }
+
     const Ray scatterRay {offsetHitPoint, materialSample.inDirection};
 
     const LinearColor scatterLight =
@@ -53,7 +68,7 @@ LinearColor MaterialRenderer::getIndirectLight(
         0.0F, getDotProduct(hitData.hitNormal, materialSample.inDirection)
     );
 
-    return materialSample.brdf * scatterLight * cosinus /
+    return (materialSample.brdf * scatterLight * cosinus) /
            materialSample.pdf;
 }
 
@@ -144,11 +159,6 @@ LinearColor MaterialRenderer::traceRay(
 
     if (not hitAnything) {
         return background_->sample(ray);
-    }
-
-    // TODO should be already set
-    if (not hitData.material) {
-        hitData.material = parameters_.defaultMaterial_;
     }
 
     const Vector3f outDirection = -ray.getDirection().getNormalized();
@@ -282,7 +292,7 @@ MaterialRenderer::MaterialRenderer(
 ) :
     logger_(std::move(logger)),
     background_(std::move(background)),
-    parameters_(std::move(parameters)) {}
+    parameters_(parameters) {}
 
 RendererStatistics MaterialRenderer::render(
     const Camera& camera,

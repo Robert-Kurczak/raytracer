@@ -14,8 +14,6 @@ private:
         const MtlParameters& parameters
     ) const;
 
-    [[nodiscard]] Vector3f createCosWeightVersor() const;
-
 public:
     DiffuseMaterial(const DiffuseParameters& parameters);
     DiffuseMaterial(const MtlParameters& parameters);

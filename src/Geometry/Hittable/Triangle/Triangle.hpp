@@ -2,6 +2,7 @@
 
 #include "Geometry/BoundingVolume/AxisAlignedBoundingBox/AxisAlignedBoundingBox.hpp"
 #include "Geometry/Hittable/IHittable.hpp"
+#include "Geometry/Vertex.hpp"
 #include "Rendering/Material/IMaterial.hpp"
 
 #include <memory>
@@ -9,42 +10,55 @@
 namespace RTC {
 class Triangle : public IHittable {
 private:
-    const Point3<float> vertexA_;
-    const Point3<float> vertexB_;
-    const Point3<float> vertexC_;
+    const Vertex vertexA_;
+    const Vertex vertexB_;
+    const Vertex vertexC_;
+
     const AxisAlignedBoundingBox boundingBox_;
     std::shared_ptr<IMaterial> material_;
 
-    const Vector3<float> edge1_;
-    const Vector3<float> edge2_;
-    const Vector3<float> outwardNormal_;
+    const Vector3f edge1_;
+    const Vector3f edge2_;
+    const std::optional<Vector3f> flatNormal_;
 
     struct MollerTrumboreResult {
         bool hasSolution = false;
-        float t0 = 0.0;
+        float t0 = 0.0F;
+        float barycentricWeightA = 0.0F;
+        float barycentricWeightB = 0.0F;
+        float barycentricWeightC = 0.0F;
     };
+
+    [[nodiscard]] std::optional<Vector3f>
+    createFlatNormalIfNeccessary() const;
+
+    [[nodiscard]] Vector3f createSmoothNormal(
+        const MollerTrumboreResult& result
+    ) const;
 
     [[nodiscard]] MollerTrumboreResult solveMollerTrumbore(
         const Ray& ray
     ) const;
 
     [[nodiscard]] AxisAlignedBoundingBox createBoundingBox(
-        const Point3<float>& vertexA,
-        const Point3<float>& vertexB,
-        const Point3<float>& vertexC
+        const Point3f& vertexA,
+        const Point3f& vertexB,
+        const Point3f& vertexC
     ) const;
 
+    [[nodiscard]] Vector3f getShadingNormal() const;
+
     void updateHitData(
-        float rayT,
+        const MollerTrumboreResult& result,
         const Ray& ray,
         HitData& hitData
     ) const;
 
 public:
     Triangle(
-        const Point3<float>& vertexA,
-        const Point3<float>& vertexB,
-        const Point3<float>& vertexC,
+        Vertex vertexA,
+        Vertex vertexB,
+        Vertex vertexC,
         std::shared_ptr<IMaterial> material
     );
 

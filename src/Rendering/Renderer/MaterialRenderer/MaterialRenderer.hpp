@@ -7,9 +7,11 @@
 #include "Geometry/Hittable/HitData.hpp"
 #include "Geometry/Light/ILight.hpp"
 #include "Rendering/Framebuffer/Framebuffer.hpp"
+#include "Rendering/Material/MaterialSample.hpp"
 #include "Rendering/Renderer/MaterialRenderer/MaterialRendererParameters.hpp"
 #include "Rendering/Renderer/RendererStatistics.hpp"
 #include "Utils/Logger/ILogger.hpp"
+#include "World/Scene/Scene.hpp"
 
 #include <memory>
 

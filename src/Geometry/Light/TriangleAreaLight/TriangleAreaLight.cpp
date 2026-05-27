@@ -2,6 +2,8 @@
 
 #include "Core/Color/Color.hpp"
 #include "Core/Math/Random.hpp"
+#include "Core/Math/Sampling.hpp"
+#include "Core/Math/Transformations.hpp"
 #include "Core/Math/Vector.hpp"
 #include "Geometry/Light/LightSample.hpp"
 
@@ -47,7 +49,8 @@ TriangleAreaLight::TriangleAreaLight(
     emission_(emission),
     perpendicular_(getPerpendicular(vertexA_, vertexB_, vertexC_)),
     normal_(perpendicular_.getNormalized()),
-    area_(perpendicular_.getLength()) {}
+    area_(perpendicular_.getLength()),
+    power_(area_ * emission_) {}
 
 LightSample TriangleAreaLight::getSample(const Point3f& origin) const {
     const Point3f sample = getRandomSample();
@@ -71,6 +74,21 @@ LightSample TriangleAreaLight::getSample(const Point3f& origin) const {
         .toLight = toLight,
         .inDirection = inDirection,
         .pdf = solidAreaPdf
+    };
+}
+
+LinearColor TriangleAreaLight::getPower() const {
+    return power_;
+}
+
+Photon TriangleAreaLight::emitPhoton() const {
+    const Vector3f randomDirection =
+        transformToWorldSpace(sampleCosineHemisphere(), normal_);
+
+    return Photon {
+        .position = getRandomSample(),
+        .direction = randomDirection,
+        .power = power_
     };
 }
 }

@@ -2,7 +2,7 @@
 
 #include "Core/Color/Color.hpp"
 #include "Core/Math/Numeric.hpp"
-#include "Core/Math/Random.hpp"
+#include "Core/Math/Sampling.hpp"
 #include "Core/Math/Transformations.hpp"
 #include "Core/Math/Vector.hpp"
 #include "Rendering/Material/DiffuseMaterial/DiffuseParameters.hpp"
@@ -19,19 +19,6 @@ DiffuseParameters DiffuseMaterial::convertFromMtl(
         .baseColor = parameters.diffuse,
         .emission = parameters.emission / float(std::numbers::pi)
     };
-}
-
-Vector3f DiffuseMaterial::createCosWeightVersor() const {
-    const auto uTheta = getRandomNumber<float>();
-    const auto uPhi = getRandomNumber<float>(0, 2 * std::numbers::pi);
-
-    const float sinTheta = std::sqrt(uTheta);
-
-    const float x = sinTheta * std::cos(uPhi);
-    const float y = sinTheta * std::sin(uPhi);
-    const float z = std::sqrt(1 - uTheta);
-
-    return Vector3f {x, y, z};
 }
 
 DiffuseMaterial::DiffuseMaterial(const DiffuseParameters& parameters) :
@@ -88,7 +75,7 @@ MaterialSample DiffuseMaterial::getSample(
     const Vector3f& normal,
     const Vector3f& outDirection
 ) const {
-    const Vector3f localVersor = createCosWeightVersor();
+    const Vector3f localVersor = sampleCosineHemisphere();
     const Vector3f inDirection =
         transformToWorldSpace(localVersor, normal).getNormalized();
 
@@ -97,7 +84,10 @@ MaterialSample DiffuseMaterial::getSample(
     const float pdf = localVersor.getZ() / float(std::numbers::pi);
 
     return MaterialSample {
-        .inDirection = inDirection, .brdf = brdf, .pdf = pdf
+        .inDirection = inDirection,
+        .brdf = brdf,
+        .pdf = pdf,
+        .scatterType = ScatterType::Diffuse
     };
 }
 }

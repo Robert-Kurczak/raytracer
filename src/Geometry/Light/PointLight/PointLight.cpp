@@ -1,7 +1,10 @@
 #include "PointLight.hpp"
 
+#include "Core/Math/Sampling.hpp"
+#include "Core/Math/Transformations.hpp"
 #include "Core/Math/Vector.hpp"
 #include "Geometry/Light/LightSample.hpp"
+#include "Geometry/Light/Photon.hpp"
 
 namespace RTC {
 static constexpr float epsilon = 0.001;
@@ -41,6 +44,18 @@ LightSample PointLight::getSample(const Point3f& origin) const {
         .toLight = toLight,
         .inDirection = inDirection,
         .pdf = 1
+    };
+}
+
+LinearColor PointLight::getPower() const  {
+    return emission_;
+}
+
+Photon PointLight::emitPhoton() const {
+    return Photon {
+        .position = position_,
+        .direction = sampleUnitVector(),
+        .power = emission_
     };
 }
 }
