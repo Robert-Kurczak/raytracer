@@ -40,7 +40,7 @@ LinearColor PhotonMapRenderer::getIndirectLight(
     const HitData& hitData,
     const Vector3f& outDirection,
     const Scene& scene,
-    const PhotonMap& photonMap,
+    const PhotonMaps& photonMaps,
     RendererStatistics& statistics,
     uint32_t recursionDepth
 ) const {
@@ -57,15 +57,21 @@ LinearColor PhotonMapRenderer::getIndirectLight(
         };
 
         const LinearColor scatterLight = traceRay(
-            scatterRay, scene, photonMap, statistics, recursionDepth + 1
+            scatterRay, scene, photonMaps, statistics, recursionDepth + 1
         );
 
         return (materialSample.brdf * scatterLight) / materialSample.pdf;
     }
 
-    return photonMap.getRadiance(
+    const LinearColor globalRadiance = photonMaps.globalMap.getRadiance(
         hitData, outDirection, parameters_.nearestPhotons
     );
+
+    const LinearColor causticRadiance = photonMaps.causticMap.getRadiance(
+        hitData, outDirection, parameters_.nearestPhotons
+    );
+
+    return globalRadiance + causticRadiance;
 }
 
 LinearColor PhotonMapRenderer::getDirectLight(
@@ -134,7 +140,9 @@ bool PhotonMapRenderer::isInShadow(
 
 void PhotonMapRenderer::tracePhoton(
     Photon& photon,
-    std::vector<Photon>& photonMap,
+    bool specularBounce,
+    std::vector<Photon>& globalPhotons,
+    std::vector<Photon>& causticPhotons,
     const Scene& scene,
     RendererStatistics& statistics,
     uint32_t recursionDepth
@@ -189,21 +197,36 @@ void PhotonMapRenderer::tracePhoton(
     photon.power.blue *= materialColor.blue;
     photon.power /= survivalProbability;
 
-    if (materialSample.scatterType == ScatterType::Diffuse) {
-        photonMap.push_back(photon);
+    const bool hitDiffuse =
+        materialSample.scatterType == ScatterType::Diffuse;
+
+    if (specularBounce and hitDiffuse) {
+        causticPhotons.push_back(photon);
+    } else if (hitDiffuse) {
+        globalPhotons.push_back(photon);
+    } else if (materialSample.scatterType == ScatterType::Specular) {
+        specularBounce = true;
     }
 
     photon.direction = materialSample.inDirection;
 
-    tracePhoton(photon, photonMap, scene, statistics, recursionDepth + 1);
+    tracePhoton(
+        photon,
+        specularBounce,
+        globalPhotons,
+        causticPhotons,
+        scene,
+        statistics,
+        recursionDepth + 1
+    );
 }
 
-std::vector<Photon> PhotonMapRenderer::scatterPhotons(
+void PhotonMapRenderer::scatterPhotons(
     const Scene& scene,
-    RendererStatistics& statistics
+    RendererStatistics& statistics,
+    std::vector<Photon>& globalPhotons,
+    std::vector<Photon>& causticPhotons
 ) {
-    std::vector<Photon> photons {};
-
     const uint32_t photonsPerLight =
         parameters_.emittedPhotons / scene.getLights().size();
 
@@ -212,17 +235,22 @@ std::vector<Photon> PhotonMapRenderer::scatterPhotons(
             Photon photon = light->emitPhoton();
             photon.power /= float(photonsPerLight);
 
-            tracePhoton(photon, photons, scene, statistics);
+            tracePhoton(
+                photon,
+                false,
+                globalPhotons,
+                causticPhotons,
+                scene,
+                statistics
+            );
         }
     }
-
-    return photons;
 }
 
 LinearColor PhotonMapRenderer::traceRay(
     const Ray& ray,
     const Scene& scene,
-    const PhotonMap& photonMap,
+    const PhotonMaps& photonMaps,
     RendererStatistics& statistics,
     uint32_t recursionDepth
 ) const {
@@ -256,7 +284,7 @@ LinearColor PhotonMapRenderer::traceRay(
         hitData,
         outDirection,
         scene,
-        photonMap,
+        photonMaps,
         statistics,
         recursionDepth
     );
@@ -271,7 +299,7 @@ LinearColor PhotonMapRenderer::traceRay(
 RendererStatistics PhotonMapRenderer::renderSection(
     const Camera& camera,
     const Scene& scene,
-    const PhotonMap& photonMap,
+    const PhotonMaps& photonMaps,
     const Interval<float>& renderInterval,
     const Interval<uint32_t>& xIndices,
     const Interval<uint32_t>& yIndices,
@@ -289,7 +317,7 @@ RendererStatistics PhotonMapRenderer::renderSection(
                 Ray ray = camera.getRandomizedRay(pixel);
 
                 const LinearColor color =
-                    traceRay(ray, scene, photonMap, statistics);
+                    traceRay(ray, scene, photonMaps, statistics);
 
                 resultColor += color;
             }
@@ -306,7 +334,7 @@ RendererStatistics PhotonMapRenderer::renderSection(
 std::vector<RendererStatistics> PhotonMapRenderer::renderAll(
     const Camera& camera,
     const Scene& scene,
-    const PhotonMap& photonMap,
+    const PhotonMaps& photonMaps,
     Framebuffer& framebuffer
 ) const {
     const uint32_t threadCount = std::thread::hardware_concurrency();
@@ -344,7 +372,7 @@ std::vector<RendererStatistics> PhotonMapRenderer::renderAll(
                 statistics[i] = renderSection(
                     camera,
                     scene,
-                    photonMap,
+                    photonMaps,
                     renderInterval,
                     xIndices,
                     yIndices,
@@ -361,7 +389,7 @@ std::vector<RendererStatistics> PhotonMapRenderer::renderAll(
             statistics[threadCount - 1] = renderSection(
                 camera,
                 scene,
-                photonMap,
+                photonMaps,
                 renderInterval,
                 xIndices,
                 yIndices,
@@ -391,14 +419,18 @@ RendererStatistics PhotonMapRenderer::render(
 ) noexcept {
     RendererStatistics totalStatistics;
 
-    std::vector<Photon> scatteredPhotons =
-        scatterPhotons(scene, totalStatistics);
+    std::vector<Photon> globalPhotons;
+    std::vector<Photon> causticPhotons;
 
-    const PhotonMap photonMap =
-        photonMapBuilder_->build(std::move(scatteredPhotons));
+    scatterPhotons(scene, totalStatistics, globalPhotons, causticPhotons);
+
+    const PhotonMaps photonMaps {
+        .globalMap = photonMapBuilder_->build(std::move(globalPhotons)),
+        .causticMap = photonMapBuilder_->build(std::move(causticPhotons))
+    };
 
     const std::vector<RendererStatistics> threadStatistics =
-        renderAll(camera, scene, photonMap, framebuffer);
+        renderAll(camera, scene, photonMaps, framebuffer);
 
     for (const auto& stats : threadStatistics) {
         totalStatistics.rays += stats.rays;

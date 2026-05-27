@@ -23,6 +23,11 @@ private:
     std::unique_ptr<IBackground> background_;
     PhotonMapRendererParameters parameters_;
 
+    struct PhotonMaps {
+        PhotonMap globalMap;
+        PhotonMap causticMap;
+    };
+
     [[nodiscard]] LinearColor getEmission(
         const HitData& hitData,
         const Vector3f& outDirection,
@@ -33,7 +38,7 @@ private:
         const HitData& hitData,
         const Vector3f& outDirection,
         const Scene& scene,
-        const PhotonMap& photonMap,
+        const PhotonMaps& photonMaps,
         RendererStatistics& statistics,
         uint32_t recursionDepth
     ) const;
@@ -54,7 +59,9 @@ private:
 
     void tracePhoton(
         Photon& photon,
-        std::vector<Photon>& photonMap,
+        bool specularBounce,
+        std::vector<Photon>& globalPhotons,
+        std::vector<Photon>& causticPhotons,
         const Scene& scene,
         RendererStatistics& statistics,
         uint32_t recursionDepth = 0
@@ -63,20 +70,22 @@ private:
     [[nodiscard]] LinearColor traceRay(
         const Ray& ray,
         const Scene& scene,
-        const PhotonMap& photonMap,
+        const PhotonMaps& photonMaps,
         RendererStatistics& statistics,
         uint32_t recursionDepth = 0
     ) const;
 
-    std::vector<Photon> scatterPhotons(
+    void scatterPhotons(
         const Scene& scene,
-        RendererStatistics& statistics
+        RendererStatistics& statistics,
+        std::vector<Photon>& globalPhotons,
+        std::vector<Photon>& causticPhotons
     );
 
     RendererStatistics renderSection(
         const Camera& camera,
         const Scene& scene,
-        const PhotonMap& photonMap,
+        const PhotonMaps& photonMaps,
         const Interval<float>& renderInterval,
         const Interval<uint32_t>& xIndices,
         const Interval<uint32_t>& yIndices,
@@ -86,7 +95,7 @@ private:
     std::vector<RendererStatistics> renderAll(
         const Camera& camera,
         const Scene& scene,
-        const PhotonMap& photonMap,
+        const PhotonMaps& photonMaps,
         Framebuffer& framebuffer
     ) const;
 

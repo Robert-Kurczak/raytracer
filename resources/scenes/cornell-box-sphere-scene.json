@@ -7,7 +7,7 @@
         "scatterRecursionDepth": 10,
         "photonMappingEnabled": true,
         "emittedPhotons": 100000,
-        "nearestPhotons": 100
+        "nearestPhotons": 200
     },
     "camera": {
         "screenWidth": 1000,
