@@ -43,7 +43,6 @@ void CoutProgressIndicator::startWatcherThread(
             const uint32_t currentGoal = goal.load();
 
             if (currentTicks >= currentGoal) {
-                // showProgress(1.0F);
                 break;
             }
 

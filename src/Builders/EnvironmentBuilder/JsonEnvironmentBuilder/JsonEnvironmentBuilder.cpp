@@ -19,8 +19,8 @@
 #include "Rendering/ProgressIndicator/CoutProgressIndicator/CoutProgressIndicator.hpp"
 #include "Rendering/ProgressIndicator/IProgressIndicator.hpp"
 #include "Rendering/Renderer/IRenderer.hpp"
-#include "Rendering/Renderer/MaterialRenderer/MaterialRenderer.hpp"
-#include "Rendering/Renderer/MaterialRenderer/MaterialRendererParameters.hpp"
+#include "Rendering/Renderer/PathRenderer/PathRenderer.hpp"
+#include "Rendering/Renderer/PathRenderer/PathRendererParameters.hpp"
 #include "Rendering/Renderer/PhotonMapRenderer/PhotonMapRenderer.hpp"
 #include "Rendering/Renderer/PhotonMapRenderer/PhotonMapRendererParameters.hpp"
 #include "Rendering/Writer/ExrWriter/ExrWriter.hpp"
@@ -165,7 +165,7 @@ std::unique_ptr<IRenderer> JsonEnvironmentBuilder::parseRenderer(
         );
     }
 
-    const MaterialRendererParameters parameters {
+    const PathRendererParameters parameters {
         .pathsPerPixel =
             jsonContent["renderer"]["pathsPerPixel"].get<uint32_t>(),
         .lightSamplesPerHit =
@@ -175,7 +175,7 @@ std::unique_ptr<IRenderer> JsonEnvironmentBuilder::parseRenderer(
                 .get<uint32_t>(),
     };
 
-    return std::make_unique<MaterialRenderer>(
+    return std::make_unique<PathRenderer>(
         logger,
         std::move(progressIndicator),
         std::move(background),

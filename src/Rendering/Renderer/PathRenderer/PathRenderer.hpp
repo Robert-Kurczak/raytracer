@@ -9,7 +9,7 @@
 #include "Rendering/Framebuffer/Framebuffer.hpp"
 #include "Rendering/Material/MaterialSample.hpp"
 #include "Rendering/ProgressIndicator/IProgressIndicator.hpp"
-#include "Rendering/Renderer/MaterialRenderer/MaterialRendererParameters.hpp"
+#include "Rendering/Renderer/PathRenderer/PathRendererParameters.hpp"
 #include "Rendering/Renderer/RendererStatistics.hpp"
 #include "Utils/Logger/ILogger.hpp"
 #include "World/Scene/Scene.hpp"
@@ -17,12 +17,12 @@
 #include <memory>
 
 namespace RTC {
-class MaterialRenderer : public IRenderer {
+class PathRenderer : public IRenderer {
 private:
     std::shared_ptr<ILogger> logger_;
     std::unique_ptr<IProgressIndicator> progressIndicator_;
     std::unique_ptr<IBackground> background_;
-    MaterialRendererParameters parameters_;
+    PathRendererParameters parameters_;
 
     [[nodiscard]] LinearColor getEmission(
         const HitData& hitData,
@@ -76,11 +76,11 @@ private:
     ) const;
 
 public:
-    MaterialRenderer(
+    PathRenderer(
         std::shared_ptr<ILogger> logger,
         std::unique_ptr<IProgressIndicator> progressIndicator,
         std::unique_ptr<IBackground> background,
-        MaterialRendererParameters parameters
+        PathRendererParameters parameters
     );
 
     RendererStatistics render(

@@ -1,4 +1,4 @@
-#include "MaterialRenderer.hpp"
+#include "PathRenderer.hpp"
 
 #include "Core/Color/Color.hpp"
 #include "Core/Math/Interval.hpp"
@@ -22,7 +22,7 @@
 
 namespace RTC {
 
-LinearColor MaterialRenderer::getEmission(
+LinearColor PathRenderer::getEmission(
     const HitData& hitData,
     const Vector3f& outDirection,
     uint32_t recursionDepth
@@ -34,7 +34,7 @@ LinearColor MaterialRenderer::getEmission(
     return isRayPrimary ? materialEmission : LinearColor::black();
 }
 
-LinearColor MaterialRenderer::getIndirectLight(
+LinearColor PathRenderer::getIndirectLight(
     const HitData& hitData,
     const Point3f& offsetHitPoint,
     const Vector3f& outDirection,
@@ -73,7 +73,7 @@ LinearColor MaterialRenderer::getIndirectLight(
            materialSample.pdf;
 }
 
-LinearColor MaterialRenderer::getDirectLight(
+LinearColor PathRenderer::getDirectLight(
     const HitData& hitData,
     const Point3f& offsetHitPoint,
     const Vector3f& outDirection,
@@ -121,7 +121,7 @@ LinearColor MaterialRenderer::getDirectLight(
     return directLight;
 }
 
-bool MaterialRenderer::isInShadow(
+bool PathRenderer::isInShadow(
     const Point3f& origin,
     const Vector3f& toLight,
     const Scene& scene
@@ -137,7 +137,7 @@ bool MaterialRenderer::isInShadow(
     return scene.hitAny(shadowRay, interval);
 }
 
-LinearColor MaterialRenderer::traceRay(
+LinearColor PathRenderer::traceRay(
     const Ray& ray,
     const Scene& scene,
     RendererStatistics& statistics,
@@ -185,7 +185,7 @@ LinearColor MaterialRenderer::traceRay(
     return emittedLight + indirectLight + directLight;
 }
 
-RendererStatistics MaterialRenderer::renderSection(
+RendererStatistics PathRenderer::renderSection(
     const Camera& camera,
     const Scene& scene,
     const Interval<float>& renderInterval,
@@ -220,7 +220,7 @@ RendererStatistics MaterialRenderer::renderSection(
     return statistics;
 }
 
-std::vector<RendererStatistics> MaterialRenderer::renderAll(
+std::vector<RendererStatistics> PathRenderer::renderAll(
     const Camera& camera,
     const Scene& scene,
     Framebuffer& framebuffer
@@ -289,18 +289,18 @@ std::vector<RendererStatistics> MaterialRenderer::renderAll(
     return statistics;
 }
 
-MaterialRenderer::MaterialRenderer(
+PathRenderer::PathRenderer(
     std::shared_ptr<ILogger> logger,
     std::unique_ptr<IProgressIndicator> progressIndicator,
     std::unique_ptr<IBackground> background,
-    MaterialRendererParameters parameters
+    PathRendererParameters parameters
 ) :
     logger_(std::move(logger)),
     progressIndicator_(std::move(progressIndicator)),
     background_(std::move(background)),
     parameters_(parameters) {}
 
-RendererStatistics MaterialRenderer::render(
+RendererStatistics PathRenderer::render(
     const Camera& camera,
     const Scene& scene,
     Framebuffer& framebuffer
