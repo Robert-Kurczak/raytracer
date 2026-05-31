@@ -2,7 +2,7 @@
     "outputPath": "resources/renders/bmw-scene.exr",
     "verbose": true,
     "renderer": {
-        "pathsPerPixel": 20,
+        "pathsPerPixel": 10,
         "lightSamplesPerHit": 1,
         "scatterRecursionDepth": 10,
         "photonMappingEnabled": false,

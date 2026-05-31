@@ -2,6 +2,7 @@
 
 #include "Core/Color/Color.hpp"
 #include "Core/Math/Interval.hpp"
+#include "Core/Math/Numeric.hpp"
 #include "Core/Math/Vector.hpp"
 #include "Core/Ray/Ray.hpp"
 #include "Geometry/Hittable/HitData.hpp"
@@ -9,6 +10,7 @@
 #include "Geometry/Light/LightSample.hpp"
 #include "Rendering/Material/IMaterial.hpp"
 #include "Rendering/Material/MaterialSample.hpp"
+#include "Rendering/ProgressIndicator/IProgressIndicator.hpp"
 #include "Rendering/Renderer/RendererStatistics.hpp"
 #include "Utils/Logger/ILogger.hpp"
 #include "World/Scene/Scene.hpp"
@@ -19,7 +21,6 @@
 #include <utility>
 
 namespace RTC {
-static constexpr float epsilon = 1e-4F;
 
 LinearColor MaterialRenderer::getEmission(
     const HitData& hitData,
@@ -47,7 +48,7 @@ LinearColor MaterialRenderer::getIndirectLight(
 
     if (materialSample.scatterType == ScatterType::Specular) {
         const Point3f specularOffsetPoint =
-            hitData.hitPoint + epsilon * materialSample.inDirection;
+            hitData.hitPoint + EPSILON * materialSample.inDirection;
 
         const Ray scatterRay {
             specularOffsetPoint, materialSample.inDirection
@@ -128,8 +129,8 @@ bool MaterialRenderer::isInShadow(
     const Ray shadowRay {origin, toLight};
 
     const Interval<float> interval {
-        epsilon,       // ray origin is at hit point
-        1.0F - epsilon // ray end (light) is at the end of unnormalized
+        EPSILON,       // ray origin is at hit point
+        1.0F - EPSILON // ray end (light) is at the end of unnormalized
                        // direction
     };
 
@@ -143,7 +144,7 @@ LinearColor MaterialRenderer::traceRay(
     uint32_t recursionDepth
 ) const {
     constexpr Interval<float> renderInterval {
-        epsilon, Interval<float>::infinity()
+        EPSILON, Interval<float>::infinity()
     };
 
     if (recursionDepth > parameters_.scatterRecursionDepth) {
@@ -163,7 +164,7 @@ LinearColor MaterialRenderer::traceRay(
 
     const Vector3f outDirection = -ray.getDirection().getNormalized();
     const Point3f offsetHitPoint =
-        hitData.hitPoint + epsilon * hitData.hitNormal;
+        hitData.hitPoint + EPSILON * hitData.hitNormal;
 
     const LinearColor emittedLight =
         getEmission(hitData, outDirection, recursionDepth);
@@ -210,8 +211,9 @@ RendererStatistics MaterialRenderer::renderSection(
             }
 
             resultColor /= float(parameters_.pathsPerPixel);
-
             framebuffer.setColorAt(pixel, resultColor);
+
+            progressIndicator_->tick();
         }
     }
 
@@ -239,11 +241,13 @@ std::vector<RendererStatistics> MaterialRenderer::renderAll(
     const uint32_t sectionWidth = resolution.getX() / threadCount;
 
     const Interval<float> renderInterval {
-        epsilon, Interval<float>::infinity()
+        EPSILON, Interval<float>::infinity()
     };
     const Interval<uint32_t> yIndices {0, resolution.getY()};
 
     std::vector<RendererStatistics> statistics(threadCount);
+
+    progressIndicator_->setGoal(resolution.getX() * resolution.getY());
 
     {
         std::vector<std::jthread> threads(threadCount);
@@ -287,10 +291,12 @@ std::vector<RendererStatistics> MaterialRenderer::renderAll(
 
 MaterialRenderer::MaterialRenderer(
     std::shared_ptr<ILogger> logger,
+    std::unique_ptr<IProgressIndicator> progressIndicator,
     std::unique_ptr<IBackground> background,
     MaterialRendererParameters parameters
 ) :
     logger_(std::move(logger)),
+    progressIndicator_(std::move(progressIndicator)),
     background_(std::move(background)),
     parameters_(parameters) {}
 

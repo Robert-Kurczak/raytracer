@@ -16,6 +16,8 @@
 #include "Geometry/Hittable/Sphere/Sphere.hpp"
 #include "Geometry/Light/ILight.hpp"
 #include "Geometry/Light/PointLight/PointLight.hpp"
+#include "Rendering/ProgressIndicator/CoutProgressIndicator/CoutProgressIndicator.hpp"
+#include "Rendering/ProgressIndicator/IProgressIndicator.hpp"
 #include "Rendering/Renderer/IRenderer.hpp"
 #include "Rendering/Renderer/MaterialRenderer/MaterialRenderer.hpp"
 #include "Rendering/Renderer/MaterialRenderer/MaterialRendererParameters.hpp"
@@ -126,6 +128,9 @@ std::unique_ptr<IRenderer> JsonEnvironmentBuilder::parseRenderer(
     const std::shared_ptr<ILogger>& logger,
     const nlohmann::json& jsonContent
 ) const {
+    std::unique_ptr<IProgressIndicator> progressIndicator =
+        std::make_unique<CoutProgressIndicator>();
+
     std::unique_ptr<IBackground> background =
         parseBackground(jsonContent);
 
@@ -153,6 +158,7 @@ std::unique_ptr<IRenderer> JsonEnvironmentBuilder::parseRenderer(
 
         return std::make_unique<PhotonMapRenderer>(
             logger,
+            std::move(progressIndicator),
             std::move(photonMapBuilder),
             std::move(background),
             parameters
@@ -170,7 +176,10 @@ std::unique_ptr<IRenderer> JsonEnvironmentBuilder::parseRenderer(
     };
 
     return std::make_unique<MaterialRenderer>(
-        logger, std::move(background), parameters
+        logger,
+        std::move(progressIndicator),
+        std::move(background),
+        parameters
     );
 }
 

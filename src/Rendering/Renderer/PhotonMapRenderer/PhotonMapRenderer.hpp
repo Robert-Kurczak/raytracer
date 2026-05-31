@@ -9,6 +9,7 @@
 #include "Geometry/Light/ILight.hpp"
 #include "Rendering/Framebuffer/Framebuffer.hpp"
 #include "Rendering/PhotonMap/PhotonMap.hpp"
+#include "Rendering/ProgressIndicator/IProgressIndicator.hpp"
 #include "Rendering/Renderer/PhotonMapRenderer/PhotonMapRendererParameters.hpp"
 #include "Rendering/Renderer/RendererStatistics.hpp"
 #include "Utils/Logger/ILogger.hpp"
@@ -19,6 +20,7 @@ namespace RTC {
 class PhotonMapRenderer : public IRenderer {
 private:
     std::shared_ptr<ILogger> logger_;
+    std::unique_ptr<IProgressIndicator> progressIndicator_;
     std::unique_ptr<IPhotonMapBuilder> photonMapBuilder_;
     std::unique_ptr<IBackground> background_;
     PhotonMapRendererParameters parameters_;
@@ -102,6 +104,7 @@ private:
 public:
     PhotonMapRenderer(
         std::shared_ptr<ILogger> logger,
+        std::unique_ptr<IProgressIndicator> progressIndicator,
         std::unique_ptr<IPhotonMapBuilder> photonMapBuilder,
         std::unique_ptr<IBackground> background,
         PhotonMapRendererParameters parameters

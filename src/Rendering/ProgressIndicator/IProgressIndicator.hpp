@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstdint>
 namespace RTC {
 class IProgressIndicator {
 public:
@@ -10,6 +11,7 @@ public:
     IProgressIndicator operator=(IProgressIndicator&&) = delete;
     virtual ~IProgressIndicator() = default;
 
-    virtual void showProgress(float unitValue) const = 0;
+    virtual void setGoal(uint32_t value) = 0;
+    virtual void tick() = 0;
 };
 }

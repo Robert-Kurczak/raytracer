@@ -8,6 +8,7 @@
 #include "Geometry/Light/ILight.hpp"
 #include "Rendering/Framebuffer/Framebuffer.hpp"
 #include "Rendering/Material/MaterialSample.hpp"
+#include "Rendering/ProgressIndicator/IProgressIndicator.hpp"
 #include "Rendering/Renderer/MaterialRenderer/MaterialRendererParameters.hpp"
 #include "Rendering/Renderer/RendererStatistics.hpp"
 #include "Utils/Logger/ILogger.hpp"
@@ -19,6 +20,7 @@ namespace RTC {
 class MaterialRenderer : public IRenderer {
 private:
     std::shared_ptr<ILogger> logger_;
+    std::unique_ptr<IProgressIndicator> progressIndicator_;
     std::unique_ptr<IBackground> background_;
     MaterialRendererParameters parameters_;
 
@@ -76,6 +78,7 @@ private:
 public:
     MaterialRenderer(
         std::shared_ptr<ILogger> logger,
+        std::unique_ptr<IProgressIndicator> progressIndicator,
         std::unique_ptr<IBackground> background,
         MaterialRendererParameters parameters
     );

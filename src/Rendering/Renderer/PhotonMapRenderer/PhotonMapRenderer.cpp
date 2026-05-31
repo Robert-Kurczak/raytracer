@@ -347,8 +347,9 @@ RendererStatistics PhotonMapRenderer::renderSection(
             }
 
             resultColor /= float(parameters_.pathsPerPixel);
-
             framebuffer.setColorAt(pixel, resultColor);
+
+            progressIndicator_->tick();
         }
     }
 
@@ -380,6 +381,8 @@ std::vector<RendererStatistics> PhotonMapRenderer::renderAll(
         EPSILON, Interval<float>::infinity()
     };
     const Interval<uint32_t> yIndices {0, resolution.getY()};
+
+    progressIndicator_->setGoal(resolution.getX() * resolution.getY());
 
     std::vector<RendererStatistics> statistics(threadCount);
 
@@ -427,11 +430,13 @@ std::vector<RendererStatistics> PhotonMapRenderer::renderAll(
 
 PhotonMapRenderer::PhotonMapRenderer(
     std::shared_ptr<ILogger> logger,
+    std::unique_ptr<IProgressIndicator> progressIndicator,
     std::unique_ptr<IPhotonMapBuilder> photonMapBuilder,
     std::unique_ptr<IBackground> background,
     PhotonMapRendererParameters parameters
 ) :
     logger_(std::move(logger)),
+    progressIndicator_(std::move(progressIndicator)),
     photonMapBuilder_(std::move(photonMapBuilder)),
     background_(std::move(background)),
     parameters_(parameters) {}
