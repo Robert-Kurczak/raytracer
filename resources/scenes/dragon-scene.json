@@ -4,7 +4,10 @@
     "renderer": {
         "pathsPerPixel": 100,
         "lightSamplesPerHit": 1,
-        "scatterRecursionDepth": 10
+        "scatterRecursionDepth": 10,
+        "photonMappingEnabled": false,
+        "emittedPhotons": 1000000,
+        "nearestPhotons": 100
     },
     "camera": {
         "screenWidth": 1920,

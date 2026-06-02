@@ -2,9 +2,13 @@
     "outputPath": "resources/renders/breakfast-room-scene.exr",
     "verbose": true,
     "renderer": {
-        "pathsPerPixel": 500,
+        "pathsPerPixel": 10,
         "lightSamplesPerHit": 1,
-        "scatterRecursionDepth": 200
+        "scatterRecursionDepth": 5,
+        "photonMappingEnabled": false,
+        "emittedPhotons": 1000000,
+        "nearestPhotons": 100
+        
     },
     "camera": {
         "screenWidth": 1920,
@@ -40,5 +44,11 @@
             ]
         }
     ],
-    "lights": []
+    "lights": [
+        {
+            "type": "directional",
+            "color": [225, 130, 85],
+            "direction": [-0.8, -0.5, -0.3]
+        }
+    ]
 }

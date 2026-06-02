@@ -2,6 +2,7 @@
 
 #include "Core/Math/Interval.hpp"
 #include "Core/Ray/Ray.hpp"
+#include "Geometry/BoundingVolume/AxisAlignedBoundingBox/AxisAlignedBoundingBox.hpp"
 #include "Geometry/Hittable/HitData.hpp"
 #include "Geometry/Hittable/IHittable.hpp"
 #include "Geometry/Light/ILight.hpp"
@@ -20,6 +21,8 @@ public:
         std::unique_ptr<IHittable> sceneRoot,
         std::vector<std::unique_ptr<ILight>> lights
     );
+
+    void setup();
 
     [[nodiscard]] const std::vector<std::unique_ptr<ILight>>&
     getLights() const;

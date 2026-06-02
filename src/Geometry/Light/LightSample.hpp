@@ -5,7 +5,7 @@
 
 namespace RTC {
 struct LightSample {
-    LinearColor outLight {0.0F, 0.0F, 0.0F};
+    LinearColor outLight {.red = 0.0F, .green = 0.0F, .blue = 0.0F};
     Vector3f toLight {0.0F, 0.0F, 0.0F};
     Vector3f inDirection {0.0F, 0.0F, 0.0F};
     float pdf = 0.0F;

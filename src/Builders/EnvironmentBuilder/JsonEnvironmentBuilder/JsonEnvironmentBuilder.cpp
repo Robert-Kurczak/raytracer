@@ -14,6 +14,7 @@
 #include "Geometry/Background/SolidBackground/SolidBackground.hpp"
 #include "Geometry/Hittable/IHittable.hpp"
 #include "Geometry/Hittable/Sphere/Sphere.hpp"
+#include "Geometry/Light/DirectionalLight/DirectionalLight.hpp"
 #include "Geometry/Light/ILight.hpp"
 #include "Geometry/Light/PointLight/PointLight.hpp"
 #include "Rendering/ProgressIndicator/CoutProgressIndicator/CoutProgressIndicator.hpp"
@@ -69,14 +70,15 @@ Point3<float> JsonEnvironmentBuilder::parsePosition(
     };
 }
 
-Color8Bit JsonEnvironmentBuilder::parse8BitColor(
+LinearColor JsonEnvironmentBuilder::parse8BitColor(
     const nlohmann::json& jsonArray
 ) const {
-    return Color8Bit {
-        .red = jsonArray[0].get<uint8_t>(),
-        .green = jsonArray[1].get<uint8_t>(),
-        .blue = jsonArray[2].get<uint8_t>()
-    };
+    return LinearColor {
+               .red = jsonArray[0].get<float>(),
+               .green = jsonArray[1].get<float>(),
+               .blue = jsonArray[2].get<float>(),
+           } /
+           255.0F;
 }
 
 LinearColor JsonEnvironmentBuilder::parseNormalizedColor(
@@ -260,10 +262,9 @@ void JsonEnvironmentBuilder::parseSceneLights(
             jsonLight["type"].get<std::string>();
 
         if (objectType == "point") {
-            const Point3<float> position =
-                parsePosition(jsonLight["position"]);
+            const Point3f position = parsePosition(jsonLight["position"]);
 
-            const Color8Bit color = parse8BitColor(jsonLight["color"]);
+            const LinearColor color = parse8BitColor(jsonLight["color"]);
 
             const float decay = jsonLight["decay"].get<float>();
 
@@ -271,6 +272,16 @@ void JsonEnvironmentBuilder::parseSceneLights(
                 std::make_unique<PointLight>(position, color, decay);
 
             sceneLights.emplace_back(std::move(pointLight));
+        } else if (objectType == "directional") {
+            const LinearColor color = parse8BitColor(jsonLight["color"]);
+
+            const Vector3f direction =
+                parsePosition(jsonLight["direction"]).getNormalized();
+
+            std::unique_ptr<ILight> directionalLight =
+                std::make_unique<DirectionalLight>(color, direction);
+
+            sceneLights.emplace_back(std::move(directionalLight));
         }
     }
 }
@@ -290,9 +301,13 @@ std::unique_ptr<Scene> JsonEnvironmentBuilder::parseScene(
     std::unique_ptr<IHittable> sceneRoot =
         bvhBuilder.build(std::move(objects));
 
-    return std::make_unique<Scene>(
+    auto scene = std::make_unique<Scene>(
         std::move(sceneRoot), std::move(sceneLights)
     );
+
+    scene->setup();
+
+    return std::move(scene);
 }
 
 RenderEnvironment JsonEnvironmentBuilder::build(

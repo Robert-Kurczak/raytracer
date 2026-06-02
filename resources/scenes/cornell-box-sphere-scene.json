@@ -2,10 +2,10 @@
     "outputPath": "resources/renders/cornell-sphere-scene.exr",
     "verbose": true,
     "renderer": {
-        "pathsPerPixel": 10,
+        "pathsPerPixel": 100,
         "lightSamplesPerHit": 1,
         "scatterRecursionDepth": 10,
-        "photonMappingEnabled": true,
+        "photonMappingEnabled": false,
         "emittedPhotons": 1000000,
         "nearestPhotons": 100
     },

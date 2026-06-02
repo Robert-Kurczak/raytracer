@@ -93,6 +93,28 @@ uint8_t AxisAlignedBoundingBox::getLongestAxisIndex() const {
     return Z_AXIS_INDEX;
 }
 
+Point3f AxisAlignedBoundingBox::getBoxCenter() const {
+    return Point3f {
+        getIntervalCenter(0), getIntervalCenter(1), getIntervalCenter(2)
+    };
+}
+
+float AxisAlignedBoundingBox::getDiagonal() const {
+    const Point3f startPoint {
+        axisIntervals_[0].start,
+        axisIntervals_[1].start,
+        axisIntervals_[2].start
+    };
+
+    const Point3f endPoint {
+        axisIntervals_[0].end,
+        axisIntervals_[1].end,
+        axisIntervals_[2].end
+    };
+
+    return (endPoint - startPoint).getLength();
+}
+
 bool AxisAlignedBoundingBox::isHit(
     const Ray& ray,
     const Interval<float>& rayInterval

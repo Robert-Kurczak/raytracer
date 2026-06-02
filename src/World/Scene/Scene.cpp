@@ -1,5 +1,6 @@
 #include "Scene.hpp"
 
+#include "Geometry/BoundingVolume/AxisAlignedBoundingBox/AxisAlignedBoundingBox.hpp"
 #include "Geometry/Hittable/IHittable.hpp"
 
 #include <memory>
@@ -14,6 +15,15 @@ Scene::Scene(
 
 const std::vector<std::unique_ptr<ILight>>& Scene::getLights() const {
     return lights_;
+}
+
+void Scene::setup() {
+    const AxisAlignedBoundingBox boundingBox =
+        sceneRoot_->getBoundingBox();
+
+    for (const auto& light : lights_) {
+        light->setup(boundingBox);
+    }
 }
 
 bool Scene::hitClosest(

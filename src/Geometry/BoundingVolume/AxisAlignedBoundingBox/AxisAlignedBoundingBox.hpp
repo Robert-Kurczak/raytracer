@@ -40,6 +40,8 @@ public:
 
     [[nodiscard]] float getIntervalCenter(uint8_t axisIndex) const;
     [[nodiscard]] uint8_t getLongestAxisIndex() const;
+    [[nodiscard]] Point3f getBoxCenter() const;
+    [[nodiscard]] float getDiagonal() const;
 
     [[nodiscard]] bool isHit(
         const Ray& ray,

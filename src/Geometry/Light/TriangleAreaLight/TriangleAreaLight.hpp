@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Core/Color/Color.hpp"
+#include "Geometry/BoundingVolume/AxisAlignedBoundingBox/AxisAlignedBoundingBox.hpp"
 #include "Geometry/Light/ILight.hpp"
 
 namespace RTC {
@@ -31,6 +32,8 @@ public:
         const Point3f& vertexC,
         const LinearColor& emission
     );
+
+    void setup(const AxisAlignedBoundingBox& sceneBoundingBox) override;
 
     [[nodiscard]] LightSample getSample(
         const Point3f& origin

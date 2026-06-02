@@ -1,22 +1,22 @@
 #pragma once
 
 #include "Core/Color/Color.hpp"
-#include "Geometry/BoundingVolume/AxisAlignedBoundingBox/AxisAlignedBoundingBox.hpp"
 #include "Geometry/Light/ILight.hpp"
-#include "Geometry/Light/LightSample.hpp"
 
 namespace RTC {
-class PointLight : public ILight {
+class DirectionalLight : public ILight {
 private:
-    Point3f position_;
-    LinearColor emission_;
-    float decay_;
+    const LinearColor emission_;
+    const Vector3f direction_;
+
+    Point3f boundingSphereCenter_ {0.0F, 0.0F, 0.0F};
+    float boundingSphereRadius_ = 0.0F;
+    LinearColor power_;
 
 public:
-    PointLight(
-        const Point3f& position,
+    DirectionalLight(
         const LinearColor& emission,
-        float decay
+        const Vector3f& direction
     );
 
     void setup(const AxisAlignedBoundingBox& sceneBoundingBox) override;

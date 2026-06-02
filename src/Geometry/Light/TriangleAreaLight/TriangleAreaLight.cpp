@@ -5,6 +5,7 @@
 #include "Core/Math/Sampling.hpp"
 #include "Core/Math/Transformations.hpp"
 #include "Core/Math/Vector.hpp"
+#include "Geometry/BoundingVolume/AxisAlignedBoundingBox/AxisAlignedBoundingBox.hpp"
 #include "Geometry/Light/LightSample.hpp"
 
 #include <unistd.h>
@@ -51,6 +52,10 @@ TriangleAreaLight::TriangleAreaLight(
     normal_(perpendicular_.getNormalized()),
     area_(perpendicular_.getLength()),
     power_(area_ * emission_) {}
+
+void TriangleAreaLight::setup(
+    const AxisAlignedBoundingBox& sceneBoundingBox
+) {}
 
 LightSample TriangleAreaLight::getSample(const Point3f& origin) const {
     const Point3f sample = getRandomSample();

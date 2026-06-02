@@ -28,7 +28,7 @@ private:
         const nlohmann::json& jsonArray
     ) const;
 
-    [[nodiscard]] Color8Bit parse8BitColor(
+    [[nodiscard]] LinearColor parse8BitColor(
         const nlohmann::json& jsonArray
     ) const;
 

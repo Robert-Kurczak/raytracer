@@ -1,8 +1,8 @@
 #include "PointLight.hpp"
 
 #include "Core/Math/Sampling.hpp"
-#include "Core/Math/Transformations.hpp"
 #include "Core/Math/Vector.hpp"
+#include "Geometry/BoundingVolume/AxisAlignedBoundingBox/AxisAlignedBoundingBox.hpp"
 #include "Geometry/Light/LightSample.hpp"
 #include "Geometry/Light/Photon.hpp"
 
@@ -18,20 +18,7 @@ PointLight::PointLight(
     emission_(emission),
     decay_(std::max(decay, epsilon)) {}
 
-PointLight::PointLight(
-    const Point3<float>& position,
-    const Color8Bit& emission,
-    float decay
-) :
-    PointLight(
-        position,
-        LinearColor {
-            .red = float(emission.red) / 255.0F,
-            .green = float(emission.green) / 255.0F,
-            .blue = float(emission.blue) / 255.0F
-        },
-        decay
-    ) {}
+void PointLight::setup(const AxisAlignedBoundingBox& sceneBoundingBox) {}
 
 LightSample PointLight::getSample(const Point3f& origin) const {
     const Vector3f toLight = position_ - origin;
@@ -47,7 +34,7 @@ LightSample PointLight::getSample(const Point3f& origin) const {
     };
 }
 
-LinearColor PointLight::getPower() const  {
+LinearColor PointLight::getPower() const {
     return emission_;
 }
 
