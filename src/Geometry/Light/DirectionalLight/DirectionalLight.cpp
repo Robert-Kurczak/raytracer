@@ -20,7 +20,7 @@ void DirectionalLight::setup(
     const AxisAlignedBoundingBox& sceneBoundingBox
 ) {
     boundingSphereCenter_ = sceneBoundingBox.getBoxCenter();
-    boundingSphereRadius_ = sceneBoundingBox.getDiagonal() / 1.8F;
+    boundingSphereRadius_ = sceneBoundingBox.getDiagonal() / 1.5F;
 
     power_ = emission_ * float(std::numbers::pi) * boundingSphereRadius_ *
              boundingSphereRadius_;
