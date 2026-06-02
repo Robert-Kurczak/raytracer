@@ -19,24 +19,24 @@ private:
 
     [[nodiscard]] Vector3f createMicrofacetNormal() const;
 
-    [[nodiscard]] float getMaskingShadowingLambda(float cosinus) const;
+    [[nodiscard]] float getMaskingShadowingLambda(float cosine) const;
 
-    [[nodiscard]] float getDistributionTerm(float normalsCosinus) const;
+    [[nodiscard]] float getDistributionTerm(float normalsCosine) const;
 
     [[nodiscard]] float getGeometricTerm(
-        float outCosinus,
-        float inCosinus
+        float outCosine,
+        float inCosine
     ) const;
 
     [[nodiscard]] LinearColor getFresnelTerm(
-        float microfacetOutCosinus
+        float microfacetOutCosine
     ) const;
 
     struct MicrofacetData {
         LinearColor brdf;
         float distribution {};
-        float normalsCosinus {};
-        float microfacetOutCosinus {};
+        float normalsCosine {};
+        float microfacetOutCosine {};
     };
 
     [[nodiscard]] MicrofacetData getCookTorranceTerms(

@@ -65,11 +65,11 @@ LinearColor PathRenderer::getIndirectLight(
     const LinearColor scatterLight =
         traceRay(scatterRay, scene, statistics, recursionDepth + 1);
 
-    const float cosinus = std::max(
+    const float cosine = std::max(
         0.0F, getDotProduct(hitData.hitNormal, materialSample.inDirection)
     );
 
-    return (materialSample.brdf * scatterLight * cosinus) /
+    return (materialSample.brdf * scatterLight * cosine) /
            materialSample.pdf;
 }
 
@@ -100,13 +100,13 @@ LinearColor PathRenderer::getDirectLight(
                 lightSample.inDirection
             );
 
-            const float cosinus = std::max(
+            const float cosine = std::max(
                 0.0F,
                 getDotProduct(hitData.hitNormal, lightSample.inDirection)
             );
 
             const LinearColor sample =
-                brdf * lightSample.outLight * cosinus / lightSample.pdf;
+                brdf * lightSample.outLight * cosine / lightSample.pdf;
 
             directLight += LinearColor {
                 .red = sample.red / float(parameters_.lightSamplesPerHit),

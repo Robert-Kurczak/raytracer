@@ -42,10 +42,10 @@ Vector3f GlossyMaterial::createMicrofacetNormal() const {
     return Vector3f {x, y, z};
 }
 
-float GlossyMaterial::getDistributionTerm(float normalsCosinus) const {
-    const float cosinusSquared = normalsCosinus * normalsCosinus;
+float GlossyMaterial::getDistributionTerm(float normalsCosine) const {
+    const float cosineSquared = normalsCosine * normalsCosine;
     const float denominator_term =
-        (((alphaSquared_ - 1.0F) * cosinusSquared) + 1.0F);
+        (((alphaSquared_ - 1.0F) * cosineSquared) + 1.0F);
 
     const float denominator =
         float(std::numbers::pi) * denominator_term * denominator_term;
@@ -53,32 +53,32 @@ float GlossyMaterial::getDistributionTerm(float normalsCosinus) const {
     return alphaSquared_ / denominator;
 }
 
-float GlossyMaterial::getMaskingShadowingLambda(float cosinus) const {
-    const float cosinusSquared = cosinus * cosinus;
-    const float tangensSquared = (1.0F - cosinusSquared) / cosinusSquared;
+float GlossyMaterial::getMaskingShadowingLambda(float cosine) const {
+    const float cosineSquared = cosine * cosine;
+    const float tangentSquared = (1.0F - cosineSquared) / cosineSquared;
 
     const float nominator =
-        std::sqrt(1.0F + (alphaSquared_ * tangensSquared)) - 1.0F;
+        std::sqrt(1.0F + (alphaSquared_ * tangentSquared)) - 1.0F;
 
     return nominator / 2.0F;
 }
 
 float GlossyMaterial::getGeometricTerm(
-    float outCosinus,
-    float inCosinus
+    float outCosine,
+    float inCosine
 ) const {
-    const float outShadowing = getMaskingShadowingLambda(outCosinus);
-    const float inShadowing = getMaskingShadowingLambda(inCosinus);
+    const float outShadowing = getMaskingShadowingLambda(outCosine);
+    const float inShadowing = getMaskingShadowingLambda(inCosine);
 
     return 1.0F / (1.0F + outShadowing + inShadowing);
 }
 
 LinearColor GlossyMaterial::getFresnelTerm(
-    float microfacetOutCosinus
+    float microfacetOutCosine
 ) const {
     return fresnelBaseTerm_ +
            (UNIT_LINEAR_COLOR - fresnelBaseTerm_) *
-               float(std::pow(1.0F - microfacetOutCosinus, 5));
+               float(std::pow(1.0F - microfacetOutCosine, 5));
 }
 
 GlossyMaterial::MicrofacetData GlossyMaterial::getCookTorranceTerms(
@@ -87,32 +87,32 @@ GlossyMaterial::MicrofacetData GlossyMaterial::getCookTorranceTerms(
     const Vector3f& normal,
     const Vector3f& microfacetNormal
 ) const {
-    const float normalsCosinus = // m * n
+    const float normalsCosine = // m * n
         std::max(0.0F, getDotProduct(microfacetNormal, normal));
 
-    const float outCosinus = // wo * n
+    const float outCosine = // wo * n
         std::max(0.0F, getDotProduct(outDirection, normal));
 
-    const float inCosinus = // wi * n
+    const float inCosine = // wi * n
         std::max(0.0F, getDotProduct(inDirection, normal));
 
-    const float microfacetOutCosinus = // wo * m
+    const float microfacetOutCosine = // wo * m
         std::max(0.0F, getDotProduct(microfacetNormal, outDirection));
 
-    const float distribution = getDistributionTerm(normalsCosinus);
-    const float geometry = getGeometricTerm(outCosinus, inCosinus);
-    const LinearColor fresnel = getFresnelTerm(microfacetOutCosinus);
+    const float distribution = getDistributionTerm(normalsCosine);
+    const float geometry = getGeometricTerm(outCosine, inCosine);
+    const LinearColor fresnel = getFresnelTerm(microfacetOutCosine);
 
     const LinearColor nominator = distribution * geometry * fresnel;
-    const float denominator = 4.0F * outCosinus * inCosinus;
+    const float denominator = 4.0F * outCosine * inCosine;
 
     const LinearColor brdf = nominator / denominator;
 
     return MicrofacetData {
         .brdf = brdf,
         .distribution = distribution,
-        .normalsCosinus = normalsCosinus,
-        .microfacetOutCosinus = microfacetOutCosinus
+        .normalsCosine = normalsCosine,
+        .microfacetOutCosine = microfacetOutCosine
     };
 }
 
@@ -144,10 +144,10 @@ LinearColor GlossyMaterial::calculateBrdf(
     const Vector3f& outDirection,
     const Vector3f& inDirection
 ) const {
-    const float inCosinus = getDotProduct(inDirection, normal);
-    const float outCosinus = getDotProduct(outDirection, normal);
+    const float inCosine = getDotProduct(inDirection, normal);
+    const float outCosine = getDotProduct(outDirection, normal);
 
-    if (inCosinus <= 0.0F || outCosinus <= 0.0F) {
+    if (inCosine <= 0.0F || outCosine <= 0.0F) {
         return BLACK_LINEAR_COLOR;
     }
 
@@ -169,16 +169,16 @@ float GlossyMaterial::calculatePdf(
     const Vector3f microfacetNormal =
         (outDirection + inDirection).getNormalized();
 
-    const float normalsCosinus =
+    const float normalsCosine =
         std::max(0.0F, getDotProduct(microfacetNormal, normal));
 
-    const float microfacetOutCosinus =
+    const float microfacetOutCosine =
         std::max(0.0F, getDotProduct(outDirection, microfacetNormal));
 
-    const float distribution = getDistributionTerm(normalsCosinus);
+    const float distribution = getDistributionTerm(normalsCosine);
 
-    return (distribution * normalsCosinus) /
-           (4.0F * std::abs(microfacetOutCosinus));
+    return (distribution * normalsCosine) /
+           (4.0F * std::abs(microfacetOutCosine));
 }
 
 MaterialSample GlossyMaterial::getSample(
@@ -193,10 +193,10 @@ MaterialSample GlossyMaterial::getSample(
     const Vector3f inDirection =
         (-outDirection).getReflected(microfacetNormal);
 
-    const float inCosinus = getDotProduct(inDirection, normal);
-    const float outCosinus = getDotProduct(outDirection, normal);
+    const float inCosine = getDotProduct(inDirection, normal);
+    const float outCosine = getDotProduct(outDirection, normal);
 
-    if (inCosinus <= 0.0F || outCosinus <= 0.0F) {
+    if (inCosine <= 0.0F || outCosine <= 0.0F) {
         return MaterialSample {
             .inDirection = inDirection,
             .brdf = BLACK_LINEAR_COLOR,
@@ -208,8 +208,8 @@ MaterialSample GlossyMaterial::getSample(
         outDirection, inDirection, normal, microfacetNormal
     );
 
-    const float pdf = (data.distribution * data.normalsCosinus) /
-                      (4.0F * std::abs(data.microfacetOutCosinus));
+    const float pdf = (data.distribution * data.normalsCosine) /
+                      (4.0F * std::abs(data.microfacetOutCosine));
 
     return MaterialSample {
         .inDirection = inDirection,

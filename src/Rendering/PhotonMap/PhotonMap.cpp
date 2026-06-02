@@ -77,6 +77,10 @@ LinearColor PhotonMap::getRadiance(
     PhotonMaxHeap neighbors =
         findNearestPhotons(hitData.hitPoint, photonCount);
 
+    if (neighbors.empty()) {
+        return LinearColor::black();
+    }
+
     const float squaredMaxRadius =
         std::max(EPSILON, neighbors.top().squaredDistance);
 

@@ -50,10 +50,10 @@ float DiffuseMaterial::calculatePdf(
     const Vector3f& inDirection,
     const Vector3f& outDirection
 ) const {
-    const float cosinus = // wi * n
+    const float cosine = // wi * n
         std::max(EPSILON, getDotProduct(inDirection, normal));
 
-    return cosinus / float(std::numbers::pi);
+    return cosine / float(std::numbers::pi);
 }
 
 LinearColor DiffuseMaterial::calculateBrdf(

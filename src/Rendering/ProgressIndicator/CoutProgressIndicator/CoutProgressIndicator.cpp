@@ -1,5 +1,6 @@
 #include "CoutProgressIndicator.hpp"
 
+#include "Core/Math/Numeric.hpp"
 #include "Rendering/ProgressIndicator/CoutProgressIndicator/CoutProgressIndicator.hpp"
 
 #include <algorithm>
@@ -24,7 +25,7 @@ void CoutProgressIndicator::showProgress(float unitValue) {
         std::string(filledSymbols, '='),
         std::string(emptySymbols, ' '),
         unitValue * 100.0F,
-        unitValue >= 0.99F ? "\n" : "\r"
+        unitValue >= 1.0F - EPSILON ? "\n" : "\r"
     );
 
     std::cout << bar;

@@ -57,9 +57,9 @@ LightSample TriangleAreaLight::getSample(const Point3f& origin) const {
     const Vector3f toLight = sample - origin;
     const Vector3f inDirection = toLight.getNormalized();
     const float distanceSquared = toLight.getSquaredLength();
-    const float cosinus = getDotProduct(normal_, -inDirection);
+    const float cosine = getDotProduct(normal_, -inDirection);
 
-    if (cosinus <= 0) {
+    if (cosine <= 0) {
         return LightSample {
             .outLight = LinearColor::black(),
             .inDirection = inDirection,
@@ -67,7 +67,7 @@ LightSample TriangleAreaLight::getSample(const Point3f& origin) const {
         };
     }
 
-    const float solidAreaPdf = distanceSquared / (cosinus * area_);
+    const float solidAreaPdf = distanceSquared / (cosine * area_);
 
     return LightSample {
         .outLight = emission_,

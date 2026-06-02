@@ -101,13 +101,13 @@ LinearColor PhotonMapRenderer::getDirectLight(
                 lightSample.inDirection
             );
 
-            const float cosinus = std::max(
+            const float cosine = std::max(
                 0.0F,
                 getDotProduct(hitData.hitNormal, lightSample.inDirection)
             );
 
             const LinearColor sample =
-                brdf * lightSample.outLight * cosinus / lightSample.pdf;
+                brdf * lightSample.outLight * cosine / lightSample.pdf;
 
             directLight += LinearColor {
                 .red = sample.red / float(parameters_.lightSamplesPerHit),
