@@ -17,8 +17,6 @@ LinearColor AllLightsSampler::getRadiance(
     RendererStatistics& statistics,
     uint32_t samplesToTake
 ) {
-    statistics.shadowRays += scene.getLights().size();
-
     LinearColor radiance = LinearColor::black();
 
     for (const std::unique_ptr<ILight>& light : scene.getLights()) {
@@ -28,6 +26,8 @@ LinearColor AllLightsSampler::getRadiance(
             );
         }
     }
+
+    statistics.shadowRays += scene.getLights().size() * samplesToTake;
 
     return radiance / float(samplesToTake);
 }
