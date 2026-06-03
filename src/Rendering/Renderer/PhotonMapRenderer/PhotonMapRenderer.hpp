@@ -8,6 +8,7 @@
 #include "Geometry/Hittable/HitData.hpp"
 #include "Geometry/Light/ILight.hpp"
 #include "Rendering/Framebuffer/Framebuffer.hpp"
+#include "Rendering/LightSampler/ILightSampler.hpp"
 #include "Rendering/PhotonMap/PhotonMap.hpp"
 #include "Rendering/ProgressIndicator/IProgressIndicator.hpp"
 #include "Rendering/Renderer/PhotonMapRenderer/PhotonMapRendererParameters.hpp"
@@ -20,6 +21,7 @@ namespace RTC {
 class PhotonMapRenderer : public IRenderer {
 private:
     std::shared_ptr<ILogger> logger_;
+    std::unique_ptr<ILightSampler> lightSampler_;
     std::unique_ptr<IProgressIndicator> progressIndicator_;
     std::unique_ptr<IPhotonMapBuilder> photonMapBuilder_;
     std::unique_ptr<IBackground> background_;
@@ -43,20 +45,6 @@ private:
         const PhotonMaps& photonMaps,
         RendererStatistics& statistics,
         uint32_t recursionDepth
-    ) const;
-
-    [[nodiscard]] LinearColor getDirectLight(
-        const HitData& hitData,
-        const Point3f& offsetHitPoint,
-        const Vector3f& outDirection,
-        const Scene& scene,
-        RendererStatistics& statistics
-    ) const;
-
-    [[nodiscard]] bool isInShadow(
-        const Point3f& origin,
-        const Vector3f& toLight,
-        const Scene& scene
     ) const;
 
     void tracePhoton(
@@ -104,6 +92,7 @@ private:
 public:
     PhotonMapRenderer(
         std::shared_ptr<ILogger> logger,
+        std::unique_ptr<ILightSampler> lightSampler,
         std::unique_ptr<IProgressIndicator> progressIndicator,
         std::unique_ptr<IPhotonMapBuilder> photonMapBuilder,
         std::unique_ptr<IBackground> background,

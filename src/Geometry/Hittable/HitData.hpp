@@ -9,8 +9,8 @@ class IMaterial;
 
 struct HitData {
     float rayT = 0.0F;
-    Point3<float> hitPoint {0, 0, 0};
-    Vector3<float> hitNormal {0, 0, 0};
+    Point3f hitPoint {0, 0, 0};
+    Vector3f hitNormal {0, 0, 0};
     std::shared_ptr<IMaterial> material;
 };
 }

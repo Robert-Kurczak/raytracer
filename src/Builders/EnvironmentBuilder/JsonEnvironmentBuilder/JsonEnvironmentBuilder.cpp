@@ -17,6 +17,10 @@
 #include "Geometry/Light/DirectionalLight/DirectionalLight.hpp"
 #include "Geometry/Light/ILight.hpp"
 #include "Geometry/Light/PointLight/PointLight.hpp"
+#include "Rendering/DirectLightEstimator/DirectLightEstimator.hpp"
+#include "Rendering/DirectLightEstimator/IDirectLightEstimator.hpp"
+#include "Rendering/LightSampler/AllLightsSampler/AllLightsSampler.hpp"
+#include "Rendering/LightSampler/ILightSampler.hpp"
 #include "Rendering/ProgressIndicator/CoutProgressIndicator/CoutProgressIndicator.hpp"
 #include "Rendering/ProgressIndicator/IProgressIndicator.hpp"
 #include "Rendering/Renderer/IRenderer.hpp"
@@ -130,6 +134,14 @@ std::unique_ptr<IRenderer> JsonEnvironmentBuilder::parseRenderer(
     const std::shared_ptr<ILogger>& logger,
     const nlohmann::json& jsonContent
 ) const {
+    std::unique_ptr<IDirectLightEstimator> directLightEstimator =
+        std::make_unique<DirectLightEstimator>();
+
+    std::unique_ptr<ILightSampler> lightSampler =
+        std::make_unique<AllLightsSampler>(
+            std::move(directLightEstimator)
+        );
+
     std::unique_ptr<IProgressIndicator> progressIndicator =
         std::make_unique<CoutProgressIndicator>();
 
@@ -160,6 +172,7 @@ std::unique_ptr<IRenderer> JsonEnvironmentBuilder::parseRenderer(
 
         return std::make_unique<PhotonMapRenderer>(
             logger,
+            std::move(lightSampler),
             std::move(progressIndicator),
             std::move(photonMapBuilder),
             std::move(background),
@@ -179,6 +192,7 @@ std::unique_ptr<IRenderer> JsonEnvironmentBuilder::parseRenderer(
 
     return std::make_unique<PathRenderer>(
         logger,
+        std::move(lightSampler),
         std::move(progressIndicator),
         std::move(background),
         parameters

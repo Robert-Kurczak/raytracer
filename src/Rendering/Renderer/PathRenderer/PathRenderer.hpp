@@ -7,6 +7,7 @@
 #include "Geometry/Hittable/HitData.hpp"
 #include "Geometry/Light/ILight.hpp"
 #include "Rendering/Framebuffer/Framebuffer.hpp"
+#include "Rendering/LightSampler/ILightSampler.hpp"
 #include "Rendering/Material/MaterialSample.hpp"
 #include "Rendering/ProgressIndicator/IProgressIndicator.hpp"
 #include "Rendering/Renderer/PathRenderer/PathRendererParameters.hpp"
@@ -20,6 +21,7 @@ namespace RTC {
 class PathRenderer : public IRenderer {
 private:
     std::shared_ptr<ILogger> logger_;
+    std::unique_ptr<ILightSampler> lightSampler_;
     std::unique_ptr<IProgressIndicator> progressIndicator_;
     std::unique_ptr<IBackground> background_;
     PathRendererParameters parameters_;
@@ -37,20 +39,6 @@ private:
         const Scene& scene,
         RendererStatistics& statistics,
         uint32_t recursionDepth
-    ) const;
-
-    [[nodiscard]] LinearColor getDirectLight(
-        const HitData& hitData,
-        const Point3f& offsetHitPoint,
-        const Vector3f& outDirection,
-        const Scene& scene,
-        RendererStatistics& statistics
-    ) const;
-
-    [[nodiscard]] bool isInShadow(
-        const Point3f& origin,
-        const Vector3f& toLight,
-        const Scene& scene
     ) const;
 
     [[nodiscard]] LinearColor traceRay(
@@ -78,6 +66,7 @@ private:
 public:
     PathRenderer(
         std::shared_ptr<ILogger> logger,
+        std::unique_ptr<ILightSampler> lightSampler,
         std::unique_ptr<IProgressIndicator> progressIndicator,
         std::unique_ptr<IBackground> background,
         PathRendererParameters parameters

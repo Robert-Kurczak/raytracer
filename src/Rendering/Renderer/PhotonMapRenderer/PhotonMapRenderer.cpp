@@ -74,70 +74,6 @@ LinearColor PhotonMapRenderer::getIndirectLight(
     return globalRadiance + causticRadiance;
 }
 
-LinearColor PhotonMapRenderer::getDirectLight(
-    const HitData& hitData,
-    const Point3f& offsetHitPoint,
-    const Vector3f& outDirection,
-    const Scene& scene,
-    RendererStatistics& statistics
-) const {
-    statistics.shadowRays += scene.getLights().size();
-
-    LinearColor directLight = LinearColor::black();
-
-    for (const std::unique_ptr<ILight>& light : scene.getLights()) {
-        for (uint32_t i = 0; i < parameters_.lightSamplesPerHit; i++) {
-            const LightSample lightSample =
-                light->getSample(hitData.hitPoint);
-
-            if (isInShadow(offsetHitPoint, lightSample.toLight, scene)) {
-                continue;
-            }
-
-            const LinearColor brdf = hitData.material->calculateBrdf(
-                hitData.hitPoint,
-                hitData.hitNormal,
-                outDirection,
-                lightSample.inDirection
-            );
-
-            const float cosine = std::max(
-                0.0F,
-                getDotProduct(hitData.hitNormal, lightSample.inDirection)
-            );
-
-            const LinearColor sample =
-                brdf * lightSample.outLight * cosine / lightSample.pdf;
-
-            directLight += LinearColor {
-                .red = sample.red / float(parameters_.lightSamplesPerHit),
-                .green =
-                    sample.green / float(parameters_.lightSamplesPerHit),
-                .blue =
-                    sample.blue / float(parameters_.lightSamplesPerHit)
-            };
-        }
-    }
-
-    return directLight;
-}
-
-bool PhotonMapRenderer::isInShadow(
-    const Point3f& origin,
-    const Vector3f& toLight,
-    const Scene& scene
-) const {
-    const Ray shadowRay {origin, toLight};
-
-    const Interval<float> interval {
-        EPSILON,       // ray origin is at hit point
-        1.0F - EPSILON // ray end (light) is at the end of unnormalized
-                       // direction
-    };
-
-    return scene.hitAny(shadowRay, interval);
-}
-
 void PhotonMapRenderer::tracePhoton(
     Photon& photon,
     bool specularBounce,
@@ -313,8 +249,13 @@ LinearColor PhotonMapRenderer::traceRay(
         recursionDepth
     );
 
-    const LinearColor directLight = getDirectLight(
-        hitData, offsetHitPoint, outDirection, scene, statistics
+    const LinearColor directLight = lightSampler_->getRadiance(
+        scene,
+        hitData,
+        offsetHitPoint,
+        outDirection,
+        statistics,
+        parameters_.lightSamplesPerHit
     );
 
     return emittedLight + directLight + indirectLight;
@@ -430,12 +371,14 @@ std::vector<RendererStatistics> PhotonMapRenderer::renderAll(
 
 PhotonMapRenderer::PhotonMapRenderer(
     std::shared_ptr<ILogger> logger,
+    std::unique_ptr<ILightSampler> lightSampler,
     std::unique_ptr<IProgressIndicator> progressIndicator,
     std::unique_ptr<IPhotonMapBuilder> photonMapBuilder,
     std::unique_ptr<IBackground> background,
     PhotonMapRendererParameters parameters
 ) :
     logger_(std::move(logger)),
+    lightSampler_(std::move(lightSampler)),
     progressIndicator_(std::move(progressIndicator)),
     photonMapBuilder_(std::move(photonMapBuilder)),
     background_(std::move(background)),
