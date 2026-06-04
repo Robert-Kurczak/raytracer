@@ -30,9 +30,11 @@ LinearColor RandomLightSampler::getRadiance(
         const std::unique_ptr<ILight>& light =
             scene.getLights().at(randomIndex);
 
-        radiance += directLightEstimator_->estimate(
-            *light, scene, hitData, offsetHitPoint, outDirection
-        );
+        radiance +=
+            directLightEstimator_->estimate(
+                *light, scene, hitData, offsetHitPoint, outDirection
+            ) *
+            lightsAmount;
     }
 
     statistics.shadowRays += samplesToTake;
