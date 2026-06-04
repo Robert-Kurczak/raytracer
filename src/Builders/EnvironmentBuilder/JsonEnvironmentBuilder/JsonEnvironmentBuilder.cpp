@@ -21,6 +21,7 @@
 #include "Rendering/DirectLightEstimator/IDirectLightEstimator.hpp"
 #include "Rendering/LightSampler/AllLightsSampler/AllLightsSampler.hpp"
 #include "Rendering/LightSampler/ILightSampler.hpp"
+#include "Rendering/LightSampler/RandomLightSampler/RandomLightSampler.hpp"
 #include "Rendering/ProgressIndicator/CoutProgressIndicator/CoutProgressIndicator.hpp"
 #include "Rendering/ProgressIndicator/IProgressIndicator.hpp"
 #include "Rendering/Renderer/IRenderer.hpp"
@@ -138,7 +139,7 @@ std::unique_ptr<IRenderer> JsonEnvironmentBuilder::parseRenderer(
         std::make_unique<DirectLightEstimator>();
 
     std::unique_ptr<ILightSampler> lightSampler =
-        std::make_unique<AllLightsSampler>(
+        std::make_unique<RandomLightSampler>(
             std::move(directLightEstimator)
         );
 
