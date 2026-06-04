@@ -9,6 +9,6 @@
 namespace RTC {
 struct MeshBuilderResult {
     std::vector<std::unique_ptr<IHittable>> triangles;
-    std::vector<std::unique_ptr<ILight>> areaLights;
+    std::vector<std::shared_ptr<ILight>> areaLights;
 };
 }

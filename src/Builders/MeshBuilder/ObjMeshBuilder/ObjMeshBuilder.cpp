@@ -324,7 +324,7 @@ void ObjMeshBuilder::parseFace(
         triangleBuffer.push_back(std::move(triangle));
 
         if (material && not material->getEmission().isBlack()) {
-            auto light = std::make_unique<TriangleAreaLight>(
+            auto light = std::make_shared<TriangleAreaLight>(
                 baseVertex.position,
                 vertexA.position,
                 vertexB.position,

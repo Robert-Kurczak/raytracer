@@ -16,9 +16,14 @@ PointLight::PointLight(
 ) :
     position_(position),
     emission_(emission),
-    decay_(std::max(decay, epsilon)) {}
+    decay_(std::max(decay, epsilon)),
+    boundingBox_(AxisAlignedBoundingBox {position_}) {}
 
 void PointLight::setup(const AxisAlignedBoundingBox& sceneBoundingBox) {}
+
+AxisAlignedBoundingBox PointLight::getBoundingBox() const {
+    return boundingBox_;
+}
 
 LightSample PointLight::getSample(const Point3f& origin) const {
     const Vector3f toLight = position_ - origin;

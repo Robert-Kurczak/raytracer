@@ -11,6 +11,7 @@ private:
     Point3f position_;
     LinearColor emission_;
     float decay_;
+    AxisAlignedBoundingBox boundingBox_;
 
 public:
     PointLight(
@@ -20,6 +21,8 @@ public:
     );
 
     void setup(const AxisAlignedBoundingBox& sceneBoundingBox) override;
+
+    [[nodiscard]] AxisAlignedBoundingBox getBoundingBox() const override;
 
     [[nodiscard]] LightSample getSample(
         const Point3f& origin

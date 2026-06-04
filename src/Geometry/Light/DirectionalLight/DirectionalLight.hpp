@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Core/Color/Color.hpp"
+#include "Geometry/BoundingVolume/AxisAlignedBoundingBox/AxisAlignedBoundingBox.hpp"
 #include "Geometry/Light/ILight.hpp"
 
 namespace RTC {
@@ -11,6 +12,7 @@ private:
 
     Point3f boundingSphereCenter_ {0.0F, 0.0F, 0.0F};
     float boundingSphereRadius_ = 0.0F;
+    AxisAlignedBoundingBox boundingBox_ {boundingSphereCenter_};
     LinearColor power_;
 
 public:
@@ -20,6 +22,8 @@ public:
     );
 
     void setup(const AxisAlignedBoundingBox& sceneBoundingBox) override;
+
+    [[nodiscard]] AxisAlignedBoundingBox getBoundingBox() const override;
 
     [[nodiscard]] LightSample getSample(
         const Point3f& origin

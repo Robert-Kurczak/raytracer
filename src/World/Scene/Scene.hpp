@@ -14,17 +14,17 @@ namespace RTC {
 class Scene {
 private:
     std::unique_ptr<IHittable> sceneRoot_;
-    std::vector<std::unique_ptr<ILight>> lights_;
+    std::vector<std::shared_ptr<ILight>> lights_;
 
 public:
     Scene(
         std::unique_ptr<IHittable> sceneRoot,
-        std::vector<std::unique_ptr<ILight>> lights
+        std::vector<std::shared_ptr<ILight>> lights
     );
 
     void setup();
 
-    [[nodiscard]] const std::vector<std::unique_ptr<ILight>>&
+    [[nodiscard]] const std::vector<std::shared_ptr<ILight>>&
     getLights() const;
 
     bool hitClosest(

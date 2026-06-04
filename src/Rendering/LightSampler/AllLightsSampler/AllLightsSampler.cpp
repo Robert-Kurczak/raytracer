@@ -19,7 +19,7 @@ LinearColor AllLightsSampler::getRadiance(
 ) {
     LinearColor radiance = LinearColor::black();
 
-    for (const std::unique_ptr<ILight>& light : scene.getLights()) {
+    for (const std::shared_ptr<ILight>& light : scene.getLights()) {
         for (uint32_t i = 0; i < samplesToTake; i++) {
             radiance += directLightEstimator_->estimate(
                 *light, scene, hitData, offsetHitPoint, outDirection

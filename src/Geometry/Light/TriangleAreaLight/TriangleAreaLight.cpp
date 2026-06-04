@@ -11,6 +11,31 @@
 #include <unistd.h>
 
 namespace RTC {
+AxisAlignedBoundingBox TriangleAreaLight::createBoundingBox(
+    const Point3f& vertexA,
+    const Point3f& vertexB,
+    const Point3f& vertexC
+) const {
+    const float minX =
+        std::min({vertexA.getX(), vertexB.getX(), vertexC.getX()});
+    const float minY =
+        std::min({vertexA.getY(), vertexB.getY(), vertexC.getY()});
+    const float minZ =
+        std::min({vertexA.getZ(), vertexB.getZ(), vertexC.getZ()});
+
+    const float maxX =
+        std::max({vertexA.getX(), vertexB.getX(), vertexC.getX()});
+    const float maxY =
+        std::max({vertexA.getY(), vertexB.getY(), vertexC.getY()});
+    const float maxZ =
+        std::max({vertexA.getZ(), vertexB.getZ(), vertexC.getZ()});
+
+    const Point3f minPoint {minX, minY, minZ};
+    const Point3f maxPoint {maxX, maxY, maxZ};
+
+    return AxisAlignedBoundingBox {minPoint, maxPoint};
+}
+
 Vector3f TriangleAreaLight::getPerpendicular(
     const Point3f& vertexA,
     const Point3f& vertexB,
@@ -51,11 +76,16 @@ TriangleAreaLight::TriangleAreaLight(
     perpendicular_(getPerpendicular(vertexA_, vertexB_, vertexC_)),
     normal_(perpendicular_.getNormalized()),
     area_(perpendicular_.getLength()),
-    power_(area_ * emission_) {}
+    power_(area_ * emission_),
+    boundingBox_(createBoundingBox(vertexA_, vertexB_, vertexC_)) {}
 
 void TriangleAreaLight::setup(
     const AxisAlignedBoundingBox& sceneBoundingBox
 ) {}
+
+AxisAlignedBoundingBox TriangleAreaLight::getBoundingBox() const {
+    return boundingBox_;
+}
 
 LightSample TriangleAreaLight::getSample(const Point3f& origin) const {
     const Point3f sample = getRandomSample();

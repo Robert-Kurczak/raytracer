@@ -190,7 +190,7 @@ void PhotonMapRenderer::scatterPhotons(
     const uint32_t photonsPerLight =
         parameters_.emittedPhotons / scene.getLights().size();
 
-    for (const std::unique_ptr<ILight>& light : scene.getLights()) {
+    for (const std::shared_ptr<ILight>& light : scene.getLights()) {
         for (uint32_t i = 0; i < photonsPerLight; i++) {
             Photon photon = light->emitPhoton();
             photon.power /= float(photonsPerLight);

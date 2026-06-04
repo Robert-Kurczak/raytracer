@@ -26,6 +26,10 @@ struct Color {
         return std::max({red, green, blue});
     }
 
+    [[nodiscard]] Type getAverage() const noexcept {
+        return (red + green + blue) / 3.0F;
+    }
+
     Color& operator*=(const Type& scalar) noexcept {
         red *= scalar;
         green *= scalar;
