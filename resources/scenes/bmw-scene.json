@@ -40,7 +40,7 @@
     "objects": [
         {
             "type": "obj",
-            "filePath": "resources/objects/bmw/bmw.obj",
+            "filePath": "resources/objects/bmw/cars.obj",
             "position": [
                 0.0,
                 0.0,
