@@ -24,6 +24,14 @@ void DirectionalLight::setup(
 
     power_ = emission_ * float(std::numbers::pi) * boundingSphereRadius_ *
              boundingSphereRadius_;
+
+    boundingBox_ = AxisAlignedBoundingBox {
+        boundingSphereCenter_ + (-direction_ * boundingSphereRadius_)
+    };
+}
+
+AxisAlignedBoundingBox DirectionalLight::getBoundingBox() const {
+    return boundingBox_;
 }
 
 LightSample DirectionalLight::getSample(const Point3f& origin) const {

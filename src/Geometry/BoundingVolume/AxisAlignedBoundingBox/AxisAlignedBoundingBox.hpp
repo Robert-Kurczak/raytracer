@@ -25,9 +25,12 @@ public:
     );
 
     AxisAlignedBoundingBox(
-        const Point3<float>& startPoint,
-        const Point3<float>& endPoint
+        const Point3f& startPoint,
+        const Point3f& endPoint
     );
+
+    AxisAlignedBoundingBox(const Point3f& centerPoint, float sideLength);
+    AxisAlignedBoundingBox(const Point3f& centerPoint);
 
     AxisAlignedBoundingBox(
         const AxisAlignedBoundingBox& box1,

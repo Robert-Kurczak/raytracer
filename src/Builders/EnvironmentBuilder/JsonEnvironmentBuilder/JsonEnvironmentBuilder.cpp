@@ -223,7 +223,7 @@ std::vector<std::unique_ptr<IHittable>> JsonEnvironmentBuilder::
     parseSceneObjects(
         IMeshBuilder& meshBuilder,
         IBvhBuilder& bvhBuilder,
-        std::vector<std::unique_ptr<ILight>>& sceneLights,
+        std::vector<std::shared_ptr<ILight>>& sceneLights,
         const nlohmann::json& jsonContent
     ) const {
     const auto& jsonSceneObjects = jsonContent["objects"];
@@ -267,7 +267,7 @@ std::vector<std::unique_ptr<IHittable>> JsonEnvironmentBuilder::
 }
 
 void JsonEnvironmentBuilder::parseSceneLights(
-    std::vector<std::unique_ptr<ILight>>& sceneLights,
+    std::vector<std::shared_ptr<ILight>>& sceneLights,
     const nlohmann::json& jsonContent
 ) const {
     const auto& jsonSceneLights = jsonContent["lights"];
@@ -283,8 +283,8 @@ void JsonEnvironmentBuilder::parseSceneLights(
 
             const float decay = jsonLight["decay"].get<float>();
 
-            std::unique_ptr<ILight> pointLight =
-                std::make_unique<PointLight>(position, color, decay);
+            std::shared_ptr<ILight> pointLight =
+                std::make_shared<PointLight>(position, color, decay);
 
             sceneLights.emplace_back(std::move(pointLight));
         } else if (objectType == "directional") {
@@ -293,8 +293,8 @@ void JsonEnvironmentBuilder::parseSceneLights(
             const Vector3f direction =
                 parsePosition(jsonLight["direction"]).getNormalized();
 
-            std::unique_ptr<ILight> directionalLight =
-                std::make_unique<DirectionalLight>(color, direction);
+            std::shared_ptr<ILight> directionalLight =
+                std::make_shared<DirectionalLight>(color, direction);
 
             sceneLights.emplace_back(std::move(directionalLight));
         }
@@ -306,7 +306,7 @@ std::unique_ptr<Scene> JsonEnvironmentBuilder::parseScene(
     IBvhBuilder& bvhBuilder,
     const nlohmann::json& jsonContent
 ) const {
-    std::vector<std::unique_ptr<ILight>> sceneLights {};
+    std::vector<std::shared_ptr<ILight>> sceneLights {};
     auto objects = parseSceneObjects(
         meshBuilder, bvhBuilder, sceneLights, jsonContent
     );

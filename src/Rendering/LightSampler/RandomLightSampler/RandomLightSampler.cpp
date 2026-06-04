@@ -27,7 +27,7 @@ LinearColor RandomLightSampler::getRadiance(
         const auto randomIndex =
             uint32_t(getRandomNumber<float>(0, lightsAmount));
 
-        const std::unique_ptr<ILight>& light =
+        const std::shared_ptr<ILight>& light =
             scene.getLights().at(randomIndex);
 
         radiance +=

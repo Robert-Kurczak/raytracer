@@ -16,6 +16,13 @@ private:
     const Vector3f normal_;
     const float area_;
     const LinearColor power_;
+    const AxisAlignedBoundingBox boundingBox_;
+
+    [[nodiscard]] AxisAlignedBoundingBox createBoundingBox(
+        const Point3f& vertexA,
+        const Point3f& vertexB,
+        const Point3f& vertexC
+    ) const;
 
     [[nodiscard]] Vector3f getPerpendicular(
         const Point3f& vertexA,
@@ -34,6 +41,8 @@ public:
     );
 
     void setup(const AxisAlignedBoundingBox& sceneBoundingBox) override;
+
+    [[nodiscard]] AxisAlignedBoundingBox getBoundingBox() const override;
 
     [[nodiscard]] LightSample getSample(
         const Point3f& origin

@@ -8,12 +8,12 @@
 namespace RTC {
 Scene::Scene(
     std::unique_ptr<IHittable> sceneRoot,
-    std::vector<std::unique_ptr<ILight>> lights
+    std::vector<std::shared_ptr<ILight>> lights
 ) :
     sceneRoot_(std::move(sceneRoot)),
     lights_(std::move(lights)) {}
 
-const std::vector<std::unique_ptr<ILight>>& Scene::getLights() const {
+const std::vector<std::shared_ptr<ILight>>& Scene::getLights() const {
     return lights_;
 }
 

@@ -45,6 +45,26 @@ AxisAlignedBoundingBox::AxisAlignedBoundingBox(
 }
 
 AxisAlignedBoundingBox::AxisAlignedBoundingBox(
+    const Point3f& centerPoint,
+    float sideLength
+) {
+    const float halfLength = sideLength / 2.0F;
+
+    for (uint8_t axis = 0; axis < 3; axis++) {
+        axisIntervals_.at(axis) = {
+            centerPoint[axis] - halfLength, centerPoint[axis] + halfLength
+        };
+    }
+
+    padIntervals();
+}
+
+AxisAlignedBoundingBox::AxisAlignedBoundingBox(
+    const Point3f& centerPoint
+) :
+    AxisAlignedBoundingBox(centerPoint, 0.0F) {}
+
+AxisAlignedBoundingBox::AxisAlignedBoundingBox(
     const AxisAlignedBoundingBox& box1,
     const AxisAlignedBoundingBox& box2
 ) {

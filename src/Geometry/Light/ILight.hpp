@@ -22,6 +22,9 @@ public:
         const AxisAlignedBoundingBox& sceneBoundingBox
     ) = 0;
 
+    [[nodiscard]] virtual AxisAlignedBoundingBox
+    getBoundingBox() const = 0;
+
     [[nodiscard]] virtual LightSample getSample(
         const Point3f& origin
     ) const = 0;

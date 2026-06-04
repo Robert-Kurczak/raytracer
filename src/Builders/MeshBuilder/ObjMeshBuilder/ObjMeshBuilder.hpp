@@ -21,7 +21,7 @@ using MaterialsMap =
     std::unordered_map<std::string, std::shared_ptr<IMaterial>>;
 
 using TriangleBuffer = std::vector<std::unique_ptr<IHittable>>;
-using AreaLightBuffer = std::vector<std::unique_ptr<ILight>>;
+using AreaLightBuffer = std::vector<std::shared_ptr<ILight>>;
 
 class ObjMeshBuilder : public IMeshBuilder {
 private:
