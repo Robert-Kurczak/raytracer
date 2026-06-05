@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Geometry/Light/ILight.hpp"
-#include "Rendering/LightSampler/LightCutsSampler/LightNode.hpp"
+#include "Rendering/LightCutsTree/LightNode.hpp"
 
 #include <memory>
 #include <vector>
@@ -16,7 +16,7 @@ public:
     ILightTreeBuilder operator=(ILightTreeBuilder&&) = delete;
     virtual ~ILightTreeBuilder() = default;
 
-    [[nodiscard]] virtual std::unique_ptr<LightNode> build(
+    [[nodiscard]] virtual std::shared_ptr<LightNode> build(
         std::vector<std::shared_ptr<ILight>>&& lights
     ) const = 0;
 };

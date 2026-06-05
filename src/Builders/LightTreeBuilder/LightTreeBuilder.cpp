@@ -2,7 +2,6 @@
 
 #include "Core/Color/Color.hpp"
 #include "Geometry/Light/ILight.hpp"
-#include "Rendering/LightSampler/LightCutsSampler/LightNode.hpp"
 #include "Utils/Logger/ILogger.hpp"
 
 #include <chrono>
@@ -57,7 +56,7 @@ void LightTreeBuilder::sortBoxes(
     );
 }
 
-std::unique_ptr<LightNode> LightTreeBuilder::createInternalNode(
+std::shared_ptr<LightNode> LightTreeBuilder::createInternalNode(
     std::vector<std::shared_ptr<ILight>>& lights,
     uint32_t rangeStart,
     uint32_t rangeEnd
@@ -67,10 +66,10 @@ std::unique_ptr<LightNode> LightTreeBuilder::createInternalNode(
     const uint32_t objectSpan = rangeEnd - rangeStart;
     const uint32_t rangeMid = rangeStart + (objectSpan / 2);
 
-    std::unique_ptr<LightNode> leftNode =
+    std::shared_ptr<LightNode> leftNode =
         buildRecursively(lights, rangeStart, rangeMid);
 
-    std::unique_ptr<LightNode> rightNode =
+    std::shared_ptr<LightNode> rightNode =
         buildRecursively(lights, rangeMid, rangeEnd);
 
     const AxisAlignedBoundingBox surroundingBox {
@@ -94,7 +93,7 @@ std::unique_ptr<LightNode> LightTreeBuilder::createInternalNode(
         cumulativePower += lights[i]->getPower();
     }
 
-    return std::make_unique<LightNode>(
+    return std::make_shared<LightNode>(
         representativeLight,
         cumulativePower,
         surroundingBox,
@@ -103,7 +102,7 @@ std::unique_ptr<LightNode> LightTreeBuilder::createInternalNode(
     );
 }
 
-std::unique_ptr<LightNode> LightTreeBuilder::buildRecursively(
+std::shared_ptr<LightNode> LightTreeBuilder::buildRecursively(
     std::vector<std::shared_ptr<ILight>>& lights,
     uint32_t rangeStart,
     uint32_t rangeEnd
@@ -128,7 +127,7 @@ std::unique_ptr<LightNode> LightTreeBuilder::buildRecursively(
 LightTreeBuilder::LightTreeBuilder(std::shared_ptr<ILogger> logger) :
     logger_(std::move(logger)) {}
 
-std::unique_ptr<LightNode> LightTreeBuilder::build(
+std::shared_ptr<LightNode> LightTreeBuilder::build(
     std::vector<std::shared_ptr<ILight>>&& lights
 ) const {
     logger_->log(LogLevel::Info, "Building BVH tree");

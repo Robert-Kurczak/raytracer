@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Core/Color/Color.hpp"
-#include "Geometry/BoundingVolume/AxisAlignedBoundingBox/AxisAlignedBoundingBox.hpp"
 #include "Geometry/Light/ILight.hpp"
 
 #include <memory>
@@ -13,15 +11,19 @@ struct LightNode {
     LinearColor power;
     AxisAlignedBoundingBox boundingBox;
 
-    std::unique_ptr<LightNode> left;
-    std::unique_ptr<LightNode> right;
+    std::shared_ptr<LightNode> left;
+    std::shared_ptr<LightNode> right;
+
+    [[nodiscard]] bool isLeaf() const {
+        return left == nullptr and right == nullptr;
+    }
 
     LightNode(
         std::shared_ptr<ILight> representative,
         LinearColor power,
         AxisAlignedBoundingBox boundingBox,
-        std::unique_ptr<LightNode> left,
-        std::unique_ptr<LightNode> right
+        std::shared_ptr<LightNode> left,
+        std::shared_ptr<LightNode> right
     ) :
         representative(std::move(representative)),
         power(power),
