@@ -1,9 +1,14 @@
 {
     "outputPath": "resources/renders/bmw-scene.exr",
     "verbose": true,
+    "lightSampler": {
+        "type": "lightCuts",
+        "discreteSamplerPerLight": 1,
+        "maxError": 0.02,
+        "maxCutSize": 1024
+    },
     "renderer": {
         "pathsPerPixel": 10,
-        "lightSamplesPerHit": 10,
         "scatterRecursionDepth": 2,
         "photonMappingEnabled": false,
         "emittedPhotons": 100000,

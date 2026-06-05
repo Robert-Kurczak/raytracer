@@ -79,9 +79,6 @@ def modify_scene(scene: dict, args: Args):
     if args.paths_per_pixel:
         scene["renderer"]["pathsPerPixel"] = args.paths_per_pixel
 
-    if args.light_samples_per_hit:
-        scene["renderer"]["lightSamplesPerHit"] = args.paths_per_pixel
-
     if args.output_path:
         scene["outputPath"] = args.output_path
 

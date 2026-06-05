@@ -9,10 +9,12 @@
 namespace RTC {
 class RandomLightSampler : public ILightSampler {
 private:
+    uint32_t samples_;
     std::unique_ptr<IDirectLightEstimator> directLightEstimator_;
 
 public:
     RandomLightSampler(
+        uint32_t samples,
         std::unique_ptr<IDirectLightEstimator> directLightEstimator
     );
 
@@ -23,8 +25,7 @@ public:
         const HitData& hitData,
         const Point3f& offsetHitPoint,
         const Vector3f& outDirection,
-        RendererStatistics& statistics,
-        uint32_t samplesToTake
+        RendererStatistics& statistics
     ) override;
 };
 }

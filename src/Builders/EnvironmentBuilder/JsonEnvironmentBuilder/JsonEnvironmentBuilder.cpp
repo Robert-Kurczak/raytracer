@@ -3,6 +3,8 @@
 #include "../RenderEnvironment.hpp"
 #include "Builders/BvhBuilder/BvhBuilder.hpp"
 #include "Builders/BvhBuilder/IBvhBuilder.hpp"
+#include "Builders/LightCutsTreeBuilder/ILightCutsTreeBuilder.hpp"
+#include "Builders/LightCutsTreeBuilder/LightCutsTreeBuilder.hpp"
 #include "Builders/MeshBuilder/IMeshBuilder.hpp"
 #include "Builders/MeshBuilder/MeshBuilderResult.hpp"
 #include "Builders/MeshBuilder/ObjMeshBuilder/ObjMeshBuilder.hpp"
@@ -21,6 +23,8 @@
 #include "Rendering/DirectLightEstimator/IDirectLightEstimator.hpp"
 #include "Rendering/LightSampler/AllLightsSampler/AllLightsSampler.hpp"
 #include "Rendering/LightSampler/ILightSampler.hpp"
+#include "Rendering/LightSampler/LightCutsSampler/LightCutsSampler.hpp"
+#include "Rendering/LightSampler/LightCutsSampler/LightCutsSamplerParameters.hpp"
 #include "Rendering/LightSampler/RandomLightSampler/RandomLightSampler.hpp"
 #include "Rendering/ProgressIndicator/CoutProgressIndicator/CoutProgressIndicator.hpp"
 #include "Rendering/ProgressIndicator/IProgressIndicator.hpp"
@@ -131,17 +135,57 @@ std::unique_ptr<IWriter> JsonEnvironmentBuilder::parseWriter(
     return std::make_unique<PpmWriter>(outputPath);
 }
 
-std::unique_ptr<IRenderer> JsonEnvironmentBuilder::parseRenderer(
+std::unique_ptr<ILightSampler> JsonEnvironmentBuilder::parseLightSampler(
     const std::shared_ptr<ILogger>& logger,
     const nlohmann::json& jsonContent
 ) const {
     std::unique_ptr<IDirectLightEstimator> directLightEstimator =
         std::make_unique<DirectLightEstimator>();
 
-    std::unique_ptr<ILightSampler> lightSampler =
-        std::make_unique<RandomLightSampler>(
+    const std::string type =
+        jsonContent["lightSampler"]["type"].get<std::string>();
+
+    if (type == "lightCuts") {
+        LightCutsSamplerParameters parameters {
+            .discreteSamplerPerLight =
+                jsonContent["lightSampler"]["discreteSamplerPerLight"]
+                    .get<uint32_t>(),
+            .maxError =
+                jsonContent["lightSampler"]["maxError"].get<float>(),
+            .maxCutSize =
+                jsonContent["lightSampler"]["maxCutSize"].get<uint32_t>()
+        };
+
+        std::unique_ptr<ILightCutsTreeBuilder> treeBuilder =
+            std::make_unique<LightCutsTreeBuilder>(logger);
+
+        return std::make_unique<LightCutsSampler>(
+            parameters,
+            std::move(treeBuilder),
             std::move(directLightEstimator)
         );
+    }
+
+    const uint32_t samples =
+        jsonContent["lightSampler"]["samples"].get<uint32_t>();
+
+    if (type == "random") {
+        return std::make_unique<RandomLightSampler>(
+            samples, std::move(directLightEstimator)
+        );
+    }
+
+    return std::make_unique<AllLightsSampler>(
+        samples, std::move(directLightEstimator)
+    );
+}
+
+std::unique_ptr<IRenderer> JsonEnvironmentBuilder::parseRenderer(
+    const std::shared_ptr<ILogger>& logger,
+    const nlohmann::json& jsonContent
+) const {
+    std::unique_ptr<ILightSampler> lightSampler =
+        parseLightSampler(logger, jsonContent);
 
     std::unique_ptr<IProgressIndicator> progressIndicator =
         std::make_unique<CoutProgressIndicator>();
@@ -156,9 +200,6 @@ std::unique_ptr<IRenderer> JsonEnvironmentBuilder::parseRenderer(
         const PhotonMapRendererParameters parameters {
             .pathsPerPixel =
                 jsonContent["renderer"]["pathsPerPixel"].get<uint32_t>(),
-            .lightSamplesPerHit =
-                jsonContent["renderer"]["lightSamplesPerHit"]
-                    .get<uint32_t>(),
             .scatterRecursionDepth =
                 jsonContent["renderer"]["scatterRecursionDepth"]
                     .get<uint32_t>(),
@@ -184,8 +225,6 @@ std::unique_ptr<IRenderer> JsonEnvironmentBuilder::parseRenderer(
     const PathRendererParameters parameters {
         .pathsPerPixel =
             jsonContent["renderer"]["pathsPerPixel"].get<uint32_t>(),
-        .lightSamplesPerHit =
-            jsonContent["renderer"]["lightSamplesPerHit"].get<uint32_t>(),
         .scatterRecursionDepth =
             jsonContent["renderer"]["scatterRecursionDepth"]
                 .get<uint32_t>(),

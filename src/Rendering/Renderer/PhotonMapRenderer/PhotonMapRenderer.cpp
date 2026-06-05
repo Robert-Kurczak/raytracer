@@ -250,12 +250,7 @@ LinearColor PhotonMapRenderer::traceRay(
     );
 
     const LinearColor directLight = lightSampler_->getRadiance(
-        scene,
-        hitData,
-        offsetHitPoint,
-        outDirection,
-        statistics,
-        parameters_.lightSamplesPerHit
+        scene, hitData, offsetHitPoint, outDirection, statistics
     );
 
     return emittedLight + directLight + indirectLight;

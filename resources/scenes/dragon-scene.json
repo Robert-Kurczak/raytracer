@@ -1,9 +1,13 @@
 {
     "outputPath": "resources/renders/dragon-scene.exr",
     "verbose": true,
+    "lightSampler": {
+        "type": "all",
+        "samples": 1
+    },
     "renderer": {
         "pathsPerPixel": 100,
-        "lightSamplesPerHit": 1,
+        "": 1,
         "scatterRecursionDepth": 10,
         "photonMappingEnabled": false,
         "emittedPhotons": 1000000,
