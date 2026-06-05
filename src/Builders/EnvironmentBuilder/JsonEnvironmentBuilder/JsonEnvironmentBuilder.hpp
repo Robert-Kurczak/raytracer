@@ -7,6 +7,7 @@
 #include "Core/Math/Point.hpp"
 #include "Geometry/Background/IBackground.hpp"
 #include "Geometry/Light/ILight.hpp"
+#include "Rendering/LightSampler/ILightSampler.hpp"
 #include "Rendering/Renderer/IRenderer.hpp"
 #include "Rendering/Writer/IWriter.hpp"
 #include "Utils/Logger/ILogger.hpp"
@@ -41,6 +42,11 @@ private:
     ) const;
 
     [[nodiscard]] std::unique_ptr<IWriter> parseWriter(
+        const nlohmann::json& jsonContent
+    ) const;
+
+    [[nodiscard]] std::unique_ptr<ILightSampler> parseLightSampler(
+        const std::shared_ptr<ILogger>& logger,
         const nlohmann::json& jsonContent
     ) const;
 

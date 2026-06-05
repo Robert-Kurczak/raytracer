@@ -7,8 +7,10 @@
 
 namespace RTC {
 RandomLightSampler::RandomLightSampler(
+    uint32_t samples,
     std::unique_ptr<IDirectLightEstimator> directLightEstimator
 ) :
+    samples_(samples),
     directLightEstimator_(std::move(directLightEstimator)) {}
 
 void RandomLightSampler::setup(const Scene& scene) {}
@@ -18,14 +20,13 @@ LinearColor RandomLightSampler::getRadiance(
     const HitData& hitData,
     const Point3f& offsetHitPoint,
     const Vector3f& outDirection,
-    RendererStatistics& statistics,
-    uint32_t samplesToTake
+    RendererStatistics& statistics
 ) {
     LinearColor radiance = LinearColor::black();
 
     const auto lightsAmount = float(scene.getLights().size());
 
-    for (uint32_t i = 0; i < samplesToTake; i++) {
+    for (uint32_t i = 0; i < samples_; i++) {
         const auto randomIndex =
             uint32_t(getRandomNumber<float>(0, lightsAmount));
 
@@ -39,8 +40,8 @@ LinearColor RandomLightSampler::getRadiance(
             lightsAmount;
     }
 
-    statistics.shadowRays += samplesToTake;
+    statistics.shadowRays += samples_;
 
-    return radiance / float(samplesToTake);
+    return radiance / float(samples_);
 }
 }
