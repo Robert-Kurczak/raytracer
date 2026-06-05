@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Geometry/Light/LightSample.hpp"
 #include "Rendering/DirectLightEstimator/IDirectLightEstimator.hpp"
 
 namespace RTC {
@@ -12,7 +13,15 @@ private:
     ) const;
 
 public:
-    [[nodiscard]] LinearColor estimate(
+    [[nodiscard]] LinearColor getScatteringWeight(
+        const LightSample& lightSample,
+        const Scene& scene,
+        const HitData& hitData,
+        const Point3f& offsetHitPoint,
+        const Vector3f& outDirection
+    ) const override;
+
+    [[nodiscard]] LinearColor estimateRadiance(
         const ILight& light,
         const Scene& scene,
         const HitData& hitData,

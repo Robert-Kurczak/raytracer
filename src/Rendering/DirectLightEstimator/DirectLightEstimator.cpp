@@ -1,5 +1,6 @@
 #include "DirectLightEstimator.hpp"
 
+#include "Core/Color/Color.hpp"
 #include "Core/Math/Numeric.hpp"
 #include "Rendering/Material/IMaterial.hpp"
 #include "World/Scene/Scene.hpp"
@@ -20,15 +21,14 @@ bool DirectLightEstimator::isInShadow(
 
     return scene.hitAny(shadowRay, interval);
 }
-LinearColor DirectLightEstimator::estimate(
-    const ILight& light,
+
+LinearColor DirectLightEstimator::getScatteringWeight(
+    const LightSample& lightSample,
     const Scene& scene,
     const HitData& hitData,
     const Point3f& offsetHitPoint,
     const Vector3f& outDirection
 ) const {
-    const LightSample lightSample = light.getSample(hitData.hitPoint);
-
     if (isInShadow(offsetHitPoint, lightSample.toLight, scene)) {
         return LinearColor::black();
     }
@@ -44,6 +44,22 @@ LinearColor DirectLightEstimator::estimate(
         0.0F, getDotProduct(hitData.hitNormal, lightSample.inDirection)
     );
 
-    return brdf * lightSample.outLight * cosine / lightSample.pdf;
+    return brdf * cosine / lightSample.pdf;
+}
+
+LinearColor DirectLightEstimator::estimateRadiance(
+    const ILight& light,
+    const Scene& scene,
+    const HitData& hitData,
+    const Point3f& offsetHitPoint,
+    const Vector3f& outDirection
+) const {
+    const LightSample lightSample = light.getSample(hitData.hitPoint);
+
+    const LinearColor scatteringWeight = getScatteringWeight(
+        lightSample, scene, hitData, offsetHitPoint, outDirection
+    );
+
+    return scatteringWeight * lightSample.outLight;
 }
 }

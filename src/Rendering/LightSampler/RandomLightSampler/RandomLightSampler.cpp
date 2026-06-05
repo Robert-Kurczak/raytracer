@@ -31,7 +31,7 @@ LinearColor RandomLightSampler::getRadiance(
             scene.getLights().at(randomIndex);
 
         radiance +=
-            directLightEstimator_->estimate(
+            directLightEstimator_->estimateRadiance(
                 *light, scene, hitData, offsetHitPoint, outDirection
             ) *
             lightsAmount;

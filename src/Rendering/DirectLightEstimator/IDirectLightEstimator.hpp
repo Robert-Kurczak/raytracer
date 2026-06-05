@@ -15,7 +15,15 @@ public:
     IDirectLightEstimator operator=(IDirectLightEstimator&&) = delete;
     virtual ~IDirectLightEstimator() = default;
 
-    [[nodiscard]] virtual LinearColor estimate(
+    [[nodiscard]] virtual LinearColor getScatteringWeight(
+        const LightSample& lightSample,
+        const Scene& scene,
+        const HitData& hitData,
+        const Point3f& offsetHitPoint,
+        const Vector3f& outDirection
+    ) const = 0;
+
+    [[nodiscard]] virtual LinearColor estimateRadiance(
         const ILight& light,
         const Scene& scene,
         const HitData& hitData,

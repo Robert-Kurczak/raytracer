@@ -13,9 +13,9 @@ public:
     virtual ~ILightCutsTree() = default;
 
     [[nodiscard]] virtual LightCutMaxHeap getCut(
-        const Point3f& targetPosition,
+        const Point3f& hitPoint,
         float maxError,
-        uint32_t maxClusterSize
+        uint32_t maxCutSize
     ) const = 0;
 };
 }
