@@ -29,7 +29,7 @@ LightCutsTree::LightCutsTree(std::shared_ptr<LightNode> root) :
 LightCutMaxHeap LightCutsTree::getCut(
     const Point3f& hitPoint,
     float maxError,
-    uint32_t maxClusterSize
+    uint32_t maxCutSize
 ) const {
     LightCutMaxHeap maxHeap;
 
@@ -40,7 +40,7 @@ LightCutMaxHeap LightCutsTree::getCut(
         }
     );
 
-    bool notFull = maxHeap.size() < maxClusterSize;
+    bool notFull = maxHeap.size() < maxCutSize;
     bool errorTooBig = maxHeap.top().clusterError > maxError;
 
     while (notFull and errorTooBig) {

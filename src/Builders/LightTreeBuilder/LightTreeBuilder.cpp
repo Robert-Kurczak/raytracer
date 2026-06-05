@@ -130,7 +130,7 @@ LightTreeBuilder::LightTreeBuilder(std::shared_ptr<ILogger> logger) :
 std::shared_ptr<LightNode> LightTreeBuilder::build(
     std::vector<std::shared_ptr<ILight>>&& lights
 ) const {
-    logger_->log(LogLevel::Info, "Building BVH tree");
+    logger_->log(LogLevel::Info, "Building Light Cuts tree");
 
     const auto timeStart = std::chrono::high_resolution_clock::now();
     auto result = buildRecursively(lights, 0, lights.size());
@@ -142,7 +142,7 @@ std::shared_ptr<LightNode> LightTreeBuilder::build(
         );
 
     logger_->log(
-        LogLevel::Info, std::format("BVH built in {}", executionTime)
+        LogLevel::Info, std::format("Light Cuts built in {}", executionTime)
     );
 
     return result;
