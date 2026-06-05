@@ -1,9 +1,6 @@
 #pragma once
 
-#include "Geometry/Light/ILight.hpp"
-
-#include <memory>
-#include <vector>
+#include "Rendering/LightCutsTree/LightClusterMaxHeap.hpp"
 
 namespace RTC {
 class ILightCutsTree {
@@ -15,10 +12,10 @@ public:
     ILightCutsTree operator=(ILightCutsTree&&) = delete;
     virtual ~ILightCutsTree() = default;
 
-    [[nodiscard]] virtual std::vector<std::shared_ptr<ILight>> getCut(
+    [[nodiscard]] virtual LightCutMaxHeap getCut(
         const Point3f& targetPosition,
         float maxError,
         uint32_t maxClusterSize
-    ) const;
+    ) const = 0;
 };
 }

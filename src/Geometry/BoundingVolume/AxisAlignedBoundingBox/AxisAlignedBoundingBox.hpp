@@ -46,6 +46,13 @@ public:
     [[nodiscard]] Point3f getBoxCenter() const;
     [[nodiscard]] float getDiagonal() const;
 
+    [[nodiscard]] float getDistanceFromAxis(
+        const Point3f& point,
+        uint8_t axisIndex
+    ) const;
+
+    [[nodiscard]] float getDistanceSquared(const Point3f& point) const;
+
     [[nodiscard]] bool isHit(
         const Ray& ray,
         const Interval<float>& rayInterval

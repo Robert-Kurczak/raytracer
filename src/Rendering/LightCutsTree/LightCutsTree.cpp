@@ -1,71 +1,75 @@
 #include "LightCutsTree.hpp"
 
-#include "Geometry/Light/ILight.hpp"
+#include "Rendering/LightCutsTree/LightClusterMaxHeap.hpp"
+#include "Rendering/LightCutsTree/LightNode.hpp"
 
 #include <memory>
 
 namespace RTC {
 float LightCutsTree::estimateClusterError(
-    const Point3f& targetPosition,
-    const std::unique_ptr<LightNode>& lightNode
+    const std::shared_ptr<LightNode>& lightNode,
+    const Point3f& hitPoint
 ) const {
-    return 1.0F; // TODO
+    constexpr float visibilityError = 1.0F;
+
+    const float materialError = 1.0F;
+
+    const float distanceSquared =
+        lightNode->boundingBox.getDistanceSquared(hitPoint);
+
+    const float geometricError = 1.0F / distanceSquared;
+
+    return lightNode->power.getAverage() * visibilityError *
+           materialError * geometricError;
 }
 
-void LightCutsTree::gatherRecursively(
-    const std::unique_ptr<LightNode>& node,
-    std::vector<std::shared_ptr<ILight>>& cluster,
-    const Point3f& targetPosition,
+LightCutsTree::LightCutsTree(std::shared_ptr<LightNode> root) :
+    root_(std::move(root)) {}
+
+LightCutMaxHeap LightCutsTree::getCut(
+    const Point3f& hitPoint,
     float maxError,
     uint32_t maxClusterSize
 ) const {
-    if (!node || cluster.size() == maxClusterSize) {
-        return;
-    }
+    LightCutMaxHeap maxHeap;
 
-    const bool isLeaf = node->left == nullptr and node->right == nullptr;
-
-    if (isLeaf) {
-        cluster.push_back(node->representative);
-        return;
-    }
-
-    const float currentError = estimateClusterError(targetPosition, node);
-    const bool errorInRange = currentError <= maxError;
-
-    if (errorInRange) {
-        cluster.push_back(node->representative);
-        return;
-    }
-
-    gatherRecursively(
-        node->left, cluster, targetPosition, maxError, maxClusterSize
+    maxHeap.emplace(
+        LightCutMaxHeapItem {
+            .lightNode = root_,
+            .clusterError = estimateClusterError(root_, hitPoint)
+        }
     );
 
-    gatherRecursively(
-        node->right, cluster, targetPosition, maxError, maxClusterSize
-    );
+    bool notFull = maxHeap.size() < maxClusterSize;
+    bool errorTooBig = maxHeap.top().clusterError > maxError;
+
+    while (notFull and errorTooBig) {
+        std::shared_ptr<LightNode> highErrorNode =
+            maxHeap.top().lightNode;
+
+        if (highErrorNode->isLeaf()) {
+            break;
+        }
+
+        maxHeap.pop();
+
+        maxHeap.emplace(
+            LightCutMaxHeapItem {
+                .lightNode = highErrorNode->left,
+                .clusterError =
+                    estimateClusterError(highErrorNode->left, hitPoint)
+            }
+        );
+
+        maxHeap.emplace(
+            LightCutMaxHeapItem {
+                .lightNode = highErrorNode->right,
+                .clusterError =
+                    estimateClusterError(highErrorNode->right, hitPoint)
+            }
+        );
+    }
+
+    return maxHeap;
 }
-
-LightCutsTree::LightCutsTree(
-    std::unique_ptr<LightNode> root,
-    std::vector<std::shared_ptr<ILight>> infiniteLights
-) :
-    root_(std::move(root)),
-    infiniteLights_(std::move(infiniteLights)) {}
-
-std::vector<std::shared_ptr<ILight>> LightCutsTree::getCut(
-    const Point3f& targetPosition,
-    float maxError,
-    uint32_t maxClusterSize
-) const {
-    std::vector<std::shared_ptr<ILight>> cluster;
-
-    gatherRecursively(
-        root_, cluster, targetPosition, maxError, maxClusterSize
-    );
-
-    return cluster;
-}
-
 }

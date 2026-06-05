@@ -135,6 +135,36 @@ float AxisAlignedBoundingBox::getDiagonal() const {
     return (endPoint - startPoint).getLength();
 }
 
+float AxisAlignedBoundingBox::getDistanceFromAxis(
+    const Point3f& point,
+    uint8_t axisIndex
+) const {
+    const float axisStart = axisIntervals_[axisIndex].start;
+    const float axisEnd = axisIntervals_[axisIndex].end;
+
+    if (point[axisIndex] < axisStart) {
+        return axisStart - point[axisIndex];
+    }
+
+    if (point[axisIndex] > axisEnd) {
+        return point[axisIndex] - axisEnd;
+    }
+
+    return 0.0F;
+}
+
+float AxisAlignedBoundingBox::getDistanceSquared(
+    const Point3f& point
+) const {
+    const float xAxisDistance = getDistanceFromAxis(point, X_AXIS_INDEX);
+    const float yAxisDistance = getDistanceFromAxis(point, Y_AXIS_INDEX);
+    const float zAxisDistance = getDistanceFromAxis(point, Z_AXIS_INDEX);
+
+    return (xAxisDistance * xAxisDistance) +
+           (yAxisDistance * yAxisDistance) +
+           (zAxisDistance * zAxisDistance);
+}
+
 bool AxisAlignedBoundingBox::isHit(
     const Ray& ray,
     const Interval<float>& rayInterval

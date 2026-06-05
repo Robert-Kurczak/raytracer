@@ -2,7 +2,6 @@
 
 #include "Builders/LightTreeBuilder/ILightTreeBuilder.hpp"
 #include "Geometry/Light/ILight.hpp"
-#include "Rendering/LightSampler/LightCutsSampler/LightNode.hpp"
 #include "Utils/Logger/ILogger.hpp"
 
 #include <memory>
@@ -30,13 +29,13 @@ private:
         uint32_t rangeEnd
     ) const;
 
-    [[nodiscard]] std::unique_ptr<LightNode> createInternalNode(
+    [[nodiscard]] std::shared_ptr<LightNode> createInternalNode(
         std::vector<std::shared_ptr<ILight>>& lights,
         uint32_t rangeStart,
         uint32_t rangeEnd
     ) const;
 
-    [[nodiscard]] std::unique_ptr<LightNode> buildRecursively(
+    [[nodiscard]] std::shared_ptr<LightNode> buildRecursively(
         std::vector<std::shared_ptr<ILight>>& lights,
         uint32_t rangeStart,
         uint32_t rangeEnd
@@ -45,7 +44,7 @@ private:
 public:
     LightTreeBuilder(std::shared_ptr<ILogger> logger);
 
-    [[nodiscard]] std::unique_ptr<LightNode> build(
+    [[nodiscard]] std::shared_ptr<LightNode> build(
         std::vector<std::shared_ptr<ILight>>&& lights
     ) const override;
 };
