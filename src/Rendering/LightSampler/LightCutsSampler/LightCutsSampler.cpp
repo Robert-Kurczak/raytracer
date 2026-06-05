@@ -1,9 +1,10 @@
 #include "LightCutsSampler.hpp"
 
 #include "Core/Color/Color.hpp"
-#include "Core/Math/Numeric.hpp"
 #include "Geometry/Light/LightSample.hpp"
 #include "Rendering/LightCutsTree/LightClusterMaxHeap.hpp"
+
+#include <memory>
 
 namespace RTC {
 LinearColor LightCutsSampler::getInfiniteLightsRadiance(
@@ -26,6 +27,25 @@ LinearColor LightCutsSampler::getInfiniteLightsRadiance(
     return radiance;
 }
 
+void LightCutsSampler::setup(const Scene& scene) {
+    infiniteLights_.clear();
+
+    std::vector<std::shared_ptr<ILight>> discreteLights;
+
+    for (const std::shared_ptr<ILight>& light : scene.getLights()) {
+        if (light->isInfinite()) {
+            infiniteLights_.push_back(light);
+        } else {
+            light->discretize(
+                discreteLights, parameters_.discreteSamplerPerLight
+            );
+        }
+    }
+
+    lightCutsTree_ =
+        lightCutsTreeBuilder_->build(std::move(discreteLights));
+}
+
 LinearColor LightCutsSampler::getLightCutsRadiance(
     const Scene& scene,
     const HitData& hitData,
@@ -33,11 +53,9 @@ LinearColor LightCutsSampler::getLightCutsRadiance(
     const Vector3f& outDirection,
     RendererStatistics& statistics
 ) const {
-    constexpr float maxError = 0.02;
-    constexpr uint32_t maxCutSize = 1024;
-
-    LightCutMaxHeap lightCut =
-        lightCutsTree_->getCut(hitData.hitPoint, maxError, maxCutSize);
+    LightCutMaxHeap lightCut = lightCutsTree_->getCut(
+        hitData.hitPoint, parameters_.maxError, parameters_.maxCutSize
+    );
 
     statistics.shadowRays += lightCut.size();
 
@@ -66,13 +84,13 @@ LinearColor LightCutsSampler::getLightCutsRadiance(
 }
 
 LightCutsSampler::LightCutsSampler(
-    std::unique_ptr<IDirectLightEstimator> directLightEstimator,
-    std::unique_ptr<ILightCutsTree> lightCutsTree,
-    std::vector<std::shared_ptr<ILight>> infiniteLights
+    LightCutsSamplerParameters parameters,
+    std::unique_ptr<ILightCutsTreeBuilder> lightCutsTreeBuilder,
+    std::unique_ptr<IDirectLightEstimator> directLightEstimator
 ) :
-    directLightEstimator_(std::move(directLightEstimator)),
-    lightCutsTree_(std::move(lightCutsTree)),
-    infiniteLights_(std::move(infiniteLights)) {}
+    parameters_(parameters),
+    lightCutsTreeBuilder_(std::move(lightCutsTreeBuilder)),
+    directLightEstimator_(std::move(directLightEstimator)) {}
 
 LinearColor LightCutsSampler::getRadiance(
     const Scene& scene,

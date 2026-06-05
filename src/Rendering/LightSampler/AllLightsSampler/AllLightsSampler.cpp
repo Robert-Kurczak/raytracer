@@ -9,6 +9,8 @@ AllLightsSampler::AllLightsSampler(
 ) :
     directLightEstimator_(std::move(directLightEstimator)) {}
 
+void AllLightsSampler::setup(const Scene& scene) {}
+
 LinearColor AllLightsSampler::getRadiance(
     const Scene& scene,
     const HitData& hitData,

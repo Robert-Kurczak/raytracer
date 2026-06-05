@@ -7,6 +7,7 @@
 #include "Core/Math/Vector.hpp"
 #include "Geometry/BoundingVolume/AxisAlignedBoundingBox/AxisAlignedBoundingBox.hpp"
 #include "Geometry/Light/LightSample.hpp"
+#include "Geometry/Light/PointLight/PointLight.hpp"
 
 #include <unistd.h>
 
@@ -47,7 +48,7 @@ Vector3f TriangleAreaLight::getPerpendicular(
     return getCrossProduct(edge1, edge2);
 }
 
-Point3f TriangleAreaLight::getRandomSample() const {
+Point3f TriangleAreaLight::getRandomPoint() const {
     auto barycentricA = getRandomNumber<float>();
     auto barycentricB = getRandomNumber<float>();
 
@@ -83,12 +84,30 @@ void TriangleAreaLight::setup(
     const AxisAlignedBoundingBox& sceneBoundingBox
 ) {}
 
+void TriangleAreaLight::discretize(
+    std::vector<std::shared_ptr<ILight>>& discreteLights,
+    uint32_t samples
+) const {
+    for (uint32_t i = 0; i < samples; i++) {
+        const Point3f randomPoint = getRandomPoint();
+
+        std::shared_ptr<ILight> light =
+            std::make_shared<PointLight>(randomPoint, emission_, 1.0F);
+
+        discreteLights.emplace_back(light);
+    }
+}
+
+bool TriangleAreaLight::isInfinite() const {
+    return false;
+}
+
 AxisAlignedBoundingBox TriangleAreaLight::getBoundingBox() const {
     return boundingBox_;
 }
 
 LightSample TriangleAreaLight::getSample(const Point3f& origin) const {
-    const Point3f sample = getRandomSample();
+    const Point3f sample = getRandomPoint();
     const Vector3f toLight = sample - origin;
     const Vector3f inDirection = toLight.getNormalized();
     const float distanceSquared = toLight.getSquaredLength();
@@ -121,7 +140,7 @@ Photon TriangleAreaLight::emitPhoton() const {
         transformToWorldSpace(sampleCosineHemisphere(), normal_);
 
     return Photon {
-        .position = getRandomSample(),
+        .position = getRandomPoint(),
         .direction = randomDirection,
         .power = power_
     };

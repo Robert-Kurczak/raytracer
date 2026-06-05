@@ -15,6 +15,8 @@ private:
     AxisAlignedBoundingBox boundingBox_ {boundingSphereCenter_};
     LinearColor power_;
 
+    [[nodiscard]] Point3f getRandomPoint() const;
+
 public:
     DirectionalLight(
         const LinearColor& emission,
@@ -22,6 +24,13 @@ public:
     );
 
     void setup(const AxisAlignedBoundingBox& sceneBoundingBox) override;
+
+    void discretize(
+        std::vector<std::shared_ptr<ILight>>& discreteLights,
+        uint32_t samples
+    ) const override;
+
+    [[nodiscard]] bool isInfinite() const override;
 
     [[nodiscard]] AxisAlignedBoundingBox getBoundingBox() const override;
 

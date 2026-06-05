@@ -1,5 +1,6 @@
 #include "LightCutsTree.hpp"
 
+#include "Core/Math/Numeric.hpp"
 #include "Rendering/LightCutsTree/LightClusterMaxHeap.hpp"
 #include "Rendering/LightCutsTree/LightNode.hpp"
 
@@ -14,8 +15,9 @@ float LightCutsTree::estimateClusterError(
 
     const float materialError = 1.0F;
 
-    const float distanceSquared =
-        lightNode->boundingBox.getDistanceSquared(hitPoint);
+    const float distanceSquared = std::max(
+        EPSILON, lightNode->boundingBox.getDistanceSquared(hitPoint)
+    );
 
     const float geometricError = 1.0F / distanceSquared;
 
@@ -68,6 +70,9 @@ LightCutMaxHeap LightCutsTree::getCut(
                     estimateClusterError(highErrorNode->right, hitPoint)
             }
         );
+
+        notFull = maxHeap.size() < maxCutSize;
+        errorTooBig = maxHeap.top().clusterError > maxError;
     }
 
     return maxHeap;

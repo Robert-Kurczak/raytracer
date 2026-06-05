@@ -6,6 +6,9 @@
 #include "Geometry/Light/LightSample.hpp"
 #include "Photon.hpp"
 
+#include <memory>
+#include <vector>
+
 namespace RTC {
 class Scene;
 
@@ -21,6 +24,13 @@ public:
     virtual void setup(
         const AxisAlignedBoundingBox& sceneBoundingBox
     ) = 0;
+
+    virtual void discretize(
+        std::vector<std::shared_ptr<ILight>>& discreteLights,
+        uint32_t samples
+    ) const = 0;
+
+    [[nodiscard]] virtual bool isInfinite() const = 0;
 
     [[nodiscard]] virtual AxisAlignedBoundingBox
     getBoundingBox() const = 0;

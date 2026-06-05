@@ -1,13 +1,13 @@
 #pragma once
 
-#include "Builders/LightTreeBuilder/ILightTreeBuilder.hpp"
+#include "Builders/LightCutsTreeBuilder/ILightCutsTreeBuilder.hpp"
 #include "Geometry/Light/ILight.hpp"
 #include "Utils/Logger/ILogger.hpp"
 
 #include <memory>
 
 namespace RTC {
-class LightTreeBuilder : public ILightTreeBuilder {
+class LightCutsTreeBuilder : public ILightCutsTreeBuilder {
 private:
     std::shared_ptr<ILogger> logger_;
 
@@ -42,9 +42,9 @@ private:
     ) const;
 
 public:
-    LightTreeBuilder(std::shared_ptr<ILogger> logger);
+    LightCutsTreeBuilder(std::shared_ptr<ILogger> logger);
 
-    [[nodiscard]] std::shared_ptr<LightNode> build(
+    [[nodiscard]] std::unique_ptr<ILightCutsTree> build(
         std::vector<std::shared_ptr<ILight>>&& lights
     ) const override;
 };

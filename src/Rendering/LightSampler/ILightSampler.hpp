@@ -15,6 +15,8 @@ public:
     ILightSampler operator=(ILightSampler&&) = delete;
     virtual ~ILightSampler() = default;
 
+    virtual void setup(const Scene& scene) = 0;
+
     virtual LinearColor getRadiance(
         const Scene& scene,
         const HitData& hitData,

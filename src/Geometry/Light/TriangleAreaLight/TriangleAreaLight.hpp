@@ -30,7 +30,7 @@ private:
         const Point3f& vertexC
     ) const;
 
-    [[nodiscard]] Point3f getRandomSample() const;
+    [[nodiscard]] Point3f getRandomPoint() const;
 
 public:
     TriangleAreaLight(
@@ -41,6 +41,13 @@ public:
     );
 
     void setup(const AxisAlignedBoundingBox& sceneBoundingBox) override;
+
+    void discretize(
+        std::vector<std::shared_ptr<ILight>>& discreteLights,
+        uint32_t samples
+    ) const override;
+
+    [[nodiscard]] bool isInfinite() const override;
 
     [[nodiscard]] AxisAlignedBoundingBox getBoundingBox() const override;
 

@@ -11,6 +11,8 @@ RandomLightSampler::RandomLightSampler(
 ) :
     directLightEstimator_(std::move(directLightEstimator)) {}
 
+void RandomLightSampler::setup(const Scene& scene) {}
+
 LinearColor RandomLightSampler::getRadiance(
     const Scene& scene,
     const HitData& hitData,
