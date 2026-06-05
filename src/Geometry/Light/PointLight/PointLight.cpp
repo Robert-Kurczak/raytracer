@@ -1,5 +1,6 @@
 #include "PointLight.hpp"
 
+#include "Core/Math/Numeric.hpp"
 #include "Core/Math/Sampling.hpp"
 #include "Core/Math/Vector.hpp"
 #include "Geometry/BoundingVolume/AxisAlignedBoundingBox/AxisAlignedBoundingBox.hpp"
@@ -7,8 +8,6 @@
 #include "Geometry/Light/Photon.hpp"
 
 namespace RTC {
-static constexpr float epsilon = 0.001;
-
 PointLight::PointLight(
     const Point3f& position,
     const LinearColor& emission,
@@ -16,10 +15,24 @@ PointLight::PointLight(
 ) :
     position_(position),
     emission_(emission),
-    decay_(std::max(decay, epsilon)),
+    decay_(std::max(decay, EPSILON)),
     boundingBox_(AxisAlignedBoundingBox {position_}) {}
 
 void PointLight::setup(const AxisAlignedBoundingBox& sceneBoundingBox) {}
+
+void PointLight::discretize(
+    std::vector<std::shared_ptr<ILight>>& discreteLights,
+    uint32_t samples
+) const {
+    std::shared_ptr<ILight> light =
+        std::make_shared<PointLight>(position_, emission_, decay_);
+
+    discreteLights.emplace_back(light);
+}
+
+bool PointLight::isInfinite() const {
+    return false;
+}
 
 AxisAlignedBoundingBox PointLight::getBoundingBox() const {
     return boundingBox_;

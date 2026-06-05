@@ -16,6 +16,8 @@ public:
         std::unique_ptr<IDirectLightEstimator> directLightEstimator
     );
 
+    void setup(const Scene& scene) override;
+
     LinearColor getRadiance(
         const Scene& scene,
         const HitData& hitData,

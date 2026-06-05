@@ -10,7 +10,6 @@ namespace RTC {
 class LightCutsTree : public ILightCutsTree {
 private:
     std::shared_ptr<LightNode> root_;
-    std::vector<std::shared_ptr<ILight>> infiniteLights_;
 
     [[nodiscard]] float estimateClusterError(
         const std::shared_ptr<LightNode>& lightNode,

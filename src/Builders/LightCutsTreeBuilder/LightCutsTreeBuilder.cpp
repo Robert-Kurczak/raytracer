@@ -1,14 +1,16 @@
-#include "LightTreeBuilder.hpp"
+#include "LightCutsTreeBuilder.hpp"
 
 #include "Core/Color/Color.hpp"
 #include "Geometry/Light/ILight.hpp"
+#include "Rendering/LightCutsTree/ILightCutsTree.hpp"
+#include "Rendering/LightCutsTree/LightCutsTree.hpp"
 #include "Utils/Logger/ILogger.hpp"
 
 #include <chrono>
 #include <memory>
 
 namespace RTC {
-bool LightTreeBuilder::compareBoxes(
+bool LightCutsTreeBuilder::compareBoxes(
     const std::shared_ptr<ILight>& left,
     const std::shared_ptr<ILight>& right,
     uint8_t axis
@@ -22,7 +24,7 @@ bool LightTreeBuilder::compareBoxes(
     return leftCenter < rightCenter;
 }
 
-uint8_t LightTreeBuilder::getLongestAxisIndex(
+uint8_t LightCutsTreeBuilder::getLongestAxisIndex(
     const std::vector<std::shared_ptr<ILight>>& lights,
     uint32_t rangeStart,
     uint32_t rangeEnd
@@ -39,7 +41,7 @@ uint8_t LightTreeBuilder::getLongestAxisIndex(
     return boundingBox.getLongestAxisIndex();
 }
 
-void LightTreeBuilder::sortBoxes(
+void LightCutsTreeBuilder::sortBoxes(
     std::vector<std::shared_ptr<ILight>>& lights,
     uint32_t rangeStart,
     uint32_t rangeEnd
@@ -56,7 +58,7 @@ void LightTreeBuilder::sortBoxes(
     );
 }
 
-std::shared_ptr<LightNode> LightTreeBuilder::createInternalNode(
+std::shared_ptr<LightNode> LightCutsTreeBuilder::createInternalNode(
     std::vector<std::shared_ptr<ILight>>& lights,
     uint32_t rangeStart,
     uint32_t rangeEnd
@@ -102,7 +104,7 @@ std::shared_ptr<LightNode> LightTreeBuilder::createInternalNode(
     );
 }
 
-std::shared_ptr<LightNode> LightTreeBuilder::buildRecursively(
+std::shared_ptr<LightNode> LightCutsTreeBuilder::buildRecursively(
     std::vector<std::shared_ptr<ILight>>& lights,
     uint32_t rangeStart,
     uint32_t rangeEnd
@@ -112,7 +114,7 @@ std::shared_ptr<LightNode> LightTreeBuilder::buildRecursively(
     if (objectSpan == 1) {
         std::shared_ptr<ILight> light = lights[rangeStart];
 
-        return std::make_unique<LightNode>(
+        return std::make_shared<LightNode>(
             light,
             light->getPower(),
             light->getBoundingBox(),
@@ -124,10 +126,12 @@ std::shared_ptr<LightNode> LightTreeBuilder::buildRecursively(
     return createInternalNode(lights, rangeStart, rangeEnd);
 }
 
-LightTreeBuilder::LightTreeBuilder(std::shared_ptr<ILogger> logger) :
+LightCutsTreeBuilder::LightCutsTreeBuilder(
+    std::shared_ptr<ILogger> logger
+) :
     logger_(std::move(logger)) {}
 
-std::shared_ptr<LightNode> LightTreeBuilder::build(
+std::unique_ptr<ILightCutsTree> LightCutsTreeBuilder::build(
     std::vector<std::shared_ptr<ILight>>&& lights
 ) const {
     logger_->log(LogLevel::Info, "Building Light Cuts tree");
@@ -142,9 +146,10 @@ std::shared_ptr<LightNode> LightTreeBuilder::build(
         );
 
     logger_->log(
-        LogLevel::Info, std::format("Light Cuts built in {}", executionTime)
+        LogLevel::Info,
+        std::format("Light Cuts built in {}", executionTime)
     );
 
-    return result;
+    return std::make_unique<LightCutsTree>(std::move(result));
 }
 }
