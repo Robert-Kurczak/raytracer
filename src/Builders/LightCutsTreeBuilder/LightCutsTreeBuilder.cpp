@@ -111,6 +111,10 @@ std::shared_ptr<LightNode> LightCutsTreeBuilder::buildRecursively(
 ) const {
     const uint32_t objectSpan = rangeEnd - rangeStart;
 
+    if (objectSpan == 0) {
+        return nullptr;
+    }
+
     if (objectSpan == 1) {
         std::shared_ptr<ILight> light = lights[rangeStart];
 
