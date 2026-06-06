@@ -359,8 +359,6 @@ std::unique_ptr<Scene> JsonEnvironmentBuilder::parseScene(
         std::move(sceneRoot), std::move(sceneLights)
     );
 
-    scene->setup();
-
     return std::move(scene);
 }
 

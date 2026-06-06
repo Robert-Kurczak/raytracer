@@ -8,7 +8,6 @@
 #include "Geometry/Light/ILight.hpp"
 #include "Rendering/Framebuffer/Framebuffer.hpp"
 #include "Rendering/LightSampler/ILightSampler.hpp"
-#include "Rendering/Material/MaterialSample.hpp"
 #include "Rendering/ProgressIndicator/IProgressIndicator.hpp"
 #include "Rendering/Renderer/PathRenderer/PathRendererParameters.hpp"
 #include "Rendering/Renderer/RendererStatistics.hpp"
@@ -74,7 +73,7 @@ public:
 
     RendererStatistics render(
         const Camera& camera,
-        const Scene& scene,
+        Scene& scene,
         Framebuffer& framebuffer
     ) noexcept override;
 };

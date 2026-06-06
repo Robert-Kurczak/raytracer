@@ -7,7 +7,6 @@
 #include "Core/Ray/Ray.hpp"
 #include "Geometry/Hittable/HitData.hpp"
 #include "Geometry/Light/ILight.hpp"
-#include "Geometry/Light/LightSample.hpp"
 #include "Rendering/Material/IMaterial.hpp"
 #include "Rendering/Material/MaterialSample.hpp"
 #include "Rendering/ProgressIndicator/IProgressIndicator.hpp"
@@ -240,10 +239,13 @@ PathRenderer::PathRenderer(
 
 RendererStatistics PathRenderer::render(
     const Camera& camera,
-    const Scene& scene,
+    Scene& scene,
     Framebuffer& framebuffer
 ) noexcept {
     RendererStatistics totalStatistics;
+
+    scene.setup();
+    lightSampler_->setup(scene);
 
     const std::vector<RendererStatistics> threadStatistics =
         renderAll(camera, scene, framebuffer);

@@ -8,7 +8,6 @@
 #include "Core/Ray/Ray.hpp"
 #include "Geometry/Hittable/HitData.hpp"
 #include "Geometry/Light/ILight.hpp"
-#include "Geometry/Light/LightSample.hpp"
 #include "Rendering/Material/IMaterial.hpp"
 #include "Rendering/Material/MaterialSample.hpp"
 #include "Rendering/PhotonMap/PhotonMap.hpp"
@@ -381,10 +380,13 @@ PhotonMapRenderer::PhotonMapRenderer(
 
 RendererStatistics PhotonMapRenderer::render(
     const Camera& camera,
-    const Scene& scene,
+    Scene& scene,
     Framebuffer& framebuffer
 ) noexcept {
     RendererStatistics totalStatistics;
+
+    scene.setup();
+    lightSampler_->setup(scene);
 
     std::vector<Photon> globalPhotons;
     std::vector<Photon> causticPhotons;
