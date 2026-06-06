@@ -35,6 +35,10 @@ LightCutMaxHeap LightCutsTree::getCut(
 ) const {
     LightCutMaxHeap maxHeap;
 
+    if (root_ == nullptr) {
+        return maxHeap;
+    }
+
     maxHeap.emplace(
         LightCutMaxHeapItem {
             .lightNode = root_,
