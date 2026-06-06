@@ -27,11 +27,6 @@
 #include <vector>
 
 namespace RTC {
-static constexpr DiffuseParameters DEFAULT_MATERIAL_PARAMETERS {
-    .baseColor {.red = 0.50F, .green = 0.10F, .blue = 0.40F},
-    .emission = LinearColor::black()
-};
-
 bool ObjMeshBuilder::isMaterialTransparent(
     const MtlParameters& parameters
 ) const {
@@ -341,7 +336,8 @@ ObjMeshBuilder::ObjMeshBuilder(std::shared_ptr<ILogger> logger) :
 
 MeshBuilderResult ObjMeshBuilder::parseMesh(
     const std::filesystem::path& path,
-    const Vector3f& position
+    const Vector3f& position,
+    std::shared_ptr<IMaterial> defaultMaterial
 ) const {
     std::ifstream file {path};
 
@@ -360,8 +356,7 @@ MeshBuilderResult ObjMeshBuilder::parseMesh(
     std::vector<Vector3f> normalsBuffer {};
 
     std::unordered_map<std::string, std::shared_ptr<IMaterial>> materials;
-    std::shared_ptr<IMaterial> currentMaterial =
-        std::make_shared<DiffuseMaterial>(DEFAULT_MATERIAL_PARAMETERS);
+    std::shared_ptr<IMaterial> currentMaterial = std::move(defaultMaterial);
 
     while (std::getline(file, line)) {
         std::stringstream lineStream {line};
@@ -400,12 +395,13 @@ MeshBuilderResult ObjMeshBuilder::parseMesh(
 
 MeshBuilderResult ObjMeshBuilder::buildFromFile(
     const std::filesystem::path& path,
-    const Vector3<float>& position
+    const Vector3f& position,
+    std::shared_ptr<IMaterial> defaultMaterial
 ) const {
     logger_->log(LogLevel::Info, "Building mesh from .obj file");
 
     const auto startTime = std::chrono::high_resolution_clock::now();
-    MeshBuilderResult result = parseMesh(path, position);
+    MeshBuilderResult result = parseMesh(path, position, defaultMaterial);
     const auto endTime = std::chrono::high_resolution_clock::now();
 
     const auto executionTime =

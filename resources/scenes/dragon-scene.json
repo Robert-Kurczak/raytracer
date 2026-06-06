@@ -7,7 +7,6 @@
     },
     "renderer": {
         "pathsPerPixel": 100,
-        "": 1,
         "scatterRecursionDepth": 10,
         "photonMappingEnabled": false,
         "emittedPhotons": 1000000,

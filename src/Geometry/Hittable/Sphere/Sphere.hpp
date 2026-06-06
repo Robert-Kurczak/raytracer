@@ -10,6 +10,8 @@ class Sphere : public IHittable {
 private:
     const Point3<float> center_ {0.0F, 0.0F, 0.0F};
     const float radius_ = 0.0F;
+    std::shared_ptr<IMaterial> material_;
+
     const float radiusSquared_ = 0.0F;
     const AxisAlignedBoundingBox boundingBox_;
 
@@ -33,7 +35,11 @@ private:
     ) const;
 
 public:
-    Sphere(const Point3<float>& center, float radius);
+    Sphere(
+        const Point3f& center,
+        float radius,
+        std::shared_ptr<IMaterial> material
+    );
 
     [[nodiscard]] const AxisAlignedBoundingBox&
     getBoundingBox() const override;

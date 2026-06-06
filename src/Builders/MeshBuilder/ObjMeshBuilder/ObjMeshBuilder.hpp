@@ -104,7 +104,8 @@ private:
 
     [[nodiscard]] MeshBuilderResult parseMesh(
         const std::filesystem::path& path,
-        const Vector3f& position
+        const Vector3f& position,
+        std::shared_ptr<IMaterial> defaultMaterial
     ) const;
 
 public:
@@ -112,7 +113,8 @@ public:
 
     [[nodiscard]] MeshBuilderResult buildFromFile(
         const std::filesystem::path& path,
-        const Vector3f& position
+        const Vector3f& position,
+        std::shared_ptr<IMaterial> defaultMaterial
     ) const override;
 };
 }
