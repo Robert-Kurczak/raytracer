@@ -59,15 +59,9 @@ private:
         const nlohmann::json& jsonContent
     ) const;
 
-    void parseObjects(
-        Scene& scene,
-        IMeshBuilder& meshBuilder,
-        IBvhBuilder& bvhBuilder,
-        const nlohmann::json& jsonContent
-    ) const;
-
     [[nodiscard]] std::vector<std::unique_ptr<IHittable>>
     parseSceneObjects(
+        const std::shared_ptr<IMaterial>& defaultMaterial,
         IMeshBuilder& meshBuilder,
         IBvhBuilder& bvhBuilder,
         std::vector<std::shared_ptr<ILight>>& sceneLights,

@@ -26,6 +26,9 @@
 #include "Rendering/LightSampler/LightCutsSampler/LightCutsSampler.hpp"
 #include "Rendering/LightSampler/LightCutsSampler/LightCutsSamplerParameters.hpp"
 #include "Rendering/LightSampler/RandomLightSampler/RandomLightSampler.hpp"
+#include "Rendering/Material/GlossyMaterial/GlossyMaterial.hpp"
+#include "Rendering/Material/IMaterial.hpp"
+#include "Rendering/Material/MtlParameters.hpp"
 #include "Rendering/ProgressIndicator/CoutProgressIndicator/CoutProgressIndicator.hpp"
 #include "Rendering/ProgressIndicator/IProgressIndicator.hpp"
 #include "Rendering/Renderer/IRenderer.hpp"
@@ -55,6 +58,18 @@ static constexpr LinearColor DEFAULT_BACKGROUND_COLOR {
     .red = 0.3F,
     .green = 0.3F,
     .blue = 0.3F
+};
+
+static constexpr MtlParameters DEFAULT_MATERIAL_PARAMETERS {
+    .ambient = LinearColor::black(),
+    .diffuse = {.red = 0.50F, .green = 0.10F, .blue = 0.40F},
+    .specular = LinearColor::black(),
+    .emission = LinearColor::black(),
+    .shininess = 50.0F,
+    .transparency = 0.0F,
+    .refractionIndex = 0.0F,
+    .transmisionFilter = BLACK_LINEAR_COLOR,
+    .illuminationModel = 2
 };
 
 std::shared_ptr<ILogger> JsonEnvironmentBuilder::parseLogger(
@@ -260,6 +275,7 @@ std::unique_ptr<Camera> JsonEnvironmentBuilder::parseCamera(
 
 std::vector<std::unique_ptr<IHittable>> JsonEnvironmentBuilder::
     parseSceneObjects(
+        const std::shared_ptr<IMaterial>& defaultMaterial,
         IMeshBuilder& meshBuilder,
         IBvhBuilder& bvhBuilder,
         std::vector<std::shared_ptr<ILight>>& sceneLights,
@@ -280,7 +296,9 @@ std::vector<std::unique_ptr<IHittable>> JsonEnvironmentBuilder::
                 jsonObject["filePath"].get<std::string>();
 
             MeshBuilderResult meshParsingResult =
-                meshBuilder.buildFromFile(filePath, objectPosition);
+                meshBuilder.buildFromFile(
+                    filePath, objectPosition, defaultMaterial
+                );
 
             std::unique_ptr<IHittable> bvhMesh =
                 bvhBuilder.build(std::move(meshParsingResult.triangles));
@@ -295,8 +313,9 @@ std::vector<std::unique_ptr<IHittable>> JsonEnvironmentBuilder::
         } else if (objectType == "sphere") {
             const float radius = jsonObject["radius"].get<float>();
 
-            std::unique_ptr<Sphere> sphere =
-                std::make_unique<Sphere>(objectPosition, radius);
+            std::unique_ptr<Sphere> sphere = std::make_unique<Sphere>(
+                objectPosition, radius, defaultMaterial
+            );
 
             sceneObjects.emplace_back(std::move(sphere));
         }
@@ -345,9 +364,13 @@ std::unique_ptr<Scene> JsonEnvironmentBuilder::parseScene(
     IBvhBuilder& bvhBuilder,
     const nlohmann::json& jsonContent
 ) const {
+    std::shared_ptr<IMaterial> defaultMaterial =
+        std::make_shared<GlossyMaterial>(DEFAULT_MATERIAL_PARAMETERS);
+
     std::vector<std::shared_ptr<ILight>> sceneLights {};
+
     auto objects = parseSceneObjects(
-        meshBuilder, bvhBuilder, sceneLights, jsonContent
+        defaultMaterial, meshBuilder, bvhBuilder, sceneLights, jsonContent
     );
 
     parseSceneLights(sceneLights, jsonContent);

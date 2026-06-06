@@ -16,7 +16,8 @@ public:
 
     [[nodiscard]] virtual MeshBuilderResult buildFromFile(
         const std::filesystem::path& path,
-        const Vector3<float>& position
+        const Vector3<float>& position,
+        std::shared_ptr<IMaterial> defaultMaterial
     ) const = 0;
 };
 }

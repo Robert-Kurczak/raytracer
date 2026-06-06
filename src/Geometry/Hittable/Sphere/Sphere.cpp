@@ -6,8 +6,8 @@
 namespace RTC {
 
 Sphere::QuadraticResult Sphere::solveQuadratic(const Ray& ray) const {
-    const Vector3<float> rayDirection = ray.getDirection();
-    const Vector3<float> rayDisplacement = center_ - ray.getOrigin();
+    const Vector3f rayDirection = ray.getDirection();
+    const Vector3f rayDisplacement = center_ - ray.getOrigin();
 
     const float aTerm = rayDirection.getSquaredLength();
     const float hTerm = getDotProduct(rayDirection, rayDisplacement);
@@ -31,7 +31,7 @@ AxisAlignedBoundingBox Sphere::createBoundingBox(
     const Point3<float>& center,
     float radius
 ) const {
-    const Vector3<float> radiusOffset {radius, radius, radius};
+    const Vector3f radiusOffset {radius, radius, radius};
 
     return AxisAlignedBoundingBox {
         center - radiusOffset, center + radiusOffset
@@ -49,11 +49,17 @@ void Sphere::updateHitData(
     hitData.rayT = rayT;
     hitData.hitPoint = tPoint;
     hitData.hitNormal = normal;
+    hitData.material = material_;
 }
 
-Sphere::Sphere(const Point3<float>& center, float radius) :
+Sphere::Sphere(
+    const Point3f& center,
+    float radius,
+    std::shared_ptr<IMaterial> material
+) :
     center_(center),
     radius_(radius),
+    material_(std::move(material)),
     radiusSquared_(radius_ * radius_),
     boundingBox_(createBoundingBox(center_, radius_)) {}
 
