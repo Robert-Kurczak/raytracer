@@ -17,7 +17,7 @@ public:
 
     virtual RendererStatistics render(
         const Camera& camera,
-        const Scene& scene,
+        Scene& scene,
         Framebuffer& framebuffer
     ) noexcept = 0;
 };
