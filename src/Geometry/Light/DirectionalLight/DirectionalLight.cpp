@@ -45,11 +45,14 @@ void DirectionalLight::discretize(
     std::vector<std::shared_ptr<ILight>>& discreteLights,
     uint32_t samples
 ) const {
+    const LinearColor sampleEmission = emission_ / float(samples);
+
     for (uint32_t i = 0; i < samples; i++) {
         const Point3f randomPoint = getRandomPoint();
 
-        std::shared_ptr<ILight> light =
-            std::make_shared<PointLight>(randomPoint, emission_, 1.0F);
+        std::shared_ptr<ILight> light = std::make_shared<PointLight>(
+            randomPoint, sampleEmission, 1.0F
+        );
 
         discreteLights.emplace_back(light);
     }

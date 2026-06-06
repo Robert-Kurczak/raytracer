@@ -73,7 +73,11 @@ LinearColor LightCutsSampler::getLightCutsRadiance(
                 lightSample, scene, hitData, offsetHitPoint, outDirection
             );
 
-        const LinearColor radiance = scatteringWeight * lightNode->power;
+        const float distanceSquared =
+            std::max(0.0025F, lightSample.toLight.getSquaredLength());
+
+        const LinearColor radiance =
+            scatteringWeight * lightNode->power / distanceSquared;
 
         cumulativeRadiance += radiance;
 
