@@ -1,0 +1,57 @@
+{
+    "outputPath": "resources/renders/cyberpunk-scene.exr",
+    "verbose": true,
+    "lightSampler": {
+        "type": "lightCuts",
+        "discreteSamplerPerLight": 1,
+        "maxError": 0.02,
+        "maxCutSize": 1024
+    },
+    "renderer": {
+        "pathsPerPixel": 10,
+        "scatterRecursionDepth": 2,
+        "photonMappingEnabled": false,
+        "emittedPhotons": 100000,
+        "nearestPhotons": 40
+    },
+    "camera": {
+        "screenWidth": 1920,
+        "screenHeight": 1080,
+        "position": [
+            2.0,
+            1.0,
+            -1.0
+        ],
+        "direction": [
+            0.2,
+            0.3,
+            0.8
+        ],
+        "upDirection": [
+            0.0,
+            1.0,
+            0.0
+        ],
+        "fieldOfViewDegrees": 90
+    },
+    "background": {
+        "type": "solid",
+        "color": [
+            7,
+            11,
+            52
+        ]
+    },
+    "objects": [
+        {
+            "type": "obj",
+            "filePath": "resources/objects/cyberpunk/CuberpunkCityWithKaws.obj",
+            "position": [
+                0.0,
+                0.0,
+                0.0
+            ]
+        }
+    ],
+    "lights": []
+}
