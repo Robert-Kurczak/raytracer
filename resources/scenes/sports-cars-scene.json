@@ -1,0 +1,72 @@
+{
+    "outputPath": "resources/renders/sports-cars.exr",
+    "verbose": true,
+    "lightSampler": {
+        "type": "lightCuts",
+        "samples": 1,
+        "discreteSamplerPerLight": 1,
+        "maxError": 0.02,
+        "maxCutSize": 1024
+    },
+    "renderer": {
+        "pathsPerPixel": 10,
+        "scatterRecursionDepth": 2,
+        "photonMappingEnabled": false,
+        "emittedPhotons": 100000,
+        "nearestPhotons": 40
+    },
+    "camera": {
+        "screenWidth": 1920,
+        "screenHeight": 1080,
+        "position": [
+            6.5,
+            2.0,
+            8.0
+        ],
+        "direction": [
+            -0.5,
+            0.0,
+            -0.5
+        ],
+        "upDirection": [
+            0.0,
+            1.0,
+            0.0
+        ],
+        "fieldOfViewDegrees": 90
+    },
+    "background": {
+        "type": "solid",
+        "color": [
+            19,
+            24,
+            98
+        ]
+    },
+    "objects": [
+        {
+            "type": "obj",
+            "filePath": "resources/objects/sports-cars/sportsCars.obj",
+            "position": [
+                0.0,
+                0.0,
+                0.0
+            ]
+        }
+    ],
+    "lights": [
+        {
+            "type": "directional",
+            "color": [
+                225,
+                130,
+                85
+            ],
+            "direction": [
+                0.6,
+                -0.2,
+                -0.3
+            ]
+        }
+    ]
+}
