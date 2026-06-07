@@ -27,25 +27,6 @@ LinearColor LightCutsSampler::getInfiniteLightsRadiance(
     return radiance;
 }
 
-void LightCutsSampler::setup(const Scene& scene) {
-    infiniteLights_.clear();
-
-    std::vector<std::shared_ptr<ILight>> discreteLights;
-
-    for (const std::shared_ptr<ILight>& light : scene.getLights()) {
-        if (light->isInfinite()) {
-            infiniteLights_.push_back(light);
-        } else {
-            light->discretize(
-                discreteLights, parameters_.discreteSamplerPerLight
-            );
-        }
-    }
-
-    lightCutsTree_ =
-        lightCutsTreeBuilder_->build(std::move(discreteLights));
-}
-
 LinearColor LightCutsSampler::getLightCutsRadiance(
     const Scene& scene,
     const HitData& hitData,
@@ -95,6 +76,25 @@ LightCutsSampler::LightCutsSampler(
     parameters_(parameters),
     lightCutsTreeBuilder_(std::move(lightCutsTreeBuilder)),
     directLightEstimator_(std::move(directLightEstimator)) {}
+
+void LightCutsSampler::setup(const Scene& scene) {
+    infiniteLights_.clear();
+
+    std::vector<std::shared_ptr<ILight>> discreteLights;
+
+    for (const std::shared_ptr<ILight>& light : scene.getLights()) {
+        if (light->isInfinite()) {
+            infiniteLights_.push_back(light);
+        } else {
+            light->discretize(
+                discreteLights, parameters_.discreteSamplerPerLight
+            );
+        }
+    }
+
+    lightCutsTree_ =
+        lightCutsTreeBuilder_->build(std::move(discreteLights));
+}
 
 LinearColor LightCutsSampler::getRadiance(
     const Scene& scene,
