@@ -2,7 +2,8 @@
     "outputPath": "resources/renders/bmw-scene.exr",
     "verbose": true,
     "lightSampler": {
-        "type": "lightCuts",
+        "type": "all",
+        "samples": 1,
         "discreteSamplerPerLight": 1,
         "maxError": 0.02,
         "maxCutSize": 1024
