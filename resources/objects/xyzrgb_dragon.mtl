@@ -1,5 +1,3 @@
-newmtl jadeite
-Ka 0.0 0.0 0.0
-Kd 0.22 0.78 0.63
-Ks 0.0 0.0 0.0
-Ns 50.0
+version https://git-lfs.github.com/spec/v1
+oid sha256:becb45f8b49d20a4692bce84c0a6ca08aaf374e25590b317fbc8f36a31c43eaf
+size 70
