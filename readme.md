@@ -110,6 +110,9 @@ In addition to `.json` configuration files, it's also possible to render scene v
 
 ```
 
+## Notes
+1. [Monte Carlo](/docs/monte-carlo.md#renderer)
+
 ## Assumptions
 ### Units
 All vertex defined in .obj file are assumed to use meters $[m]$ as space unit
