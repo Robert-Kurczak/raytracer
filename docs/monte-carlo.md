@@ -2,6 +2,7 @@
 ### Light Transport Equation
 
 The core equation describing light transport in a rendered scene is
+
 $$ L_o(P, \omega_o) = L_e(P, \omega_o) + \int_\Omega f(P,\omega_o,\omega_i) \cdot L_i(P, \omega_i) \cdot \cos \theta \cdot d \omega_i $$
 
 Where
