@@ -34,6 +34,22 @@ Tracing time: 1'397'030ms
 Total execution time: 1'397'479ms = 23.3min
 Rays per second: 1'504'327.5 [rays/s]
 ```
+Cornell box spheres
+![Cornell box spheres](resources/examples/cornell-sphere-scene.png)
+```
+Resolution: 1000x1000
+Triangles in mesh: 2188
+Area lights in mesh: 2
+Mesh built in 4ms
+BVH built in 1ms
+Rendered on 16 threads
+Direct light sources: 0
+Traced rays: 2'389'898'379
+Traced shadow rays: 0
+Tracing time: 46'672'707ms
+Total execution time: 46'672'855 [rays/s]
+Rays per second: 51'205.484 [rays/s]
+```
 
 Cornell box
 ![Cornell box](resources/examples/cornell-original.png)
