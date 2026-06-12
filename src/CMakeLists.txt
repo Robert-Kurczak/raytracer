@@ -41,12 +41,27 @@ FetchContent_Declare(
   https://github.com/AcademySoftwareFoundation/openexr/releases/download/v3.4.9/openexr-3.4.9.tar.gz
 )
 
+FetchContent_Declare(
+  stb
+  GIT_REPOSITORY
+  https://github.com/nothings/stb.git
+)
+
 FetchContent_MakeAvailable(nlohmann_json)
 FetchContent_MakeAvailable(OpenEXR)
+FetchContent_MakeAvailable(stb)
+
+add_library(stb_image INTERFACE)
 
 add_executable(
   ${PROJECT_NAME}
   ${SOURCE_FILES}
+)
+
+target_include_directories(
+  stb_image
+  INTERFACE
+  ${stb_SOURCE_DIR}
 )
 
 target_include_directories(
@@ -71,4 +86,10 @@ target_link_libraries(
   ${PROJECT_NAME}
   PRIVATE
   OpenEXR::OpenEXR
+)
+
+target_link_libraries(
+  ${PROJECT_NAME}
+  PRIVATE
+  stb_image
 )
