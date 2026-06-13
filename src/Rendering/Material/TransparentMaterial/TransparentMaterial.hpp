@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Geometry/Hittable/HitData.hpp"
 #include "Rendering/Material/IMaterial.hpp"
 #include "Rendering/Material/MaterialSample.hpp"
 #include "Rendering/Material/MtlParameters.hpp"
@@ -23,10 +24,8 @@ private:
     [[nodiscard]] float getFresnelFactor(float incidenceCosine) const;
 
 public:
-    TransparentMaterial(TransparentParameters parameters);
-    TransparentMaterial(MtlParameters parameters);
-
-    [[nodiscard]] const LinearColor& getBaseColor() const override;
+    TransparentMaterial(const TransparentParameters& parameters);
+    TransparentMaterial(const MtlParameters& parameters);
 
     [[nodiscard]] const LinearColor& getEmission() const override;
 
@@ -42,15 +41,13 @@ public:
     ) const override;
 
     [[nodiscard]] LinearColor calculateBrdf(
-        const Point3f& origin,
-        const Vector3f& normal,
+        const HitData& hitData,
         const Vector3f& outDirection,
         const Vector3f& inDirection
     ) const override;
 
     [[nodiscard]] MaterialSample getSample(
-        const Point3f& origin,
-        const Vector3f& normal,
+        const HitData& hitData,
         const Vector3f& outDirection
     ) const override;
 };

@@ -1,13 +1,15 @@
 #pragma once
 
 #include "Core/Color/Color.hpp"
+#include "Rendering/Texture/ITexture.hpp"
 
 #include <cstdint>
+#include <memory>
 
 namespace RTC {
 struct MtlParameters {
+    std::shared_ptr<ITexture> diffuse;
     LinearColor ambient = LinearColor::black();
-    LinearColor diffuse = LinearColor::black();
     LinearColor specular = LinearColor::black();
     LinearColor emission = LinearColor::black();
     float shininess = 0.0F;

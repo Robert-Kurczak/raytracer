@@ -16,7 +16,7 @@ DiffuseParameters DiffuseMaterial::convertFromMtl(
     const MtlParameters& parameters
 ) const {
     return DiffuseParameters {
-        .baseColor = parameters.diffuse,
+        .colorTexture = parameters.diffuse,
         .emission = parameters.emission / float(std::numbers::pi)
     };
 }
@@ -26,10 +26,6 @@ DiffuseMaterial::DiffuseMaterial(const DiffuseParameters& parameters) :
 
 DiffuseMaterial::DiffuseMaterial(const MtlParameters& parameters) :
     parameters_(convertFromMtl(parameters)) {}
-
-const LinearColor& DiffuseMaterial::getBaseColor() const {
-    return parameters_.baseColor;
-}
 
 const LinearColor& DiffuseMaterial::getEmission() const {
     return parameters_.emission;
@@ -57,30 +53,31 @@ float DiffuseMaterial::calculatePdf(
 }
 
 LinearColor DiffuseMaterial::calculateBrdf(
-    const Point3f& origin,
-    const Vector3f& normal,
+    const HitData& hitData,
     const Vector3f& outDirection,
     const Vector3f& inDirection
 ) const {
-    (void) origin;
-    (void) normal;
     (void) outDirection;
     (void) inDirection;
 
-    return parameters_.baseColor / float(std::numbers::pi);
+    const LinearColor color = parameters_.colorTexture->sample(
+        hitData.textureCoords.getX(), hitData.textureCoords.getY()
+    );
+
+    return color / float(std::numbers::pi);
 }
 
 MaterialSample DiffuseMaterial::getSample(
-    const Point3f& origin,
-    const Vector3f& normal,
+    const HitData& hitData,
     const Vector3f& outDirection
 ) const {
     const Vector3f localVersor = sampleCosineHemisphere();
     const Vector3f inDirection =
-        transformToWorldSpace(localVersor, normal).getNormalized();
+        transformToWorldSpace(localVersor, hitData.hitNormal)
+            .getNormalized();
 
     const LinearColor brdf =
-        calculateBrdf(origin, normal, outDirection, inDirection);
+        calculateBrdf(hitData, outDirection, inDirection);
     const float pdf = localVersor.getZ() / float(std::numbers::pi);
 
     return MaterialSample {

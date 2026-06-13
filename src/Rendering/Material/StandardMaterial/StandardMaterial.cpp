@@ -4,23 +4,21 @@
 
 namespace RTC {
 MaterialSample StandardMaterial::getGlossySample(
-    const Point3f& origin,
-    const Vector3f& normal,
+    const HitData& hitData,
     const Vector3f& outDirection
 ) const {
     MaterialSample glossySample =
-        glossyMaterial_->getSample(origin, normal, outDirection);
+        glossyMaterial_->getSample(hitData, outDirection);
 
     return glossySample;
 }
 
 MaterialSample StandardMaterial::getDiffuseSample(
-    const Point3f& origin,
-    const Vector3f& normal,
+    const HitData& hitData,
     const Vector3f& outDirection
 ) const {
     MaterialSample diffuseSample =
-        diffuseMaterial_->getSample(origin, normal, outDirection);
+        diffuseMaterial_->getSample(hitData, outDirection);
 
     return diffuseSample;
 }
@@ -35,10 +33,6 @@ StandardMaterial::StandardMaterial(
     glossyBlendFactor_(glossyBlendFactor),
     diffuseBlendFactor_(1.0F - glossyBlendFactor_) {}
 
-const LinearColor& StandardMaterial::getBaseColor() const {
-    return diffuseMaterial_->getBaseColor();
-}
-
 const LinearColor& StandardMaterial::getEmission() const {
     return diffuseMaterial_->getEmission();
 }
@@ -51,17 +45,16 @@ LinearColor StandardMaterial::getEmission(
 }
 
 LinearColor StandardMaterial::calculateBrdf(
-    const Point3f& origin,
-    const Vector3f& normal,
+    const HitData& hitData,
     const Vector3f& outDirection,
     const Vector3f& inDirection
 ) const {
     const LinearColor diffuseBrdf = diffuseMaterial_->calculateBrdf(
-        origin, normal, outDirection, inDirection
+        hitData, outDirection, inDirection
     );
 
     const LinearColor glossyBrdf = glossyMaterial_->calculateBrdf(
-        origin, normal, outDirection, inDirection
+        hitData, outDirection, inDirection
     );
 
     return diffuseBlendFactor_ * diffuseBrdf +
@@ -83,16 +76,15 @@ float StandardMaterial::calculatePdf(
 }
 
 MaterialSample StandardMaterial::getSample(
-    const Point3f& origin,
-    const Vector3f& normal,
+    const HitData& hitData,
     const Vector3f& outDirection
 ) const {
     const auto randomFactor = getRandomNumber<float>();
 
     if (randomFactor <= glossyBlendFactor_) {
-        return getGlossySample(origin, normal, outDirection);
+        return getGlossySample(hitData, outDirection);
     }
 
-    return getDiffuseSample(origin, normal, outDirection);
+    return getDiffuseSample(hitData, outDirection);
 }
 }

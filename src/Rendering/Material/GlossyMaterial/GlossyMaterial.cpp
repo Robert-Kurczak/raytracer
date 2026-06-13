@@ -4,6 +4,7 @@
 #include "Core/Math/Random.hpp"
 #include "Core/Math/Transformations.hpp"
 #include "Core/Math/Vector.hpp"
+#include "Geometry/Hittable/HitData.hpp"
 #include "Rendering/Material/MaterialSample.hpp"
 
 #include <cmath>
@@ -123,10 +124,6 @@ GlossyMaterial::GlossyMaterial(const GlossyParameters& parameters) :
 GlossyMaterial::GlossyMaterial(const MtlParameters& parameters) :
     GlossyMaterial(convertFromMtl(parameters)) {}
 
-const LinearColor& GlossyMaterial::getBaseColor() const {
-    return BLACK_LINEAR_COLOR;
-}
-
 const LinearColor& GlossyMaterial::getEmission() const {
     return BLACK_LINEAR_COLOR;
 };
@@ -139,13 +136,13 @@ LinearColor GlossyMaterial::getEmission(
 };
 
 LinearColor GlossyMaterial::calculateBrdf(
-    const Point3f& origin,
-    const Vector3f& normal,
+    const HitData& hitData,
     const Vector3f& outDirection,
     const Vector3f& inDirection
 ) const {
-    const float inCosine = getDotProduct(inDirection, normal);
-    const float outCosine = getDotProduct(outDirection, normal);
+    const float inCosine = getDotProduct(inDirection, hitData.hitNormal);
+    const float outCosine =
+        getDotProduct(outDirection, hitData.hitNormal);
 
     if (inCosine <= 0.0F || outCosine <= 0.0F) {
         return BLACK_LINEAR_COLOR;
@@ -155,7 +152,8 @@ LinearColor GlossyMaterial::calculateBrdf(
         (outDirection + inDirection).getNormalized();
 
     const MicrofacetData data = getCookTorranceTerms(
-        outDirection, inDirection, normal, microfacetNormal
+
+        outDirection, inDirection, hitData.hitNormal, microfacetNormal
     );
 
     return data.brdf;
@@ -182,19 +180,19 @@ float GlossyMaterial::calculatePdf(
 }
 
 MaterialSample GlossyMaterial::getSample(
-    const Point3f& origin,
-    const Vector3f& normal,
+    const HitData& hitData,
     const Vector3f& outDirection
 ) const {
     const Vector3f microfacetNormal =
-        transformToWorldSpace(createMicrofacetNormal(), normal)
+        transformToWorldSpace(createMicrofacetNormal(), hitData.hitNormal)
             .getNormalized();
 
     const Vector3f inDirection =
         (-outDirection).getReflected(microfacetNormal);
 
-    const float inCosine = getDotProduct(inDirection, normal);
-    const float outCosine = getDotProduct(outDirection, normal);
+    const float inCosine = getDotProduct(inDirection, hitData.hitNormal);
+    const float outCosine =
+        getDotProduct(outDirection, hitData.hitNormal);
 
     if (inCosine <= 0.0F || outCosine <= 0.0F) {
         return MaterialSample {
@@ -205,7 +203,7 @@ MaterialSample GlossyMaterial::getSample(
     }
 
     const MicrofacetData data = getCookTorranceTerms(
-        outDirection, inDirection, normal, microfacetNormal
+        outDirection, inDirection, hitData.hitNormal, microfacetNormal
     );
 
     const float pdf = (data.distribution * data.normalsCosine) /

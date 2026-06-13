@@ -44,17 +44,15 @@ float TransparentMaterial::getFresnelFactor(float incidenceCosine) const {
 }
 
 TransparentMaterial::TransparentMaterial(
-    TransparentParameters parameters
+    const TransparentParameters& parameters
 ) :
     parameters_(parameters),
     inverseRefractionIndex_(1.0F / parameters_.refractionIndex) {}
 
-TransparentMaterial::TransparentMaterial(MtlParameters parameters) :
+TransparentMaterial::TransparentMaterial(
+    const MtlParameters& parameters
+) :
     TransparentMaterial(convertFromMtl(parameters)) {}
-
-const LinearColor& TransparentMaterial::getBaseColor() const {
-    return BLACK_LINEAR_COLOR;
-}
 
 const LinearColor& TransparentMaterial::getEmission() const {
     return parameters_.emission;
@@ -76,8 +74,7 @@ float TransparentMaterial::calculatePdf(
 }
 
 LinearColor TransparentMaterial::calculateBrdf(
-    const Point3f& origin,
-    const Vector3f& normal,
+    const HitData& hitData,
     const Vector3f& outDirection,
     const Vector3f& inDirection
 ) const {
@@ -85,19 +82,19 @@ LinearColor TransparentMaterial::calculateBrdf(
 }
 
 MaterialSample TransparentMaterial::getSample(
-    const Point3f& origin,
-    const Vector3f& normal,
+    const HitData& hitData,
     const Vector3f& outDirection
 ) const {
-    float incidenceCosine = getDotProduct(outDirection, normal);
-    Vector3f refractionNormal = normal;
+    float incidenceCosine =
+        getDotProduct(outDirection, hitData.hitNormal);
+    Vector3f refractionNormal = hitData.hitNormal;
     float relativeRefractionIndex = parameters_.refractionIndex;
 
     const bool fromGlasstoAir = incidenceCosine < 0.0F;
 
     if (fromGlasstoAir) {
         incidenceCosine = -incidenceCosine;
-        refractionNormal = -normal;
+        refractionNormal = -hitData.hitNormal;
         relativeRefractionIndex = inverseRefractionIndex_;
     }
 

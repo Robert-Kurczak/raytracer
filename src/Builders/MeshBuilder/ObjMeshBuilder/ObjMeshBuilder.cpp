@@ -10,6 +10,7 @@
 #include "Rendering/Material/MtlParameters.hpp"
 #include "Rendering/Material/StandardMaterial/StandardMaterial.hpp"
 #include "Rendering/Material/TransparentMaterial/TransparentMaterial.hpp"
+#include "Rendering/Texture/ColorTexture/ColorTexture.hpp"
 #include "Utils/Logger/ILogger.hpp"
 #include "Utils/StringUtils.hpp"
 
@@ -102,9 +103,13 @@ MaterialsMap ObjMeshBuilder::extractMaterials(
             lineStream >> mtlParameters.ambient.green;
             lineStream >> mtlParameters.ambient.blue;
         } else if (dataType == "Kd") {
-            lineStream >> mtlParameters.diffuse.red;
-            lineStream >> mtlParameters.diffuse.green;
-            lineStream >> mtlParameters.diffuse.blue;
+            LinearColor color;
+
+            lineStream >> color.red;
+            lineStream >> color.green;
+            lineStream >> color.blue;
+
+            mtlParameters.diffuse = std::make_shared<ColorTexture>(color);
         } else if (dataType == "Ks") {
             lineStream >> mtlParameters.specular.red;
             lineStream >> mtlParameters.specular.green;
@@ -356,7 +361,8 @@ MeshBuilderResult ObjMeshBuilder::parseMesh(
     std::vector<Vector3f> normalsBuffer {};
 
     std::unordered_map<std::string, std::shared_ptr<IMaterial>> materials;
-    std::shared_ptr<IMaterial> currentMaterial = std::move(defaultMaterial);
+    std::shared_ptr<IMaterial> currentMaterial =
+        std::move(defaultMaterial);
 
     while (std::getline(file, line)) {
         std::stringstream lineStream {line};

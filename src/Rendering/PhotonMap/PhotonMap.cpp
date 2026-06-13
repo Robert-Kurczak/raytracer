@@ -90,8 +90,7 @@ LinearColor PhotonMap::getRadiance(
 
     while (not neighbors.empty()) {
         const LinearColor brdf = hitData.material->calculateBrdf(
-            hitData.hitPoint,
-            hitData.hitNormal,
+            hitData,
             outDirection,
             -neighbors.top().photon->direction.getNormalized()
         );
