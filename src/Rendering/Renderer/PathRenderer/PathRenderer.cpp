@@ -41,9 +41,8 @@ LinearColor PathRenderer::getIndirectLight(
     RendererStatistics& statistics,
     uint32_t recursionDepth
 ) const {
-    const MaterialSample materialSample = hitData.material->getSample(
-        hitData.hitPoint, hitData.hitNormal, outDirection
-    );
+    const MaterialSample materialSample =
+        hitData.material->getSample(hitData, outDirection);
 
     if (materialSample.scatterType == ScatterType::Specular) {
         const Point3f specularOffsetPoint =

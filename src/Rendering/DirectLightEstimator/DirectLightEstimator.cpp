@@ -34,10 +34,7 @@ LinearColor DirectLightEstimator::getScatteringWeight(
     }
 
     const LinearColor brdf = hitData.material->calculateBrdf(
-        hitData.hitPoint,
-        hitData.hitNormal,
-        outDirection,
-        lightSample.inDirection
+        hitData, outDirection, lightSample.inDirection
     );
 
     const float cosine = std::max(

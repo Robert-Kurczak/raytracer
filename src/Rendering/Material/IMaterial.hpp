@@ -15,8 +15,6 @@ public:
     IMaterial operator=(IMaterial&&) = delete;
     virtual ~IMaterial() = default;
 
-    [[nodiscard]] virtual const LinearColor& getBaseColor() const = 0;
-
     [[nodiscard]] virtual const LinearColor& getEmission() const = 0;
 
     [[nodiscard]] virtual LinearColor getEmission(
@@ -31,15 +29,13 @@ public:
     ) const = 0;
 
     [[nodiscard]] virtual LinearColor calculateBrdf(
-        const Point3f& origin,
-        const Vector3f& normal,
+        const HitData& hitData,
         const Vector3f& outDirection,
         const Vector3f& inDirection
     ) const = 0;
 
     [[nodiscard]] virtual MaterialSample getSample(
-        const Point3f& origin,
-        const Vector3f& normal,
+        const HitData& hitData,
         const Vector3f& outDirection
     ) const = 0;
 };

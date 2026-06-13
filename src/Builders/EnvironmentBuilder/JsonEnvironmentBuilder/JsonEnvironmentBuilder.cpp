@@ -36,6 +36,7 @@
 #include "Rendering/Renderer/PathRenderer/PathRendererParameters.hpp"
 #include "Rendering/Renderer/PhotonMapRenderer/PhotonMapRenderer.hpp"
 #include "Rendering/Renderer/PhotonMapRenderer/PhotonMapRendererParameters.hpp"
+#include "Rendering/Texture/ColorTexture/ColorTexture.hpp"
 #include "Rendering/Writer/ExrWriter/ExrWriter.hpp"
 #include "Rendering/Writer/PpmWriter/PpmWriter.hpp"
 #include "Utils/Logger/CoutLogger/CoutLogger.hpp"
@@ -60,9 +61,11 @@ static constexpr LinearColor DEFAULT_BACKGROUND_COLOR {
     .blue = 0.3F
 };
 
-static constexpr MtlParameters DEFAULT_MATERIAL_PARAMETERS {
+static const MtlParameters DEFAULT_MATERIAL_PARAMETERS {
+    .diffuse = std::make_shared<ColorTexture>(
+        LinearColor {.red = 0.50F, .green = 0.10F, .blue = 0.40F}
+    ),
     .ambient = LinearColor::black(),
-    .diffuse = {.red = 0.50F, .green = 0.10F, .blue = 0.40F},
     .specular = LinearColor::black(),
     .emission = LinearColor::black(),
     .shininess = 50.0F,

@@ -18,8 +18,6 @@ public:
     DiffuseMaterial(const DiffuseParameters& parameters);
     DiffuseMaterial(const MtlParameters& parameters);
 
-    [[nodiscard]] const LinearColor& getBaseColor() const override;
-
     [[nodiscard]] const LinearColor& getEmission() const override;
 
     [[nodiscard]] LinearColor getEmission(
@@ -34,15 +32,13 @@ public:
     ) const override;
 
     [[nodiscard]] LinearColor calculateBrdf(
-        const Point3f& origin,
-        const Vector3f& normal,
+        const HitData& hitData,
         const Vector3f& outDirection,
         const Vector3f& inDirection
     ) const override;
 
     [[nodiscard]] MaterialSample getSample(
-        const Point3f& origin,
-        const Vector3f& normal,
+        const HitData& hitData,
         const Vector3f& outDirection
     ) const override;
 };
