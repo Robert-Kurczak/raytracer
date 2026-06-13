@@ -5,6 +5,7 @@
 namespace RTC {
 class ITexture {
 public:
+    ITexture() = default;
     ITexture(const ITexture&) = delete;
     ITexture(ITexture&&) = delete;
     ITexture& operator=(const ITexture&) = delete;
