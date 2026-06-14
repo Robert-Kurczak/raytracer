@@ -3,8 +3,6 @@
 #include "Core/Color/Color.hpp"
 
 #include <cmath>
-#include <format>
-#include <iostream>
 
 namespace RTC {
 ImageTexture::ImageTexture(
@@ -24,8 +22,8 @@ LinearColor ImageTexture::sample(float u, float v) const {
 
     v = 1.0F - v;
 
-    const auto xIndex = uint32_t(u * float(width_));
-    const auto yIndex = uint32_t(v * float(height_));
+    const auto xIndex = uint32_t(u * float(width_ - 1));
+    const auto yIndex = uint32_t(v * float(height_ - 1));
 
     const auto baseIndex = channels_ * ((yIndex * width_) + xIndex);
 
