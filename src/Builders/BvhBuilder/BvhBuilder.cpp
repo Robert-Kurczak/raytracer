@@ -6,6 +6,7 @@
 #include "Utils/Logger/ILogger.hpp"
 
 #include <algorithm>
+#include <cassert>
 #include <chrono>
 #include <memory>
 #include <utility>
@@ -122,6 +123,8 @@ BvhBuilder::BvhBuilder(std::shared_ptr<ILogger> logger) :
 [[nodiscard]] std::unique_ptr<IHittable> BvhBuilder::build(
     std::vector<std::unique_ptr<IHittable>>&& objects
 ) const {
+    assert(not objects.empty());
+
     logger_->log(LogLevel::Info, "Building BVH tree");
 
     const auto timeStart = std::chrono::high_resolution_clock::now();

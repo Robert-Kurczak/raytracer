@@ -28,6 +28,19 @@ Vector3f Triangle::createSmoothNormal(
     return interpolatedNormal.getNormalized();
 }
 
+Point2f Triangle::createTextureCoords(
+    const MollerTrumboreResult& result
+) const {
+    if (!vertexA_.texturePosition || !vertexB_.texturePosition ||
+        !vertexC_.texturePosition) {
+        return Point2f {0.0F, 0.0F};
+    }
+
+    return result.barycentricWeightA * vertexA_.texturePosition.value() +
+           result.barycentricWeightB * vertexB_.texturePosition.value() +
+           result.barycentricWeightC * vertexC_.texturePosition.value();
+}
+
 Triangle::MollerTrumboreResult Triangle::solveMollerTrumbore(
     const Ray& ray
 ) const {
@@ -115,9 +128,12 @@ void Triangle::updateHitData(
     const Vector3f normal =
         flatNormal_ ? flatNormal_.value() : createSmoothNormal(result);
 
+    const Point2f textureCoords = createTextureCoords(result);
+
     hitData.rayT = result.t0;
     hitData.hitPoint = tPoint;
     hitData.hitNormal = normal;
+    hitData.textureCoords = textureCoords;
     hitData.material = material_;
 }
 
