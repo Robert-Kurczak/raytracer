@@ -1,23 +1,26 @@
 #include "ObjMeshBuilder.hpp"
 
 #include "Builders/MeshBuilder/MeshBuilderResult.hpp"
+#include "Builders/MeshBuilder/ObjMeshBuilder/MtlParameters.hpp"
 #include "Core/Color/Color.hpp"
 #include "Geometry/Hittable/Triangle/Triangle.hpp"
 #include "Geometry/Light/TriangleAreaLight/TriangleAreaLight.hpp"
 #include "Geometry/Vertex.hpp"
 #include "Rendering/Material/DiffuseMaterial/DiffuseMaterial.hpp"
+#include "Rendering/Material/DiffuseMaterial/DiffuseParameters.hpp"
 #include "Rendering/Material/GlossyMaterial/GlossyMaterial.hpp"
-#include "Rendering/Material/MtlParameters.hpp"
+#include "Rendering/Material/GlossyMaterial/GlossyParameters.hpp"
 #include "Rendering/Material/StandardMaterial/StandardMaterial.hpp"
 #include "Rendering/Material/TransparentMaterial/TransparentMaterial.hpp"
+#include "Rendering/Material/TransparentMaterial/TransparentParameters.hpp"
 #include "Rendering/Texture/ColorTexture/ColorTexture.hpp"
+#include "Rendering/Texture/ITexture.hpp"
 #include "Utils/Logger/ILogger.hpp"
 #include "Utils/StringUtils.hpp"
 
 #include <cassert>
 #include <chrono>
 #include <filesystem>
-#include <format>
 #include <fstream>
 #include <iostream>
 #include <memory>
@@ -50,14 +53,45 @@ std::shared_ptr<IMaterial> ObjMeshBuilder::createMaterial(
     const MtlParameters& parameters
 ) const {
     if (isMaterialTransparent(parameters)) {
-        return std::make_shared<TransparentMaterial>(parameters);
+        const TransparentParameters transparentParameters {
+            .refractionIndex = parameters.refractionIndex,
+            .emission = parameters.emission / float(std::numbers::pi),
+            .transmissionColor =
+                UNIT_LINEAR_COLOR - parameters.transmisionFilter
+        };
+
+        return std::make_shared<TransparentMaterial>(
+            transparentParameters
+        );
     }
 
+    std::shared_ptr<ITexture> diffuseTexture;
+
+    if (not parameters.diffuseTexturePath.empty()) {
+        diffuseTexture = imageTextureBuilder_->buildFromFile(
+            parameters.diffuseTexturePath
+        );
+    } else {
+        diffuseTexture =
+            std::make_shared<ColorTexture>(parameters.diffuse);
+    }
+
+    const DiffuseParameters diffuseParameters {
+        .colorTexture = diffuseTexture,
+        .emission = parameters.emission / float(std::numbers::pi)
+    };
+
     const auto diffuseMaterial =
-        std::make_shared<DiffuseMaterial>(parameters);
+        std::make_shared<DiffuseMaterial>(diffuseParameters);
+
+    const GlossyParameters glossyParameters {
+        .roughness = std::sqrt(2.0F / (parameters.shininess + 2.0F)),
+        .fresnelBaseTerm =
+            LinearColor {.red = 0.80F, .green = 0.80F, .blue = 0.80F}
+    };
 
     const auto glossyMaterial =
-        std::make_shared<GlossyMaterial>(parameters);
+        std::make_shared<GlossyMaterial>(glossyParameters);
 
     const float glossyBlendFactor =
         parameters.specular.getLargestComponent();
@@ -103,13 +137,9 @@ MaterialsMap ObjMeshBuilder::extractMaterials(
             lineStream >> mtlParameters.ambient.green;
             lineStream >> mtlParameters.ambient.blue;
         } else if (dataType == "Kd") {
-            LinearColor color;
-
-            lineStream >> color.red;
-            lineStream >> color.green;
-            lineStream >> color.blue;
-
-            mtlParameters.diffuse = std::make_shared<ColorTexture>(color);
+            lineStream >> mtlParameters.diffuse.red;
+            lineStream >> mtlParameters.diffuse.green;
+            lineStream >> mtlParameters.diffuse.blue;
         } else if (dataType == "Ks") {
             lineStream >> mtlParameters.specular.red;
             lineStream >> mtlParameters.specular.green;
@@ -132,6 +162,10 @@ MaterialsMap ObjMeshBuilder::extractMaterials(
             int illum = 0;
             lineStream >> illum;
             mtlParameters.illuminationModel = uint8_t(illum);
+        } else if (dataType == "map_Kd") {
+            lineStream >> mtlParameters.diffuseTexturePath;
+            mtlParameters.diffuseTexturePath =
+                path.parent_path() / mtlParameters.diffuseTexturePath;
         }
     }
 
@@ -336,8 +370,12 @@ void ObjMeshBuilder::parseFace(
     }
 }
 
-ObjMeshBuilder::ObjMeshBuilder(std::shared_ptr<ILogger> logger) :
-    logger_(std::move(logger)) {}
+ObjMeshBuilder::ObjMeshBuilder(
+    std::shared_ptr<ILogger> logger,
+    std::unique_ptr<IImageTextureBuilder> imageTextureBuilder
+) :
+    logger_(std::move(logger)),
+    imageTextureBuilder_(std::move(imageTextureBuilder)) {}
 
 MeshBuilderResult ObjMeshBuilder::parseMesh(
     const std::filesystem::path& path,

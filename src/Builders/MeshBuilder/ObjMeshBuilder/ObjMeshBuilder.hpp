@@ -1,12 +1,13 @@
 #pragma once
 
 #include "../IMeshBuilder.hpp"
+#include "Builders/ImageTextureBuilder/IImageTextureBuilder.hpp"
 #include "Builders/MeshBuilder/MeshBuilderResult.hpp"
+#include "Builders/MeshBuilder/ObjMeshBuilder/MtlParameters.hpp"
 #include "Geometry/Hittable/IHittable.hpp"
 #include "Geometry/Light/ILight.hpp"
 #include "Geometry/Vertex.hpp"
 #include "Rendering/Material/IMaterial.hpp"
-#include "Rendering/Material/MtlParameters.hpp"
 #include "Utils/Logger/ILogger.hpp"
 
 #include <filesystem>
@@ -32,6 +33,7 @@ private:
     };
 
     std::shared_ptr<ILogger> logger_;
+    std::unique_ptr<IImageTextureBuilder> imageTextureBuilder_;
 
     [[nodiscard]] bool isMaterialTransparent(
         const MtlParameters& parameters
@@ -109,7 +111,10 @@ private:
     ) const;
 
 public:
-    ObjMeshBuilder(std::shared_ptr<ILogger> logger);
+    ObjMeshBuilder(
+        std::shared_ptr<ILogger> logger,
+        std::unique_ptr<IImageTextureBuilder> imageTextureBuilder
+    );
 
     [[nodiscard]] MeshBuilderResult buildFromFile(
         const std::filesystem::path& path,

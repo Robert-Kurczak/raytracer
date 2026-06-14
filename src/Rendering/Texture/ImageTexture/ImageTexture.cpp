@@ -7,7 +7,7 @@ ImageTexture::ImageTexture(
     uint32_t width,
     uint32_t height,
     uint32_t channels,
-    std::unique_ptr<std::vector<float>> imageData
+    std::vector<float>&& imageData
 ) :
     width_(width),
     height_(height),
@@ -22,9 +22,9 @@ LinearColor ImageTexture::sample(float u, float v) const {
         uint32_t(float(channels_) * (float(width_) * v + u));
 
     return LinearColor {
-        (*imageData_)[baseIndex],
-        (*imageData_)[baseIndex + 1],
-        (*imageData_)[baseIndex + 2]
+        imageData_[baseIndex],
+        imageData_[baseIndex + 1],
+        imageData_[baseIndex + 2]
     };
 }
 }

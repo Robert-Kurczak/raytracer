@@ -12,20 +12,8 @@
 
 namespace RTC {
 
-DiffuseParameters DiffuseMaterial::convertFromMtl(
-    const MtlParameters& parameters
-) const {
-    return DiffuseParameters {
-        .colorTexture = parameters.diffuse,
-        .emission = parameters.emission / float(std::numbers::pi)
-    };
-}
-
 DiffuseMaterial::DiffuseMaterial(const DiffuseParameters& parameters) :
     parameters_(parameters) {}
-
-DiffuseMaterial::DiffuseMaterial(const MtlParameters& parameters) :
-    parameters_(convertFromMtl(parameters)) {}
 
 const LinearColor& DiffuseMaterial::getEmission() const {
     return parameters_.emission;

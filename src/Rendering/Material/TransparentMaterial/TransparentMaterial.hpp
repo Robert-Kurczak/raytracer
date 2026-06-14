@@ -3,7 +3,6 @@
 #include "Geometry/Hittable/HitData.hpp"
 #include "Rendering/Material/IMaterial.hpp"
 #include "Rendering/Material/MaterialSample.hpp"
-#include "Rendering/Material/MtlParameters.hpp"
 #include "Rendering/Material/TransparentMaterial/TransparentParameters.hpp"
 
 namespace RTC {
@@ -11,10 +10,6 @@ class TransparentMaterial : public IMaterial {
 private:
     TransparentParameters parameters_;
     const float inverseRefractionIndex_;
-
-    [[nodiscard]] TransparentParameters convertFromMtl(
-        const MtlParameters& parameters
-    ) const;
 
     [[nodiscard]] MaterialSample createReflection(
         const Vector3f& outDirection,
@@ -25,7 +20,6 @@ private:
 
 public:
     TransparentMaterial(const TransparentParameters& parameters);
-    TransparentMaterial(const MtlParameters& parameters);
 
     [[nodiscard]] const LinearColor& getEmission() const override;
 

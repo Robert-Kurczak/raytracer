@@ -6,21 +6,7 @@
 #include "Rendering/Material/MaterialSample.hpp"
 #include "Rendering/Material/TransparentMaterial/TransparentParameters.hpp"
 
-#include <numbers>
-
 namespace RTC {
-
-TransparentParameters TransparentMaterial::convertFromMtl(
-    const MtlParameters& parameters
-) const {
-    return TransparentParameters {
-        .refractionIndex = parameters.refractionIndex,
-        .emission = parameters.emission / float(std::numbers::pi),
-        .transmissionColor =
-            UNIT_LINEAR_COLOR - parameters.transmisionFilter
-    };
-}
-
 MaterialSample TransparentMaterial::createReflection(
     const Vector3f& outDirection,
     const Vector3f& refractionNormal
@@ -48,11 +34,6 @@ TransparentMaterial::TransparentMaterial(
 ) :
     parameters_(parameters),
     inverseRefractionIndex_(1.0F / parameters_.refractionIndex) {}
-
-TransparentMaterial::TransparentMaterial(
-    const MtlParameters& parameters
-) :
-    TransparentMaterial(convertFromMtl(parameters)) {}
 
 const LinearColor& TransparentMaterial::getEmission() const {
     return parameters_.emission;
