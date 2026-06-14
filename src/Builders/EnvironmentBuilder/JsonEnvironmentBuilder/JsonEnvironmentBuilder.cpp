@@ -396,7 +396,7 @@ RenderEnvironment JsonEnvironmentBuilder::build(
     std::shared_ptr<ILogger> logger = parseLogger(jsonContent);
 
     std::unique_ptr<IImageTextureBuilder> imageTextureBuilder =
-        std::make_unique<StbImageTextureBuilder>();
+        std::make_unique<StbImageTextureBuilder>(logger);
 
     std::unique_ptr<IMeshBuilder> meshBuilder =
         std::make_unique<ObjMeshBuilder>(

@@ -36,6 +36,10 @@ private:
         const MollerTrumboreResult& result
     ) const;
 
+    [[nodiscard]] Point2f createTextureCoords(
+        const MollerTrumboreResult& result
+    ) const;
+
     [[nodiscard]] MollerTrumboreResult solveMollerTrumbore(
         const Ray& ray
     ) const;

@@ -2,6 +2,10 @@
 
 #include "Core/Color/Color.hpp"
 
+#include <cmath>
+#include <format>
+#include <iostream>
+
 namespace RTC {
 ImageTexture::ImageTexture(
     uint32_t width,
@@ -15,16 +19,20 @@ ImageTexture::ImageTexture(
     imageData_(std::move(imageData)) {}
 
 LinearColor ImageTexture::sample(float u, float v) const {
-    u *= float(width_ - 1);
-    v *= float(height_ - 1);
+    u -= std::floor(u);
+    v -= std::floor(v);
 
-    const auto baseIndex =
-        uint32_t(float(channels_) * (float(width_) * v + u));
+    v = 1.0F - v;
+
+    const auto xIndex = uint32_t(u * float(width_));
+    const auto yIndex = uint32_t(v * float(height_));
+
+    const auto baseIndex = channels_ * ((yIndex * width_) + xIndex);
 
     return LinearColor {
-        imageData_[baseIndex],
-        imageData_[baseIndex + 1],
-        imageData_[baseIndex + 2]
+        .red = imageData_[baseIndex],
+        .green = imageData_[baseIndex + 1],
+        .blue = imageData_[baseIndex + 2]
     };
 }
 }
