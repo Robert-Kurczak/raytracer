@@ -6,8 +6,8 @@
         "samples": 1
     },
     "renderer": {
-        "pathsPerPixel": 100,
-        "scatterRecursionDepth": 10,
+        "pathsPerPixel": 2,
+        "scatterRecursionDepth": 2,
         "photonMappingEnabled": false,
         "emittedPhotons": 1000000,
         "nearestPhotons": 100
@@ -46,5 +46,19 @@
             ]
         }
     ],
-    "lights": []
+    "lights": [
+        {
+            "type": "directional",
+            "color": [
+                225,
+                130,
+                85
+            ],
+            "direction": [
+                -0.4,
+                -0.5,
+                -0.1
+            ]
+        }
+    ]
 }

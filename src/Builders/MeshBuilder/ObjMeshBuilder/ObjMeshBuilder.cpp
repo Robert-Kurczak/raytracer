@@ -22,7 +22,6 @@
 #include <chrono>
 #include <filesystem>
 #include <fstream>
-#include <iostream>
 #include <memory>
 #include <sstream>
 #include <string>
@@ -42,11 +41,11 @@ bool ObjMeshBuilder::isMaterialTransparent(
         return true;
     }
 
-    const bool containsTransparentPrams =
+    const bool containsTransparentParams =
         not parameters.transmisionFilter.isBlack() and
         parameters.refractionIndex > 1.0F;
 
-    return containsTransparentPrams;
+    return containsTransparentParams;
 }
 
 std::shared_ptr<IMaterial> ObjMeshBuilder::createMaterial(
@@ -198,7 +197,9 @@ void ObjMeshBuilder::updateUsedMaterial(
     lineStream >> name;
 
     if (!materials.contains(name)) {
-        std::cerr << "Ignoring undefined material: '" << name << "'\n";
+        logger_->log(
+            LogLevel::Error, "Ignoring undefined material: " + name
+        );
     } else {
         currentMaterial = materials.at(name);
     }
