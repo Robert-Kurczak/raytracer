@@ -3,6 +3,8 @@
 #include "../RenderEnvironment.hpp"
 #include "Builders/BvhBuilder/BvhBuilder.hpp"
 #include "Builders/BvhBuilder/IBvhBuilder.hpp"
+#include "Builders/ImageTextureBuilder/IImageTextureBuilder.hpp"
+#include "Builders/ImageTextureBuilder/StbImageTextureBuilder/StbImageTextureBuilder.hpp"
 #include "Builders/LightCutsTreeBuilder/ILightCutsTreeBuilder.hpp"
 #include "Builders/LightCutsTreeBuilder/LightCutsTreeBuilder.hpp"
 #include "Builders/MeshBuilder/IMeshBuilder.hpp"
@@ -27,8 +29,8 @@
 #include "Rendering/LightSampler/LightCutsSampler/LightCutsSamplerParameters.hpp"
 #include "Rendering/LightSampler/RandomLightSampler/RandomLightSampler.hpp"
 #include "Rendering/Material/GlossyMaterial/GlossyMaterial.hpp"
+#include "Rendering/Material/GlossyMaterial/GlossyParameters.hpp"
 #include "Rendering/Material/IMaterial.hpp"
-#include "Rendering/Material/MtlParameters.hpp"
 #include "Rendering/ProgressIndicator/CoutProgressIndicator/CoutProgressIndicator.hpp"
 #include "Rendering/ProgressIndicator/IProgressIndicator.hpp"
 #include "Rendering/Renderer/IRenderer.hpp"
@@ -36,7 +38,6 @@
 #include "Rendering/Renderer/PathRenderer/PathRendererParameters.hpp"
 #include "Rendering/Renderer/PhotonMapRenderer/PhotonMapRenderer.hpp"
 #include "Rendering/Renderer/PhotonMapRenderer/PhotonMapRendererParameters.hpp"
-#include "Rendering/Texture/ColorTexture/ColorTexture.hpp"
 #include "Rendering/Writer/ExrWriter/ExrWriter.hpp"
 #include "Rendering/Writer/PpmWriter/PpmWriter.hpp"
 #include "Utils/Logger/CoutLogger/CoutLogger.hpp"
@@ -61,18 +62,9 @@ static constexpr LinearColor DEFAULT_BACKGROUND_COLOR {
     .blue = 0.3F
 };
 
-static const MtlParameters DEFAULT_MATERIAL_PARAMETERS {
-    .diffuse = std::make_shared<ColorTexture>(
-        LinearColor {.red = 0.50F, .green = 0.10F, .blue = 0.40F}
-    ),
-    .ambient = LinearColor::black(),
-    .specular = LinearColor::black(),
-    .emission = LinearColor::black(),
-    .shininess = 50.0F,
-    .transparency = 0.0F,
-    .refractionIndex = 0.0F,
-    .transmisionFilter = BLACK_LINEAR_COLOR,
-    .illuminationModel = 2
+static constexpr GlossyParameters DEFAULT_MATERIAL_PARAMETERS {
+    .roughness = 0.001F,
+    .fresnelBaseTerm = LinearColor {0.8F, 0.8F, 0.8F}
 };
 
 std::shared_ptr<ILogger> JsonEnvironmentBuilder::parseLogger(
@@ -403,8 +395,13 @@ RenderEnvironment JsonEnvironmentBuilder::build(
 
     std::shared_ptr<ILogger> logger = parseLogger(jsonContent);
 
+    std::unique_ptr<IImageTextureBuilder> imageTextureBuilder =
+        std::make_unique<StbImageTextureBuilder>();
+
     std::unique_ptr<IMeshBuilder> meshBuilder =
-        std::make_unique<ObjMeshBuilder>(logger);
+        std::make_unique<ObjMeshBuilder>(
+            logger, std::move(imageTextureBuilder)
+        );
 
     std::unique_ptr<IBvhBuilder> bvhBuilder =
         std::make_unique<BvhBuilder>(logger);

@@ -4,17 +4,12 @@
 #include "Geometry/Hittable/HitData.hpp"
 #include "GlossyParameters.hpp"
 #include "Rendering/Material/IMaterial.hpp"
-#include "Rendering/Material/MtlParameters.hpp"
 
 namespace RTC {
 class GlossyMaterial : public IMaterial {
 private:
     const LinearColor fresnelBaseTerm_;
     const float alphaSquared_;
-
-    [[nodiscard]] GlossyParameters convertFromMtl(
-        const MtlParameters& parameters
-    ) const;
 
     [[nodiscard]] float getAlphaSquared(float roughness) const;
 
@@ -49,7 +44,6 @@ private:
 
 public:
     GlossyMaterial(const GlossyParameters& parameters);
-    GlossyMaterial(const MtlParameters& parameters);
 
     [[nodiscard]] const LinearColor& getEmission() const override;
 

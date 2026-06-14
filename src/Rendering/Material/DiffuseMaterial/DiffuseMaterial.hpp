@@ -3,20 +3,14 @@
 #include "Core/Color/Color.hpp"
 #include "Rendering/Material/DiffuseMaterial/DiffuseParameters.hpp"
 #include "Rendering/Material/IMaterial.hpp"
-#include "Rendering/Material/MtlParameters.hpp"
 
 namespace RTC {
 class DiffuseMaterial : public IMaterial {
 private:
     DiffuseParameters parameters_;
 
-    [[nodiscard]] DiffuseParameters convertFromMtl(
-        const MtlParameters& parameters
-    ) const;
-
 public:
     DiffuseMaterial(const DiffuseParameters& parameters);
-    DiffuseMaterial(const MtlParameters& parameters);
 
     [[nodiscard]] const LinearColor& getEmission() const override;
 

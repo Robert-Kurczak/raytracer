@@ -11,16 +11,6 @@
 #include <numbers>
 
 namespace RTC {
-GlossyParameters GlossyMaterial::convertFromMtl(
-    const MtlParameters& parameters
-) const {
-    return GlossyParameters {
-        .roughness = std::sqrt(2.0F / (parameters.shininess + 2.0F)),
-        .fresnelBaseTerm =
-            LinearColor {.red = 0.80F, .green = 0.80F, .blue = 0.80F}
-    };
-}
-
 float GlossyMaterial::getAlphaSquared(float roughness) const {
     return std::max(0.005F, std::powf(roughness, 4));
 }
@@ -120,9 +110,6 @@ GlossyMaterial::MicrofacetData GlossyMaterial::getCookTorranceTerms(
 GlossyMaterial::GlossyMaterial(const GlossyParameters& parameters) :
     fresnelBaseTerm_(parameters.fresnelBaseTerm),
     alphaSquared_(getAlphaSquared(parameters.roughness)) {}
-
-GlossyMaterial::GlossyMaterial(const MtlParameters& parameters) :
-    GlossyMaterial(convertFromMtl(parameters)) {}
 
 const LinearColor& GlossyMaterial::getEmission() const {
     return BLACK_LINEAR_COLOR;
