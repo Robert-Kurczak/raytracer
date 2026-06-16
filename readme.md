@@ -24,15 +24,15 @@ Sponza
 Resolution: 1920x1080
 Triangles in mesh: 66450
 Area lights in mesh: 0
-Mesh built in 63ms
-BVH built in 85ms
+Mesh built in 241ms
+BVH built in 82ms
 Rendered on 16 threads
-Direct light sources: 0
-Traced rays: 2'101'590'636
-Traced shadow rays: 0
-Tracing time: 1'397'030ms
-Total execution time: 1'397'479ms = 23.3min
-Rays per second: 1'504'327.5 [rays/s]
+Total light sources: 1
+Traced rays: 4 236 279 842
+Traced shadow rays: 3 875 463 540
+Tracing time: 19 675 124ms
+Total execution time: 19 675 777ms = 5.28min
+Rays per second: 215 311.47 [rays/s]
 ```
 Cornell box spheres
 ![Cornell box spheres](resources/examples/cornell-sphere-scene.png)
