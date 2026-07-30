@@ -42,5 +42,10 @@ public:
     [[nodiscard]] virtual LinearColor getPower() const = 0;
 
     [[nodiscard]] virtual Photon emitPhoton() const = 0;
+
+    [[nodiscard]] virtual float calculatePdf(
+        const Point3f& origin,
+        const Vector3f& inDirection
+    ) const = 0;
 };
 }

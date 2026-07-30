@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Core/Math/Point.hpp"
+#include "Geometry/Light/ILight.hpp"
 
 #include <memory>
 
@@ -13,5 +14,6 @@ struct HitData {
     Point2f textureCoords {0.0F, 0.0F};
     Vector3f hitNormal {0.0, 0.0, 0.0};
     std::shared_ptr<IMaterial> material;
+    std::shared_ptr<ILight> light;
 };
 }

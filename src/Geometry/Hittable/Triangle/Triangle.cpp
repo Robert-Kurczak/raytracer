@@ -1,9 +1,9 @@
 #include "Triangle.hpp"
 
 #include "Core/Math/Interval.hpp"
-#include "Core/Math/Numeric.hpp"
 #include "Core/Math/Vector.hpp"
 #include "Geometry/BoundingVolume/AxisAlignedBoundingBox/AxisAlignedBoundingBox.hpp"
+#include "Geometry/Light/ILight.hpp"
 #include "Rendering/Material/IMaterial.hpp"
 
 #include <memory>
@@ -39,58 +39,6 @@ Point2f Triangle::createTextureCoords(
     return result.barycentricWeightA * vertexA_.texturePosition.value() +
            result.barycentricWeightB * vertexB_.texturePosition.value() +
            result.barycentricWeightC * vertexC_.texturePosition.value();
-}
-
-Triangle::MollerTrumboreResult Triangle::solveMollerTrumbore(
-    const Ray& ray
-) const {
-    const Vector3f reversedDirection = -ray.getDirection();
-    const Vector3f crossedEdge2 =
-        getCrossProduct(edge2_, reversedDirection);
-    const Vector3f solution = ray.getOrigin() - vertexC_.position;
-
-    const Interval<float> unitInterval {0.0F, 1.0F};
-    const float mainDeterminant = getDotProduct(edge1_, crossedEdge2);
-
-    if (isCloseToZero(mainDeterminant)) {
-        return MollerTrumboreResult {};
-    }
-
-    const float weight1Determinant =
-        getDotProduct(solution, crossedEdge2);
-
-    const float weight1 = weight1Determinant / mainDeterminant;
-
-    if (not unitInterval.contains(weight1)) {
-        return MollerTrumboreResult {};
-    }
-
-    const float weight2Determinant = getDotProduct(
-        edge1_, getCrossProduct(solution, reversedDirection)
-    );
-
-    const float weight2 = weight2Determinant / mainDeterminant;
-
-    if (not unitInterval.contains(weight2)) {
-        return MollerTrumboreResult {};
-    }
-
-    if (weight1 + weight2 > 1) {
-        return MollerTrumboreResult {};
-    }
-
-    const float rayTDeterminant =
-        getDotProduct(edge1_, getCrossProduct(edge2_, solution));
-
-    const float rayT = rayTDeterminant / mainDeterminant;
-
-    return MollerTrumboreResult {
-        .hasSolution = true,
-        .t0 = rayT,
-        .barycentricWeightA = weight1,
-        .barycentricWeightB = weight2,
-        .barycentricWeightC = 1.0F - weight1 - weight2
-    };
 }
 
 [[nodiscard]] AxisAlignedBoundingBox Triangle::createBoundingBox(
@@ -135,13 +83,15 @@ void Triangle::updateHitData(
     hitData.hitNormal = normal;
     hitData.textureCoords = textureCoords;
     hitData.material = material_;
+    hitData.light = light_;
 }
 
 Triangle::Triangle(
     Vertex vertexA,
     Vertex vertexB,
     Vertex vertexC,
-    std::shared_ptr<IMaterial> material
+    std::shared_ptr<IMaterial> material,
+    std::shared_ptr<ILight> light
 ) :
     vertexA_(vertexA),
     vertexB_(vertexB),
@@ -152,6 +102,7 @@ Triangle::Triangle(
         vertexC_.position
     )),
     material_(std::move(material)),
+    light_(std::move(light)),
     edge1_(vertexA_.position - vertexC_.position),
     edge2_(vertexB_.position - vertexC_.position),
     flatNormal_(createFlatNormalIfNeccessary()) {}
@@ -166,7 +117,9 @@ bool Triangle::hitClosest(
     const Interval<float>& interval,
     HitData& hitData
 ) const {
-    const MollerTrumboreResult result = solveMollerTrumbore(ray);
+    const MollerTrumboreResult result = intersectTriangle(
+        ray, vertexA_.position, vertexB_.position, vertexC_.position
+    );
 
     if (not result.hasSolution) {
         return false;
@@ -184,7 +137,9 @@ bool Triangle::hitAny(
     const Ray& ray,
     const Interval<float>& interval
 ) const {
-    const MollerTrumboreResult result = solveMollerTrumbore(ray);
+    const MollerTrumboreResult result = intersectTriangle(
+        ray, vertexA_.position, vertexB_.position, vertexC_.position
+    );
 
     return interval.contains(result.t0);
 }

@@ -8,10 +8,12 @@
 namespace RTC {
 Scene::Scene(
     std::unique_ptr<IHittable> sceneRoot,
-    std::vector<std::shared_ptr<ILight>> lights
+    std::vector<std::shared_ptr<ILight>> lights,
+    std::unique_ptr<IBackground> background_
 ) :
     sceneRoot_(std::move(sceneRoot)),
-    lights_(std::move(lights)) {}
+    lights_(std::move(lights)),
+    background_(std::move(background_)) {}
 
 const std::vector<std::shared_ptr<ILight>>& Scene::getLights() const {
     return lights_;
@@ -24,6 +26,10 @@ void Scene::setup() {
     for (const auto& light : lights_) {
         light->setup(boundingBox);
     }
+}
+
+LinearColor Scene::sampleBackground(const Ray& ray) const {
+    return background_->sample(ray);
 }
 
 bool Scene::hitClosest(

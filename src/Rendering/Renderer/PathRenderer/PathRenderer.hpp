@@ -22,7 +22,6 @@ private:
     std::shared_ptr<ILogger> logger_;
     std::unique_ptr<ILightSampler> lightSampler_;
     std::unique_ptr<IProgressIndicator> progressIndicator_;
-    std::unique_ptr<IBackground> background_;
     PathRendererParameters parameters_;
 
     [[nodiscard]] LinearColor getEmission(
@@ -67,7 +66,6 @@ public:
         std::shared_ptr<ILogger> logger,
         std::unique_ptr<ILightSampler> lightSampler,
         std::unique_ptr<IProgressIndicator> progressIndicator,
-        std::unique_ptr<IBackground> background,
         PathRendererParameters parameters
     );
 

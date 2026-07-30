@@ -11,7 +11,7 @@ private:
 
 public:
     Ray() = default;
-    Ray(const Point3<float>& origin, const Vector3<float>& direction);
+    Ray(const Point3f& origin, const Vector3f& direction);
 
     [[nodiscard]] const Point3f& getOrigin() const;
     [[nodiscard]] const Vector3f& getDirection() const;

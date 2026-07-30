@@ -24,7 +24,6 @@ private:
     std::unique_ptr<ILightSampler> lightSampler_;
     std::unique_ptr<IProgressIndicator> progressIndicator_;
     std::unique_ptr<IPhotonMapBuilder> photonMapBuilder_;
-    std::unique_ptr<IBackground> background_;
     PhotonMapRendererParameters parameters_;
 
     struct PhotonMaps {
@@ -95,7 +94,6 @@ public:
         std::unique_ptr<ILightSampler> lightSampler,
         std::unique_ptr<IProgressIndicator> progressIndicator,
         std::unique_ptr<IPhotonMapBuilder> photonMapBuilder,
-        std::unique_ptr<IBackground> background,
         PhotonMapRendererParameters parameters
     );
 

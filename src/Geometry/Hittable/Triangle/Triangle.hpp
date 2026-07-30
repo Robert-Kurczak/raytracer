@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Core/Math/Intersections.hpp"
 #include "Geometry/BoundingVolume/AxisAlignedBoundingBox/AxisAlignedBoundingBox.hpp"
 #include "Geometry/Hittable/IHittable.hpp"
 #include "Geometry/Vertex.hpp"
@@ -16,18 +17,11 @@ private:
 
     const AxisAlignedBoundingBox boundingBox_;
     std::shared_ptr<IMaterial> material_;
+    std::shared_ptr<ILight> light_ = nullptr;
 
     const Vector3f edge1_;
     const Vector3f edge2_;
     const std::optional<Vector3f> flatNormal_;
-
-    struct MollerTrumboreResult {
-        bool hasSolution = false;
-        float t0 = 0.0F;
-        float barycentricWeightA = 0.0F;
-        float barycentricWeightB = 0.0F;
-        float barycentricWeightC = 0.0F;
-    };
 
     [[nodiscard]] std::optional<Vector3f>
     createFlatNormalIfNeccessary() const;
@@ -38,10 +32,6 @@ private:
 
     [[nodiscard]] Point2f createTextureCoords(
         const MollerTrumboreResult& result
-    ) const;
-
-    [[nodiscard]] MollerTrumboreResult solveMollerTrumbore(
-        const Ray& ray
     ) const;
 
     [[nodiscard]] AxisAlignedBoundingBox createBoundingBox(
@@ -63,7 +53,8 @@ public:
         Vertex vertexA,
         Vertex vertexB,
         Vertex vertexC,
-        std::shared_ptr<IMaterial> material
+        std::shared_ptr<IMaterial> material,
+        std::shared_ptr<ILight> light = nullptr
     );
 
     [[nodiscard]] const AxisAlignedBoundingBox&

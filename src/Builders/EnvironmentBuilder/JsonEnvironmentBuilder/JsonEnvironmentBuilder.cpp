@@ -200,9 +200,6 @@ std::unique_ptr<IRenderer> JsonEnvironmentBuilder::parseRenderer(
     std::unique_ptr<IProgressIndicator> progressIndicator =
         std::make_unique<CoutProgressIndicator>();
 
-    std::unique_ptr<IBackground> background =
-        parseBackground(jsonContent);
-
     const bool photonMappingEnabled =
         jsonContent["renderer"]["photonMappingEnabled"].get<bool>();
 
@@ -227,7 +224,6 @@ std::unique_ptr<IRenderer> JsonEnvironmentBuilder::parseRenderer(
             std::move(lightSampler),
             std::move(progressIndicator),
             std::move(photonMapBuilder),
-            std::move(background),
             parameters
         );
     }
@@ -244,7 +240,6 @@ std::unique_ptr<IRenderer> JsonEnvironmentBuilder::parseRenderer(
         logger,
         std::move(lightSampler),
         std::move(progressIndicator),
-        std::move(background),
         parameters
     );
 }
@@ -370,11 +365,16 @@ std::unique_ptr<Scene> JsonEnvironmentBuilder::parseScene(
 
     parseSceneLights(sceneLights, jsonContent);
 
+    std::unique_ptr<IBackground> background =
+        parseBackground(jsonContent);
+
     std::unique_ptr<IHittable> sceneRoot =
         bvhBuilder.build(std::move(objects));
 
     auto scene = std::make_unique<Scene>(
-        std::move(sceneRoot), std::move(sceneLights)
+        std::move(sceneRoot),
+        std::move(sceneLights),
+        std::move(background)
     );
 
     return std::move(scene);

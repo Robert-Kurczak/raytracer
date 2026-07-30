@@ -4,6 +4,7 @@
 #include "Builders/MeshBuilder/ObjMeshBuilder/MtlParameters.hpp"
 #include "Core/Color/Color.hpp"
 #include "Geometry/Hittable/Triangle/Triangle.hpp"
+#include "Geometry/Light/ILight.hpp"
 #include "Geometry/Light/TriangleAreaLight/TriangleAreaLight.hpp"
 #include "Geometry/Vertex.hpp"
 #include "Rendering/Material/DiffuseMaterial/DiffuseMaterial.hpp"
@@ -352,11 +353,7 @@ void ObjMeshBuilder::parseFace(
             fanIndexB, vertexBuffer, textureCoordsBuffer, normalsBuffer
         );
 
-        auto triangle = std::make_unique<Triangle>(
-            baseVertex, vertexA, vertexB, material
-        );
-
-        triangleBuffer.push_back(std::move(triangle));
+        std::shared_ptr<ILight> triangleLight = nullptr;
 
         if (material && not material->getEmission().isBlack()) {
             auto light = std::make_shared<TriangleAreaLight>(
@@ -366,8 +363,16 @@ void ObjMeshBuilder::parseFace(
                 material->getEmission()
             );
 
+            triangleLight = light;
+
             areaLightBuffer.push_back(std::move(light));
         }
+
+        auto triangle = std::make_unique<Triangle>(
+            baseVertex, vertexA, vertexB, material, triangleLight
+        );
+
+        triangleBuffer.push_back(std::move(triangle));
     }
 }
 
