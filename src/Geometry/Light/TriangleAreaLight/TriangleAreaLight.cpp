@@ -1,6 +1,7 @@
 #include "TriangleAreaLight.hpp"
 
 #include "Core/Color/Color.hpp"
+#include "Core/Math/Intersections.hpp"
 #include "Core/Math/Random.hpp"
 #include "Core/Math/Sampling.hpp"
 #include "Core/Math/Transformations.hpp"
@@ -88,7 +89,8 @@ void TriangleAreaLight::discretize(
     std::vector<std::shared_ptr<ILight>>& discreteLights,
     uint32_t samples
 ) const {
-    const LinearColor sampleEmission = (emission_ * area_) / float(samples);
+    const LinearColor sampleEmission =
+        (emission_ * area_) / float(samples);
 
     for (uint32_t i = 0; i < samples; i++) {
         const Point3f randomPoint = getRandomPoint();
@@ -147,5 +149,29 @@ Photon TriangleAreaLight::emitPhoton() const {
         .direction = randomDirection,
         .power = power_
     };
+}
+
+float TriangleAreaLight::calculatePdf(
+    const Point3f& origin,
+    const Vector3f& inDirection
+) const {
+    const Ray ray {origin, inDirection};
+
+    const MollerTrumboreResult result =
+        intersectTriangle(ray, vertexA_, vertexB_, vertexC_);
+
+    if (not result.hasSolution) {
+        return 0.0F;
+    }
+
+    const Point3f hitPoint = ray.at(result.t0);
+    const Vector3f toLight = hitPoint - origin;
+
+    const float distanceSquared = toLight.getSquaredLength();
+    const float cosine =
+        std::max(0.0F, getDotProduct(normal_, -inDirection));
+    const float solidAreaPdf = distanceSquared / (cosine * area_);
+
+    return solidAreaPdf;
 }
 }

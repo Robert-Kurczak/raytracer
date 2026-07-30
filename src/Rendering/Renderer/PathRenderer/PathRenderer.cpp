@@ -20,7 +20,6 @@
 #include <utility>
 
 namespace RTC {
-
 LinearColor PathRenderer::getEmission(
     const HitData& hitData,
     const Vector3f& outDirection,
@@ -93,7 +92,7 @@ LinearColor PathRenderer::traceRay(
         scene.hitClosest(ray, renderInterval, hitData);
 
     if (not hitAnything) {
-        return background_->sample(ray);
+        return scene.sampleBackground(ray);
     }
 
     const Vector3f outDirection = -ray.getDirection().getNormalized();
@@ -227,13 +226,11 @@ PathRenderer::PathRenderer(
     std::shared_ptr<ILogger> logger,
     std::unique_ptr<ILightSampler> lightSampler,
     std::unique_ptr<IProgressIndicator> progressIndicator,
-    std::unique_ptr<IBackground> background,
     PathRendererParameters parameters
 ) :
     logger_(std::move(logger)),
     lightSampler_(std::move(lightSampler)),
     progressIndicator_(std::move(progressIndicator)),
-    background_(std::move(background)),
     parameters_(parameters) {}
 
 RendererStatistics PathRenderer::render(

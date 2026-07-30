@@ -227,7 +227,7 @@ LinearColor PhotonMapRenderer::traceRay(
         scene.hitClosest(ray, renderInterval, hitData);
 
     if (not hitAnything) {
-        return background_->sample(ray);
+        return scene.sampleBackground(ray);
     }
 
     const Vector3f outDirection = -ray.getDirection().getNormalized();
@@ -366,14 +366,12 @@ PhotonMapRenderer::PhotonMapRenderer(
     std::unique_ptr<ILightSampler> lightSampler,
     std::unique_ptr<IProgressIndicator> progressIndicator,
     std::unique_ptr<IPhotonMapBuilder> photonMapBuilder,
-    std::unique_ptr<IBackground> background,
     PhotonMapRendererParameters parameters
 ) :
     logger_(std::move(logger)),
     lightSampler_(std::move(lightSampler)),
     progressIndicator_(std::move(progressIndicator)),
     photonMapBuilder_(std::move(photonMapBuilder)),
-    background_(std::move(background)),
     parameters_(parameters) {}
 
 RendererStatistics PhotonMapRenderer::render(

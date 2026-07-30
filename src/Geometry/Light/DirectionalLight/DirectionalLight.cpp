@@ -86,4 +86,11 @@ Photon DirectionalLight::emitPhoton() const {
         .position = randomPoint, .direction = direction_, .power = power_
     };
 }
+
+float DirectionalLight::calculatePdf(
+    const Point3f& origin,
+    const Vector3f& inDirection
+) const {
+    return 0.0F;
+}
 }

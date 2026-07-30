@@ -38,5 +38,10 @@ public:
     [[nodiscard]] LinearColor getPower() const override;
 
     [[nodiscard]] Photon emitPhoton() const override;
+
+    [[nodiscard]] float calculatePdf(
+        const Point3f& origin,
+        const Vector3f& inDirection
+    ) const override;
 };
 }

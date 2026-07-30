@@ -63,4 +63,11 @@ Photon PointLight::emitPhoton() const {
         .power = emission_
     };
 }
+
+float PointLight::calculatePdf(
+    const Point3f& origin,
+    const Vector3f& inDirection
+) const {
+    return 0.0F;
+}
 }
