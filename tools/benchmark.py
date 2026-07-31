@@ -6,13 +6,13 @@ Measures renderer performance
 
 import json
 import os
-from pathlib import Path
 import subprocess
 import sys
 import tempfile
 import time
 from dataclasses import dataclass
 from datetime import datetime
+from pathlib import Path
 
 from dev import common, paths
 
@@ -36,7 +36,6 @@ class BenchmarkResults:
 
     render_times: list[float]
     average_render_time: float
-
 
 BENCHMARK_SCENES = [
     BenchmarkSceneData(
@@ -73,7 +72,9 @@ def create_benchmark_directory():
     return directory_path
 
 
-def load_scene(scene_data: BenchmarkSceneData, output_directory: Path):
+def load_scene(
+    scene_data: BenchmarkSceneData, output_directory: Path
+) -> dict:
     "Loads initial scene json config"
 
     json_path = paths.SCENES_DIRECTORY_PATH.joinpath(
@@ -119,6 +120,20 @@ def measure_render_time(scene_json_path: str):
         sys.exit(1)
 
 
+def prefix_output_file_name(
+    output_directory: Path, output_name: str, prefix: int
+):
+    "Prefixes rendered image name with the given number"
+
+    prefixed_name = f"{prefix}-{output_name}"
+    initial_path = output_directory.joinpath(output_name)
+    result_path = initial_path.as_posix().replace(
+        output_name, prefixed_name
+    )
+
+    os.rename(initial_path, result_path)
+
+
 def benchmark_scene(
     scene_data: BenchmarkSceneData, output_directory: Path
 ):
@@ -150,6 +165,10 @@ def benchmark_scene(
 
             render_times.append(render_time)
             average_render_time += render_time
+
+            prefix_output_file_name(
+                output_directory, scene_data.output_name, i
+            )
 
     average_render_time /= renders
 
@@ -211,7 +230,6 @@ def main():
         export_benchmark_results(scene_data, results, output_directory)
 
     common.log_success("=== Benchmark successfull ===")
-
 
 if __name__ == "__main__":
     main()
