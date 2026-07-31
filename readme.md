@@ -6,16 +6,8 @@ Breakfast room
 ```
 Resolution: 1920x1080
 Triangles in mesh: 269764
-Area lights in mesh: 0
-Mesh built in 218ms
-BVH built in 490ms
-Rendered on 16 threads
-Direct light sources: 0
-Traced rays: 2'810'738'937
-Traced shadow rays: 0
-Tracing time: 17'604'123ms
-Total execution time: 17'605'125ms = 4.89h
-Rays per second: 159'654.61 [rays/s]
+Traced rays: 2 810 738 937
+Total execution time: 17 605 125ms = 4.89h
 ```
 
 Sponza
@@ -23,32 +15,17 @@ Sponza
 ```
 Resolution: 1920x1080
 Triangles in mesh: 66450
-Area lights in mesh: 0
-Mesh built in 241ms
-BVH built in 82ms
-Rendered on 16 threads
-Total light sources: 1
 Traced rays: 4 236 279 842
-Traced shadow rays: 3 875 463 540
-Tracing time: 19 675 124ms
-Total execution time: 19 675 777ms = 5.28min
-Rays per second: 215 311.47 [rays/s]
+Total execution time: 19 675 777ms = 5.47h
+
 ```
 Cornell box spheres
 ![Cornell box spheres](resources/examples/cornell-sphere-scene.png)
 ```
 Resolution: 1000x1000
 Triangles in mesh: 2188
-Area lights in mesh: 2
-Mesh built in 4ms
-BVH built in 1ms
-Rendered on 16 threads
-Direct light sources: 0
-Traced rays: 2'389'898'379
-Traced shadow rays: 0
-Tracing time: 46'672'707ms
-Total execution time: 46'672'855 [rays/s]
-Rays per second: 51'205.484 [rays/s]
+Traced rays: 2 389 898 379
+Total execution time: 46 672 855ms = 12.96h
 ```
 
 Cornell box
@@ -56,16 +33,8 @@ Cornell box
 ```
 Resolution: 1000x1000
 Triangles in mesh: 36
-Area lights in mesh: 2
-Mesh built in 0ms
-BVH built in 0ms
-Rendered on 16 threads
-Direct light sources: 0
-Traced rays: 110'020'216
-Traced shadow rays: 187'305'892
-Tracing time: 13'745ms
-Total execution time: 8'004'381 [rays/s]
-Rays per second: 7'927'671 [rays/s]
+Traced rays: 110 020 216
+Total execution time: 13 878ms = 14s
 ```
 
 ## Build & Run
